@@ -1,0 +1,131 @@
+.register-left{
+    height: 100vh;
+    /* background: red; */
+    background-size: cover;
+    background-image: url(https://makeafricaborderlessnow.com/wp-content/uploads/2025/12/hero-bg.jpg);
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.8);
+    background-position: center center;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    padding: 30px;
+}
+
+.card-wrapper{
+    width: 90%;
+    margin: 30px auto;
+}
+
+.admin-main-text{
+    color: white !important;
+    font-size: 80px;
+    font-weight: bolder;
+    font-family: 'Space Grotesk', Sans-serif;
+}
+
+.register-left .bottom .card{
+    width: 60%;
+    margin: 20px auto;
+    background: rgba(255, 255, 255, 0.1); /* translucent white */
+    border-radius: 0.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: 4px solid #fff;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    color: #fff; /* white text for contrast */
+}
+
+.register-wrapper{
+    height: 100vh;
+    overflow-y: scroll;
+}
+
+
+.login-wrapper{
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-form-wrapper{
+    width: 450px;
+}
+
+.form-card{
+  width: 60%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.gradient-text {
+  background-image: linear-gradient( 135deg, hsl(45, 100%, 50%), hsl(355, 85%, 55%), hsl(142, 70%, 45%) );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+
+.register-left .content h1{
+    font-size: 50px;
+}
+
+.register-left .content p{
+    font-size: 20px;
+}
+
+.log-logo{
+    width: 200px;
+}
+
+
+
+@media (max-width: 768px) {
+    .c-font-1 {
+        font-size: 3rem;
+    }
+
+    .register-left{
+        height: 40vh;
+        padding: 20px;
+    }
+
+.admin-main-text{
+        color: white !important;
+        font-size: 30px;
+    }
+
+
+    .card-wrapper{
+        margin: 10px auto;
+    }
+
+    .register-left .bottom .card{
+        width: 100%;
+        margin: 10px auto;
+    }
+
+    .form-card {
+        width: 90%;
+    }
+
+    .login-wrapper{
+        height: 50vh;
+        justify-content: start;
+        padding-top: 20px;
+    }
+
+
+}
+
+.c-font-1 {
+    font-size: 3rem;
+}
+
+/* @media (min-width:730px) {
+    .c-font-1 {
+        font-size: 10rem;
+    }
+} */
