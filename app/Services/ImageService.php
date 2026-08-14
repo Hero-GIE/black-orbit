@@ -9,36 +9,35 @@ use Illuminate\Support\Facades\Log;
 
 class ImageService
 {
-    public function upload(UploadedFile $file, string $userId, string $folder = 'general'): array
-    {
-        // Generate unique filename
-        $filename = time() . '_' . Str::random(16) . '.' . $file->getClientOriginalExtension();
-        $path = "uploads/{$userId}/{$folder}";
+  public function upload(UploadedFile $file, string $userId, string $folder = 'general'): array
+{
+   
+    $filename = time() . '_' . Str::random(16) . '.' . $file->getClientOriginalExtension();
+    $path = "uploads/{$userId}/{$folder}";
 
-        // Store file on server
-        $storedPath = $file->storeAs($path, $filename, 'public');
 
-        if (!$storedPath) {
-            throw new \Exception('Failed to store image');
-        }
+    $storedPath = $file->storeAs($path, $filename, 'public');
 
-        // Generate URL from your server
-        $url = asset('storage/' . $storedPath);
-
-        Log::info('Image uploaded', ['path' => $storedPath]);
-
-        return [
-            'user_id' => $userId,
-            'filename' => $filename,
-            'original_name' => $file->getClientOriginalName(),
-            'path' => $storedPath,
-            'url' => $url,
-            'folder' => $folder,
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'created_at' => now()->toISOString(),
-        ];
+    if (!$storedPath) {
+        throw new \Exception('Failed to store image');
     }
+
+    $url = Storage::disk('public')->url($storedPath);
+
+    Log::info('Image uploaded', ['path' => $storedPath]);
+
+    return [
+        'user_id' => $userId,
+        'filename' => $filename,
+        'original_name' => $file->getClientOriginalName(),
+        'path' => $storedPath,
+        'url' => $url,
+        'folder' => $folder,
+        'mime_type' => $file->getMimeType(),
+        'size' => $file->getSize(),
+        'created_at' => now()->toISOString(),
+    ];
+}
 
     public function delete(string $path, string $userId): bool
     {
@@ -56,30 +55,62 @@ class ImageService
 
     public function getUserImages(string $userId, int $limit = 50, int $offset = 0): array
     {
-        $path = "uploads/{$userId}";
+        $basePath = "uploads/{$userId}";
 
-        if (!Storage::disk('public')->exists($path)) {
+        // Check if directory exists
+        if (!Storage::disk('public')->exists($basePath)) {
+            Log::info('User directory not found', ['path' => $basePath]);
             return ['data' => [], 'total' => 0];
         }
 
-        $files = Storage::disk('public')->files($path);
-        $images = [];
+        // ✅ FIX: Use allFiles() to get files from ALL subdirectories recursively
+        $allFiles = Storage::disk('public')->allFiles($basePath);
+        
+        // Filter only image files (optional but recommended)
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+        $imageFiles = array_filter($allFiles, function ($file) use ($imageExtensions) {
+            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            return in_array($extension, $imageExtensions);
+        });
 
-        foreach ($files as $file) {
+        // Sort by last modified (newest first)
+        usort($imageFiles, function ($a, $b) {
+            $timeA = Storage::disk('public')->lastModified($a);
+            $timeB = Storage::disk('public')->lastModified($b);
+            return $timeB - $timeA;
+        });
+
+        $total = count($imageFiles);
+        
+        // Apply pagination
+        $paginatedFiles = array_slice($imageFiles, $offset, $limit);
+
+        $images = [];
+        foreach ($paginatedFiles as $file) {
+            // Extract folder name from path
+            $folder = dirname($file);
+            $folder = str_replace("uploads/{$userId}/", '', $folder);
+            
             $images[] = [
                 'path' => $file,
                 'url' => asset('storage/' . $file),
                 'size' => Storage::disk('public')->size($file),
                 'last_modified' => date('Y-m-d H:i:s', Storage::disk('public')->lastModified($file)),
+                'filename' => basename($file),
+                'folder' => $folder ?: 'root',
+                'user_id' => $userId,
             ];
         }
 
-        // Apply pagination
-        $paginated = array_slice($images, $offset, $limit);
+        Log::info('User images retrieved', [
+            'user_id' => $userId,
+            'total' => $total,
+            'returned' => count($images)
+        ]);
 
         return [
-            'data' => $paginated,
-            'total' => count($images),
+            'data' => $images,
+            'total' => $total,
         ];
     }
 

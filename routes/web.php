@@ -84,4 +84,6 @@ use App\Http\Controllers\Admin\PersonalityController;
     Route::post('/api/personalities', [PersonalityController::class, 'store'])->name('api.personalities.store');
     Route::put('/api/personalities/{id}', [PersonalityController::class, 'update'])->name('api.personalities.update');
     Route::delete('/api/personalities/{id}', [PersonalityController::class, 'destroy'])->name('api.personalities.delete');
+    
+    
 });

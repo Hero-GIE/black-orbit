@@ -471,11 +471,11 @@
                     </form>
                 </div>
 
-                <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                    <small class="text-muted">Forgot your password? Reset it
-                        <a href="{{ route('password.request') }}" class="login-link">here</a>
-                    </small>
-                </div>
+                <!--<div class="card-footer text-center pt-0 px-lg-2 px-1">-->
+                <!--    <small class="text-muted">Forgot your password? Reset it-->
+                <!--        <a href="{{ route('password.request') }}" class="login-link">here</a>-->
+                <!--    </small>-->
+                <!--</div>-->
             </div>
         </div>
 
