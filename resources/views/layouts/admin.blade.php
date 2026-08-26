@@ -89,6 +89,24 @@
                     </a>
                 </li>
 
+
+                   {{-- Users --}}
+                <li>
+                    <a class="sb-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+                       href="{{ route('admin.users.index') }}" data-label="Users">
+                        <i class="fas fa-users"></i><span>Users</span>
+                    </a>
+                </li>
+
+
+                  {{-- Personalities --}}
+                <li>
+                    <a class="sb-link {{ request()->routeIs('admin.personalities.*') ? 'active' : '' }}"
+                       href="{{ route('admin.personalities.index') }}" data-label="Personalities">
+                        <i class="fas fa-user-tie"></i><span>Personalities</span>
+                    </a>
+                </li>
+
                 {{-- Chats --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.chats.*') ? 'active' : '' }}"
@@ -97,22 +115,24 @@
                     </a>
                 </li>
 
-                {{-- Cosmic Word Search Progress --}}
-                <li>
-                    <a class="sb-link {{ request()->routeIs('admin.cosmic.*') ? 'active' : '' }}"
-                       href="{{ route('admin.cosmic.index') }}" data-label="Cosmic Word Search">
-                        <i class="fas fa-search"></i><span>Word Search Progress</span>
-                    </a>
-                </li>
-
                 <li class="sb-divider"></li>
                 <li class="sb-label"><span>Management</span></li>
+
+
 
                 {{-- Courses --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}"
                        href="{{ route('admin.courses.index') }}" data-label="Courses">
                         <i class="fas fa-book"></i><span>Courses</span>
+                    </a>
+                </li>
+
+                  {{-- Cosmic Word Search Progress --}}
+                <li>
+                    <a class="sb-link {{ request()->routeIs('admin.cosmic.*') ? 'active' : '' }}"
+                       href="{{ route('admin.cosmic.index') }}" data-label="Cosmic Word Search">
+                        <i class="fas fa-search"></i><span>Word Search Progress</span>
                     </a>
                 </li>
 
@@ -126,19 +146,13 @@
 
                 {{-- Personalities --}}
                 <li>
-                    <a class="sb-link {{ request()->routeIs('admin.personalities.*') ? 'active' : '' }}"
-                       href="{{ route('admin.personalities.index') }}" data-label="Personalities">
-                        <i class="fas fa-user-tie"></i><span>Personalities</span>
+                    <a class="sb-link {{ request()->routeIs('admin.players.*') ? 'active' : '' }}"
+                       href="{{ route('admin.players.index') }}" data-label="Players">
+                        <i class="fas fa-user-tie"></i><span>Players</span>
                     </a>
                 </li>
 
-                {{-- Users --}}
-                <li>
-                    <a class="sb-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
-                       href="{{ route('admin.users.index') }}" data-label="Users">
-                        <i class="fas fa-users"></i><span>Users</span>
-                    </a>
-                </li>
+
             </ul>
         </div>
     </nav>

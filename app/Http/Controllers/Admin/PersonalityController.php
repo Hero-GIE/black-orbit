@@ -49,6 +49,7 @@ class PersonalityController extends Controller
                     $personalities[] = [
                         'id' => basename($doc['name']),
                         'name' => $fields['name']['stringValue'] ?? 'Unknown',
+                        'occupation' => $fields['occupation']['stringValue'] ?? '',
                         'bio' => $fields['bio']['stringValue'] ?? '',
                         'image' => $fields['image']['stringValue'] ?? '',
                         'achievements' => $achievements,
@@ -92,6 +93,7 @@ class PersonalityController extends Controller
                 $personality = [
                     'id' => $id,
                     'name' => $fields['name']['stringValue'] ?? 'Unknown',
+                    'occupation' => $fields['occupation']['stringValue'] ?? '',
                     'bio' => $fields['bio']['stringValue'] ?? '',
                     'image' => $fields['image']['stringValue'] ?? '',
                     'achievements' => $achievements,
@@ -113,6 +115,7 @@ class PersonalityController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
+                'occupation' => 'nullable|string|max:255',
                 'bio' => 'required|string',
                 'image' => 'nullable|url',
                 'achievements' => 'nullable|string',
@@ -125,14 +128,22 @@ class PersonalityController extends Controller
                 return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
             }
 
-            $personalityId = uniqid() . '_' . time();
-            $achievementsArray = array_filter(array_map('trim', explode("\n", $request->achievements)));
+            $personalityId = $this->generateRandomId(28);
+
+            $achievementsArray = [];
+            if ($request->achievements) {
+                if (strpos($request->achievements, "\n") !== false) {
+                    $achievementsArray = array_filter(array_map('trim', explode("\n", $request->achievements)));
+                } else {
+                    $achievementsArray = array_filter(array_map('trim', explode(',', $request->achievements)));
+                }
+            }
             $achievementsValues = array_map(fn($val) => ['stringValue' => $val], $achievementsArray);
 
             $personalityData = [
                 'fields' => [
-                    'id' => ['stringValue' => $personalityId],
                     'name' => ['stringValue' => $request->name],
+                    'occupation' => ['stringValue' => $request->occupation ?? ''],
                     'bio' => ['stringValue' => $request->bio],
                     'image' => ['stringValue' => $request->image ?? ''],
                     'achievements' => ['arrayValue' => ['values' => $achievementsValues]],
@@ -167,6 +178,7 @@ class PersonalityController extends Controller
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
+                'occupation' => 'nullable|string|max:255',
                 'bio' => 'required|string',
                 'image' => 'nullable|url',
                 'achievements' => 'nullable|string',
@@ -179,15 +191,24 @@ class PersonalityController extends Controller
                 return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
             }
 
-            $achievementsArray = array_filter(array_map('trim', explode("\n", $request->achievements)));
+            $achievementsArray = [];
+            if ($request->achievements) {
+                if (strpos($request->achievements, "\n") !== false) {
+                    $achievementsArray = array_filter(array_map('trim', explode("\n", $request->achievements)));
+                } else {
+                    $achievementsArray = array_filter(array_map('trim', explode(',', $request->achievements)));
+                }
+            }
             $achievementsValues = array_map(fn($val) => ['stringValue' => $val], $achievementsArray);
 
+            // Get existing document to preserve createdAt
             $getUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/personalities/{$id}";
             $getResponse = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->timeout(30)->get($getUrl);
             $existingFields = $getResponse->successful() ? $getResponse->json()['fields'] ?? [] : [];
 
             $updateFields = [
                 'name' => ['stringValue' => $request->name],
+                'occupation' => ['stringValue' => $request->occupation ?? ''],
                 'bio' => ['stringValue' => $request->bio],
                 'image' => ['stringValue' => $request->image ?? ''],
                 'achievements' => ['arrayValue' => ['values' => $achievementsValues]],
@@ -196,9 +217,6 @@ class PersonalityController extends Controller
 
             if (isset($existingFields['createdAt'])) {
                 $updateFields['createdAt'] = $existingFields['createdAt'];
-            }
-            if (isset($existingFields['id'])) {
-                $updateFields['id'] = $existingFields['id'];
             }
 
             $patchUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/personalities/{$id}";
@@ -251,5 +269,15 @@ class PersonalityController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    private function generateRandomId($length = 28)
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $id = '';
+        for ($i = 0; $i < $length; $i++) {
+            $id .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $id;
     }
 }

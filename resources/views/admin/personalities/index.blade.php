@@ -7,6 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-users me-2"></i>Personalities Management</h4>
+            <small class="text-muted" id="recordCount">Loading...</small>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddModal()">
@@ -20,19 +21,22 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-            <div class="table-responsive">
+
+            <div class="table-responsive" id="personalitiesTableWrapper" style="max-height: 900px; overflow-y: auto;">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="border-bottom-2">
+                    <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
                         <tr>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Name</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Bio</th>
-                            <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
+                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
+                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
+                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
+                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
+                            <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="personalitiesTableBody">
                         <tr>
-                            <td colspan="4" class="text-center py-5">
+                            <td colspan="6" class="text-center py-5">
                                 <div class="text-muted">
                                     <div class="spinner-border text-dark mb-3" role="status">
                                         <span class="visually-hidden">Loading...</span>
@@ -43,6 +47,11 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            {{-- Scroll indicator --}}
+            <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
+                <i class="fas fa-chevron-down me-1"></i> Scroll for more records
             </div>
         </div>
     </div>
@@ -64,6 +73,10 @@
                         <input type="text" class="form-control form-control-custom" id="name" name="name" required>
                     </div>
                     <div class="mb-3">
+                        <label for="occupation" class="form-label text-muted small fw-bold">Occupation</label>
+                        <input type="text" class="form-control form-control-custom" id="occupation" name="occupation" placeholder="e.g., Engineer & Inventor">
+                    </div>
+                    <div class="mb-3">
                         <label for="image" class="form-label text-muted small fw-bold">Image URL</label>
                         <input type="url" class="form-control form-control-custom" id="image" name="image" placeholder="https://res.cloudinary.com/...">
                     </div>
@@ -72,8 +85,9 @@
                         <textarea class="form-control form-control-custom" id="bio" name="bio" rows="4" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="achievements" class="form-label text-muted small fw-bold">Achievements (One per line)</label>
+                        <label for="achievements" class="form-label text-muted small fw-bold">Achievements (One per line or comma separated)</label>
                         <textarea class="form-control form-control-custom" id="achievements" name="achievements" rows="3" placeholder="Founded the Famous Association of Gents&#10;Won Nobel Prize in 2024"></textarea>
+                        <small class="text-muted">Enter each achievement on a new line, or separate with commas</small>
                     </div>
                 </form>
             </div>
@@ -170,15 +184,55 @@
     }
 
     .table > :not(caption) > * > * {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem 0.75rem;
         vertical-align: middle;
     }
 
     .bio-truncate {
-        max-width: 400px;
+        max-width: 200px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    .achievements-truncate {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .achievements-truncate .badge {
+        margin-right: 2px;
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* Custom scrollbar */
+    #personalitiesTableWrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #personalitiesTableWrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    #personalitiesTableWrapper::-webkit-scrollbar-thumb {
+        background: #d1d1d1;
+        border-radius: 10px;
+    }
+
+    #personalitiesTableWrapper::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
     }
 </style>
 @endsection
@@ -210,11 +264,32 @@ async function loadPersonalities() {
 
 function renderPersonalities(personalities) {
     const tbody = document.getElementById('personalitiesTableBody');
+    const recordCount = document.getElementById('recordCount');
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    const tableWrapper = document.getElementById('personalitiesTableWrapper');
+
+    // Update record count
+    if (personalities && personalities.length > 0) {
+        recordCount.textContent = `(${personalities.length} records)`;
+    } else {
+        recordCount.textContent = '(0 records)';
+    }
+
+    // Show/hide scroll indicator based on record count
+    if (personalities && personalities.length > 10) {
+        tableWrapper.style.maxHeight = '600px';
+        tableWrapper.style.overflowY = 'auto';
+        scrollIndicator.style.display = 'block';
+    } else {
+        tableWrapper.style.maxHeight = 'none';
+        tableWrapper.style.overflowY = 'visible';
+        scrollIndicator.style.display = 'none';
+    }
 
     if (!personalities || personalities.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center py-5">
+                <td colspan="6" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-user-slash fa-2x mb-3 d-block opacity-50"></i>
                         <p class="mb-0 fw-bold">No personalities found</p>
@@ -228,6 +303,23 @@ function renderPersonalities(personalities) {
 
     let html = '';
     personalities.forEach((p, index) => {
+        // Format achievements for display
+        let achievementsHtml = '';
+        if (p.achievements && p.achievements.length > 0) {
+            const displayAchievements = p.achievements.slice(0, 3);
+            const remaining = p.achievements.length - 3;
+
+            achievementsHtml = displayAchievements.map(a =>
+                `<span class="badge bg-light text-dark border me-1">${escapeHtml(a)}</span>`
+            ).join('');
+
+            if (remaining > 0) {
+                achievementsHtml += `<span class="badge bg-secondary text-white">+${remaining} more</span>`;
+            }
+        } else {
+            achievementsHtml = '<span class="text-muted">—</span>';
+        }
+
         html += `
             <tr>
                 <td class="text-muted">${index + 1}</td>
@@ -235,6 +327,12 @@ function renderPersonalities(personalities) {
                     <div class="d-flex align-items-center">
                         <img src="${escapeHtml(p.image || 'https://via.placeholder.com/50')}" alt="${escapeHtml(p.name)}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
                         <div class="fw-bold text-dark">${escapeHtml(p.name)}</div>
+                    </div>
+                </td>
+                <td class="text-muted small">${escapeHtml(p.occupation || '—')}</td>
+                <td>
+                    <div class="achievements-truncate">
+                        ${achievementsHtml}
                     </div>
                 </td>
                 <td class="text-muted small bio-truncate">${escapeHtml(p.bio)}</td>
@@ -281,6 +379,7 @@ async function editPersonality(id) {
             document.getElementById('personalityModalTitle').textContent = 'Edit Personality';
             document.getElementById('personalityId').value = id;
             document.getElementById('name').value = p.name || '';
+            document.getElementById('occupation').value = p.occupation || '';
             document.getElementById('bio').value = p.bio || '';
             document.getElementById('image').value = p.image || '';
             document.getElementById('achievements').value = (p.achievements || []).join('\n');
@@ -322,10 +421,12 @@ async function viewPersonality(id) {
             const achievementsHtml = p.achievements && p.achievements.length > 0
                 ? p.achievements.map(a => `<li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>${escapeHtml(a)}</li>`).join('')
                 : '<li class="text-muted">No achievements listed</li>';
+
             content.innerHTML = `
                 <div class="text-center mb-4">
                     <img src="${escapeHtml(p.image || 'https://via.placeholder.com/120')}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
                     <h4 class="fw-bold mb-1">${escapeHtml(p.name)}</h4>
+                    ${p.occupation ? `<p class="text-muted mb-2"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
                 </div>
                 <div class="bg-light p-3 rounded-3 mb-3">
                     <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Biography</small>
@@ -368,6 +469,7 @@ document.getElementById('savePersonalityBtn').addEventListener('click', async fu
 
     const payload = {
         name: formData.get('name'),
+        occupation: formData.get('occupation'),
         bio: formData.get('bio'),
         image: formData.get('image'),
         achievements: formData.get('achievements'),

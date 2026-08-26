@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\CosmicWordSearchController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\PersonalityController;
+use App\Http\Controllers\Admin\PlayerController;
 
     Route::get('/', function () {
     return redirect('/login');
@@ -84,6 +85,12 @@ use App\Http\Controllers\Admin\PersonalityController;
     Route::post('/api/personalities', [PersonalityController::class, 'store'])->name('api.personalities.store');
     Route::put('/api/personalities/{id}', [PersonalityController::class, 'update'])->name('api.personalities.update');
     Route::delete('/api/personalities/{id}', [PersonalityController::class, 'destroy'])->name('api.personalities.delete');
-    
-    
+
+    // Player Routes
+    Route::get('/players', [PlayerController::class, 'index'])->name('players.index');
+    Route::get('/api/players', [PlayerController::class, 'fetchPlayers'])->name('api.players');
+    Route::get('/api/players/{id}', [PlayerController::class, 'getPlayer'])->name('api.player.get');
+    Route::put('/api/players/{id}', [PlayerController::class, 'update'])->name('api.players.update');
+    Route::delete('/api/players/{id}', [PlayerController::class, 'destroy'])->name('api.players.delete');
+
 });
