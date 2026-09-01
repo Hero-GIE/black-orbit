@@ -23,7 +23,7 @@ class FirebaseAuthService
      */
     public function verifyToken(string $token): ?array
     {
-        // LOCAL: Return test user for development (no token required)
+
         if (app()->environment('local') && $token === 'test-token') {
             return [
                 'uid' => 'test_user_' . time(),
@@ -48,7 +48,7 @@ class FirebaseAuthService
         }
 
         try {
-            // Verify using Firebase REST API
+            // Verify using Firebase API
             $response = Http::post(
                 "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={$this->apiKey}",
                 ['idToken' => $token]

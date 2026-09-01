@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CosmicWordSearchController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\PersonalityController;
 use App\Http\Controllers\Admin\PlayerController;
+use App\Http\Controllers\Api\ImageController;
 
     Route::get('/', function () {
     return redirect('/login');
@@ -32,6 +33,8 @@ use App\Http\Controllers\Admin\PlayerController;
 
     // Admin Routes (Protected)
     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::post('/api/images/upload', [ImageController::class, 'upload']);
 
     // admin dashboard routes
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -11,7 +11,7 @@ class ImageService
 {
   public function upload(UploadedFile $file, string $userId, string $folder = 'general'): array
 {
-   
+
     $filename = time() . '_' . Str::random(16) . '.' . $file->getClientOriginalExtension();
     $path = "uploads/{$userId}/{$folder}";
 
@@ -63,9 +63,8 @@ class ImageService
             return ['data' => [], 'total' => 0];
         }
 
-        // ✅ FIX: Use allFiles() to get files from ALL subdirectories recursively
         $allFiles = Storage::disk('public')->allFiles($basePath);
-        
+
         // Filter only image files (optional but recommended)
         $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
         $imageFiles = array_filter($allFiles, function ($file) use ($imageExtensions) {
@@ -73,7 +72,6 @@ class ImageService
             return in_array($extension, $imageExtensions);
         });
 
-        // Sort by last modified (newest first)
         usort($imageFiles, function ($a, $b) {
             $timeA = Storage::disk('public')->lastModified($a);
             $timeB = Storage::disk('public')->lastModified($b);
@@ -81,7 +79,7 @@ class ImageService
         });
 
         $total = count($imageFiles);
-        
+
         // Apply pagination
         $paginatedFiles = array_slice($imageFiles, $offset, $limit);
 
@@ -90,7 +88,7 @@ class ImageService
             // Extract folder name from path
             $folder = dirname($file);
             $folder = str_replace("uploads/{$userId}/", '', $folder);
-            
+
             $images[] = [
                 'path' => $file,
                 'url' => asset('storage/' . $file),

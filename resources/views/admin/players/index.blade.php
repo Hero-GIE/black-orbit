@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-user-astronaut me-2"></i>Players Management</h4>
-            <small class="text-muted" id="recordCount">Loading...</small>
+            {{-- <small class="text-muted" id="recordCount">Loading...</small> --}}
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-dark btn-sm d-flex align-items-center" onclick="window.location.href='{{ route('admin.dashboard') }}'">
@@ -16,40 +16,117 @@
         </div>
     </div>
 
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text"
+                       class="form-control border-start-0"
+                       id="searchPlayers"
+                       placeholder="Search by username or destination..."
+                       style="border-left: none; border-radius: 0 10px 10px 0;">
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-8 text-md-end">
+            <span class="text-muted small" id="recordCount">Loading...</span>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-            <div class="table-responsive" id="playersTableWrapper" style="max-height: 900px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
-                        <tr>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Player</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Destination</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">XP</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Phase</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 150px;">Crew</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Resources</th>
-                            <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="playersTableBody">
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <div class="text-muted">
-                                    <div class="spinner-border text-dark mb-3" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mb-0">Loading players...</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- SKELETON LOADING -->
+            <div id="players-skeleton">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
+                            <tr>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Player</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Destination</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">XP</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Phase</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 150px;">Crew</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Resources</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for($i = 0; $i < 6; $i++)
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="skeleton-box me-3" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+                                            <div>
+                                                <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 4px;"></div>
+                                                <div class="skeleton-box" style="width: 80px; height: 12px; border-radius: 4px;"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 60px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 40px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 60px; height: 16px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 100px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <div class="skeleton-box" style="width: 30px; height: 16px; border-radius: 4px;"></div>
+                                            <div class="skeleton-box" style="width: 30px; height: 16px; border-radius: 4px;"></div>
+                                            <div class="skeleton-box" style="width: 30px; height: 16px; border-radius: 4px;"></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            {{-- Scroll indicator --}}
-            <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
-                <i class="fas fa-chevron-down me-1"></i> Scroll for more records
+            <!-- ACTUAL CONTENT -->
+            <div id="players-content" style="display: none; animation: fadeIn 0.5s ease-in-out;">
+                <div class="table-responsive" id="playersTableWrapper" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
+                            <tr>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Player</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Destination</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">XP</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Phase</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 150px;">Crew</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Resources</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Scroll indicator --}}
+                <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
+                    <i class="fas fa-chevron-down me-1"></i> Scroll for more records
+                </div>
             </div>
         </div>
     </div>
@@ -153,6 +230,25 @@
 </div>
 
 <style>
+    /* Skeleton Pulse Animation */
+    @keyframes skeleton-pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    .skeleton-box {
+        display: block;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        animation: skeleton-pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .form-control-custom {
         border: 1px solid #e9ecef;
         background-color: #f8f9fa;
@@ -254,6 +350,15 @@
         border-color: #c3e6cb;
         color: #155724;
     }
+
+    .input-group .form-control:focus {
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
+
+    .input-group .form-control:focus + .input-group-text {
+        border-color: #dee2e6;
+    }
 </style>
 @endsection
 
@@ -261,49 +366,111 @@
 <script>
 let editingPlayerId = null;
 let viewModalInstance = null;
+let allPlayers = [];
+let filteredPlayers = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     loadPlayers();
+    setupSearch();
 });
 
+// Setup search functionality
+function setupSearch() {
+    const searchInput = document.getElementById('searchPlayers');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterPlayers(query);
+        });
+    }
+}
+
+// Filter players based on search query
+function filterPlayers(query) {
+    if (!query) {
+        filteredPlayers = allPlayers;
+    } else {
+        filteredPlayers = allPlayers.filter(player => {
+            const username = (player.username || '').toLowerCase();
+            const destination = (player.destination || '').toLowerCase();
+            const phase = (player.phase || '').toLowerCase();
+            return username.includes(query) ||
+                   destination.includes(query) ||
+                   phase.includes(query);
+        });
+    }
+    renderPlayers(filteredPlayers);
+    updateFilteredCount(filteredPlayers.length);
+}
+
+// Update filtered count display
+function updateFilteredCount(count) {
+    const countElement = document.getElementById('filteredCount');
+    const recordCount = document.getElementById('recordCount');
+    if (countElement) {
+        if (count === 1) {
+            countElement.textContent = '1 record found';
+        } else {
+            countElement.textContent = count + ' records found';
+        }
+    }
+    if (recordCount) {
+        recordCount.textContent = `(${allPlayers.length} total records)`;
+    }
+}
+
 async function loadPlayers() {
+    const skeleton = document.getElementById('players-skeleton');
+    const content = document.getElementById('players-content');
+    const recordCount = document.getElementById('recordCount');
+
     try {
         const response = await fetch('/admin/api/players');
         const data = await response.json();
 
         if (data.success) {
-            renderPlayers(data.data);
+            allPlayers = data.data || [];
+            filteredPlayers = allPlayers;
+            renderPlayers(filteredPlayers);
+            updateFilteredCount(filteredPlayers.length);
+            recordCount.textContent = `(${allPlayers.length} total records)`;
         } else {
             showToast('Failed to load players', 'danger');
+            renderPlayers([]);
+            updateFilteredCount(0);
+            recordCount.textContent = '(0 records)';
         }
     } catch (error) {
         console.error('Error loading players:', error);
         showToast('Error loading players', 'danger');
+        renderPlayers([]);
+        updateFilteredCount(0);
+        recordCount.textContent = '(0 records)';
+    } finally {
+        // Hide skeleton, show content
+        if (skeleton) skeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
     }
 }
 
 function renderPlayers(players) {
     const tbody = document.getElementById('playersTableBody');
-    const recordCount = document.getElementById('recordCount');
     const scrollIndicator = document.getElementById('scrollIndicator');
     const tableWrapper = document.getElementById('playersTableWrapper');
 
-    // Update record count
-    if (players && players.length > 0) {
-        recordCount.textContent = `(${players.length} records)`;
-    } else {
-        recordCount.textContent = '(0 records)';
-    }
-
     // Show/hide scroll indicator based on record count
     if (players && players.length > 10) {
-        tableWrapper.style.maxHeight = '600px';
-        tableWrapper.style.overflowY = 'auto';
-        scrollIndicator.style.display = 'block';
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = '650px';
+            tableWrapper.style.overflowY = 'auto';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'block';
     } else {
-        tableWrapper.style.maxHeight = 'none';
-        tableWrapper.style.overflowY = 'visible';
-        scrollIndicator.style.display = 'none';
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = 'none';
+            tableWrapper.style.overflowY = 'visible';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'none';
     }
 
     if (!players || players.length === 0) {
@@ -312,8 +479,8 @@ function renderPlayers(players) {
                 <td colspan="8" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-user-slash fa-2x mb-3 d-block opacity-50"></i>
-                        <p class="mb-0 fw-bold">No players found</p>
-                        <small>Players will appear here once they register</small>
+                        <p class="mb-0 fw-bold">${allPlayers.length > 0 ? 'No matching players found' : 'No players found'}</p>
+                        <small>${allPlayers.length > 0 ? 'Try a different search term' : 'Players will appear here once they register'}</small>
                     </div>
                 </td>
             </tr>

@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-users me-2"></i>Personalities Management</h4>
-            <small class="text-muted" id="recordCount">Loading...</small>
+            {{-- <small class="text-muted" id="recordCount">Loading...</small> --}}
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddModal()">
@@ -19,39 +19,101 @@
         </div>
     </div>
 
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text"
+                       class="form-control border-start-0"
+                       id="searchPersonalities"
+                       placeholder="Search by name or occupation..."
+                       style="border-left: none; border-radius: 0 10px 10px 0;">
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-8 text-md-end">
+            <span class="text-muted small" id="recordCount">Loading...</span>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
 
-            <div class="table-responsive" id="personalitiesTableWrapper" style="max-height: 900px; overflow-y: auto;">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
-                        <tr>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
-                            <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="personalitiesTableBody">
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="text-muted">
-                                    <div class="spinner-border text-dark mb-3" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mb-0">Loading personalities...</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- SKELETON LOADING -->
+            <div id="personalities-skeleton">
+                <div class="table-responsive" style="max-height: 900px; overflow-y: auto;">
+                    <table class="table align-middle mb-0">
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
+                            <tr>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for($i = 0; $i < 6; $i++)
+                                <tr>
+                                    <td>
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="skeleton-box me-3" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+                                            <div class="skeleton-box" style="width: 120px; height: 16px; border-radius: 4px;"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 100px; height: 14px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 150px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 160px; height: 14px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            {{-- Scroll indicator --}}
-            <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
-                <i class="fas fa-chevron-down me-1"></i> Scroll for more records
+            <!-- ACTUAL CONTENT -->
+            <div id="personalities-content" style="display: none; animation: fadeIn 0.5s ease-in-out;">
+                <div class="table-responsive" id="personalitiesTableWrapper" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
+                            <tr>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="personalitiesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Scroll indicator --}}
+                <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
+                    <i class="fas fa-chevron-down me-1"></i> Scroll for more records
+                </div>
             </div>
         </div>
     </div>
@@ -76,10 +138,37 @@
                         <label for="occupation" class="form-label text-muted small fw-bold">Occupation</label>
                         <input type="text" class="form-control form-control-custom" id="occupation" name="occupation" placeholder="e.g., Engineer & Inventor">
                     </div>
-                    <div class="mb-3">
-                        <label for="image" class="form-label text-muted small fw-bold">Image URL</label>
-                        <input type="url" class="form-control form-control-custom" id="image" name="image" placeholder="https://res.cloudinary.com/...">
-                    </div>
+                <div class="mb-3">
+    <label for="image" class="form-label text-muted small fw-bold">Image</label>
+
+    {{-- Preview --}}
+    <div class="mb-2">
+        <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
+            <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light"
+                 style="width: 88px; height: 88px; object-fit: cover;">
+            <button type="button" id="removeImageBtn" title="Remove image"
+                    class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0"
+                    style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
+        </div>
+        <div id="imageEmptyState" class="text-muted small">
+            <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
+        </div>
+    </div>
+
+    {{-- URL --}}
+    <input type="url" class="form-control form-control-custom mb-2" id="image" name="image"
+           placeholder="https://res.cloudinary.com/...">
+
+    {{-- Upload from device --}}
+    <div class="d-flex align-items-center gap-2">
+        <input type="file" id="imageFile" accept="image/*" class="d-none">
+        <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
+            <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
+        </button>
+        <span id="imageUploadStatus" class="small text-muted"></span>
+    </div>
+    <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
+</div>
                     <div class="mb-3">
                         <label for="bio" class="form-label text-muted small fw-bold">Biography *</label>
                         <textarea class="form-control form-control-custom" id="bio" name="bio" rows="4" required></textarea>
@@ -147,6 +236,25 @@
 </div>
 
 <style>
+    /* Skeleton Loading Animation */
+    @keyframes skeleton-pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    .skeleton-box {
+        display: block;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        animation: skeleton-pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .form-control-custom {
         border: 1px solid #e9ecef;
         background-color: #f8f9fa;
@@ -234,6 +342,15 @@
     #personalitiesTableWrapper::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
+
+    .input-group .form-control:focus {
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
+
+    .input-group .form-control:focus + .input-group-text {
+        border-color: #dee2e6;
+    }
 </style>
 @endsection
 
@@ -241,49 +358,205 @@
 <script>
 let editingPersonalityId = null;
 let viewModalInstance = null;
+let allPersonalities = [];
+let filteredPersonalities = [];
+
+// ==========================
+// IMAGE UPLOAD
+// ==========================
+const imageInputEl = document.getElementById('image');
+const imageFileInput = document.getElementById('imageFile');
+const imagePreviewEl = document.getElementById('imagePreview');
+const imagePreviewWrapper = document.getElementById('imagePreviewWrapper');
+const imageEmptyState = document.getElementById('imageEmptyState');
+const imageUploadStatus = document.getElementById('imageUploadStatus');
+const uploadImageBtn = document.getElementById('uploadImageBtn');
+
+const IMAGE_UPLOAD_URL = '/admin/api/images/upload'; // ← adjust if your route differs
+
+uploadImageBtn.addEventListener('click', () => imageFileInput.click());
+
+document.getElementById('removeImageBtn').addEventListener('click', () => {
+    imageInputEl.value = '';
+    clearImagePreview();
+});
+
+// Preview when URL is typed/pasted manually
+imageInputEl.addEventListener('change', () => showImagePreview(imageInputEl.value));
+
+// If URL is broken, just hide the preview
+imagePreviewEl.addEventListener('error', () => clearImagePreview());
+
+function showImagePreview(url) {
+    if (!url) { clearImagePreview(); return; }
+    imagePreviewEl.src = url;
+    imagePreviewWrapper.style.display = 'inline-block';
+    imageEmptyState.style.display = 'none';
+}
+
+function clearImagePreview() {
+    imagePreviewEl.removeAttribute('src');
+    imagePreviewWrapper.style.display = 'none';
+    imageEmptyState.style.display = 'block';
+}
+
+imageFileInput.addEventListener('change', async function () {
+    const file = this.files[0];
+    this.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('Please choose an image file', 'danger');
+        return;
+    }
+    if (file.size > 10240 * 1024) {
+        showToast('Image is too large (max 10 MB)', 'danger');
+        return;
+    }
+
+    // Instant local preview while uploading
+    const reader = new FileReader();
+    reader.onload = (e) => showImagePreview(e.target.result);
+    reader.readAsDataURL(file);
+
+    imageUploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Uploading…';
+    uploadImageBtn.disabled = true;
+
+    const fd = new FormData();
+    fd.append('image', file);
+    fd.append('folder', 'personalities');
+
+    try {
+        const response = await fetch(IMAGE_UPLOAD_URL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            body: fd,
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.data && data.data.url) {
+            imageInputEl.value = data.data.url;
+            showImagePreview(data.data.url);
+            imageUploadStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i> Uploaded';
+            showToast('Image uploaded', 'success');
+        } else {
+            const msg = data.message
+                || (data.errors ? Object.values(data.errors).flat().join(' ') : null)
+                || 'Upload failed';
+            clearImagePreview();
+            imageUploadStatus.textContent = '';
+            showToast(msg, 'danger');
+        }
+    } catch (err) {
+        console.error('Image upload error:', err);
+        clearImagePreview();
+        imageUploadStatus.textContent = '';
+        showToast('Error uploading image', 'danger');
+    } finally {
+        uploadImageBtn.disabled = false;
+        setTimeout(() => { imageUploadStatus.textContent = ''; }, 5000);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', function() {
     loadPersonalities();
+    setupSearch();
 });
 
+// search functionality
+function setupSearch() {
+    const searchInput = document.getElementById('searchPersonalities');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterPersonalities(query);
+        });
+    }
+}
+
+// Filter personalities based on search query
+function filterPersonalities(query) {
+    if (!query) {
+        filteredPersonalities = allPersonalities;
+    } else {
+        filteredPersonalities = allPersonalities.filter(p => {
+            const name = (p.name || '').toLowerCase();
+            const occupation = (p.occupation || '').toLowerCase();
+            return name.includes(query) || occupation.includes(query);
+        });
+    }
+    renderPersonalities(filteredPersonalities);
+    updateFilteredCount(filteredPersonalities.length);
+}
+
+// Update filtered count display
+function updateFilteredCount(count) {
+    const countElement = document.getElementById('filteredCount');
+    if (countElement) {
+        if (count === 1) {
+            countElement.textContent = '1 record found';
+        } else {
+            countElement.textContent = count + ' records found';
+        }
+    }
+}
+
 async function loadPersonalities() {
+    const skeleton = document.getElementById('personalities-skeleton');
+    const content = document.getElementById('personalities-content');
+    const recordCount = document.getElementById('recordCount');
+
     try {
         const response = await fetch('/admin/api/personalities');
         const data = await response.json();
 
         if (data.success) {
-            renderPersonalities(data.data);
+            allPersonalities = data.data || [];
+            filteredPersonalities = allPersonalities;
+            renderPersonalities(filteredPersonalities);
+            updateFilteredCount(filteredPersonalities.length);
+            recordCount.textContent = `(${allPersonalities.length} total records)`;
         } else {
             showToast('Failed to load personalities', 'danger');
+            renderPersonalities([]);
+            updateFilteredCount(0);
+            recordCount.textContent = '(0 records)';
         }
     } catch (error) {
         console.error('Error loading personalities:', error);
         showToast('Error loading personalities', 'danger');
+        renderPersonalities([]);
+        updateFilteredCount(0);
+        recordCount.textContent = '(0 records)';
+    } finally {
+        // Hide skeleton, show content
+        if (skeleton) skeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
     }
 }
 
 function renderPersonalities(personalities) {
     const tbody = document.getElementById('personalitiesTableBody');
-    const recordCount = document.getElementById('recordCount');
     const scrollIndicator = document.getElementById('scrollIndicator');
     const tableWrapper = document.getElementById('personalitiesTableWrapper');
 
-    // Update record count
-    if (personalities && personalities.length > 0) {
-        recordCount.textContent = `(${personalities.length} records)`;
-    } else {
-        recordCount.textContent = '(0 records)';
-    }
-
     // Show/hide scroll indicator based on record count
     if (personalities && personalities.length > 10) {
-        tableWrapper.style.maxHeight = '600px';
-        tableWrapper.style.overflowY = 'auto';
-        scrollIndicator.style.display = 'block';
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = '650px';
+            tableWrapper.style.overflowY = 'auto';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'block';
     } else {
-        tableWrapper.style.maxHeight = 'none';
-        tableWrapper.style.overflowY = 'visible';
-        scrollIndicator.style.display = 'none';
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = 'none';
+            tableWrapper.style.overflowY = 'visible';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'none';
     }
 
     if (!personalities || personalities.length === 0) {
@@ -292,8 +565,8 @@ function renderPersonalities(personalities) {
                 <td colspan="6" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-user-slash fa-2x mb-3 d-block opacity-50"></i>
-                        <p class="mb-0 fw-bold">No personalities found</p>
-                        <small>Click "Add Personality" to create one</small>
+                        <p class="mb-0 fw-bold">${allPersonalities.length > 0 ? 'No matching personalities found' : 'No personalities found'}</p>
+                        <small>${allPersonalities.length > 0 ? 'Try a different search term' : 'Click "Add Personality" to create one'}</small>
                     </div>
                 </td>
             </tr>
@@ -360,6 +633,7 @@ function openAddModal() {
     editingPersonalityId = null;
     document.getElementById('personalityModalTitle').textContent = 'Add Personality';
     document.getElementById('personalityForm').reset();
+    clearImagePreview(); imageUploadStatus.textContent = '';
     document.getElementById('personalityId').value = '';
     document.getElementById('savePersonalityBtn').textContent = 'Save Personality';
 
@@ -382,6 +656,7 @@ async function editPersonality(id) {
             document.getElementById('occupation').value = p.occupation || '';
             document.getElementById('bio').value = p.bio || '';
             document.getElementById('image').value = p.image || '';
+            showImagePreview(p.image || '');imageUploadStatus.textContent = '';
             document.getElementById('achievements').value = (p.achievements || []).join('\n');
             document.getElementById('savePersonalityBtn').textContent = 'Update Personality';
 
@@ -426,7 +701,7 @@ async function viewPersonality(id) {
                 <div class="text-center mb-4">
                     <img src="${escapeHtml(p.image || 'https://via.placeholder.com/120')}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
                     <h4 class="fw-bold mb-1">${escapeHtml(p.name)}</h4>
-                    ${p.occupation ? `<p class="text-muted mb-2"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
+                    ${p.occupation ? `<p class="text-muted mb-3"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
                 </div>
                 <div class="bg-light p-3 rounded-3 mb-3">
                     <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Biography</small>

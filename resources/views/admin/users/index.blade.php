@@ -8,7 +8,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-users me-2"></i>User Management</h4>
-
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddModal()">
@@ -20,35 +19,97 @@
         </div>
     </div>
 
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text"
+                       class="form-control border-start-0"
+                       id="searchUsers"
+                       placeholder="Search by username or email..."
+                       style="border-left: none; border-radius: 0 10px 10px 0;">
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-8 text-md-end">
+            <span class="text-muted small" id="userCount">Loading...</span>
+        </div>
+    </div>
+
     <!-- Main Card -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-          <div class="table-responsive table-scroll-wrapper">
-    <table class="table table-hover align-middle mb-0" id="usersTable">
-        <thead class="border-bottom-2">
-            <tr>
-                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
-                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">User</th>
-                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Role</th>
-                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Access Level</th>
-                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Joined</th>
-                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
-            </tr>
-        </thead>
-        <tbody id="usersTableBody">
-            <tr>
-                <td colspan="6" class="text-center py-5">
-                    <div class="text-muted">
-                        <div class="spinner-border text-dark mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mb-0">Loading users...</p>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+            <div id="users-skeleton">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="border-bottom-2">
+                            <tr>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">User</th>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Role</th>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Access Level</th>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Joined</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for($i = 0; $i < 8; $i++)
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="skeleton-box me-3" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+                                            <div>
+                                                <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 4px;"></div>
+                                                <div class="skeleton-box" style="width: 150px; height: 12px; border-radius: 4px;"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 60px; height: 24px; border-radius: 20px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 50px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 80px; height: 14px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="users-content" style="display: none; animation: fadeIn 0.5s ease-in-out;">
+                <div class="table-responsive table-scroll-wrapper">
+                    <table class="table table-hover align-middle mb-0" id="usersTable">
+                        <thead class="border-bottom-2">
+                            <tr>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">User</th>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Role</th>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Access Level</th>
+                                <th class="text-muted text-uppercase text-center fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Joined</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -156,65 +217,83 @@
 </div>
 
 <style>
+    /* Skeleton Loading Animation */
+    @keyframes skeleton-pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    .skeleton-box {
+        display: block;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        animation: skeleton-pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
     .table-scroll-wrapper {
-    max-height: 520px;
-    overflow-y: auto;
-    overflow-x: auto;
-}
+        max-height: 760px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
 
-.table-scroll-wrapper thead th {
-    position: sticky;
-    top: 0;
-    background-color: #fff;
-    z-index: 10;
-    box-shadow: inset 0 -1px 0 #dee2e6;
-}
+    .table-scroll-wrapper thead th {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        z-index: 10;
+        box-shadow: inset 0 -1px 0 #dee2e6;
+    }
 
+    .table-scroll-wrapper::-webkit-scrollbar {
+        width: 8px;
+    }
 
-.table-scroll-wrapper::-webkit-scrollbar {
-    width: 8px;
-}
+    .table-scroll-wrapper::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 8px;
+    }
 
-.table-scroll-wrapper::-webkit-scrollbar-thumb {
-    background-color: #d1d5db;
-    border-radius: 8px;
-}
+    .table-scroll-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-.table-scroll-wrapper::-webkit-scrollbar-track {
-    background: transparent;
-}
     .avatar-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #f1f1f1;
-    color: #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-}
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f1f1f1;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
 
-.view-avatar-circle {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #f1f1f1;
-    color: #333;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.5rem;
-}
+    .view-avatar-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #f1f1f1;
+        color: #333;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
 
-/* Center table content */
-.table td, .table th {
-    vertical-align: middle;
-}
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
     .form-control-custom {
         border: 1px solid #e9ecef;
         background-color: #f8f9fa;
@@ -223,6 +302,7 @@
         font-size: 0.9rem;
         transition: all 0.2s ease;
     }
+
     .form-control-custom:focus {
         background-color: #fff;
         border-color: #000;
@@ -230,7 +310,6 @@
         outline: none;
     }
 
-    /* Minimalist Action Buttons */
     .action-btn {
         width: 32px;
         height: 32px;
@@ -243,16 +322,17 @@
         color: #6c757d;
         transition: all 0.2s ease;
     }
+
     .action-btn:hover {
         background: #f1f1f1;
         color: #000;
     }
+
     .action-btn.delete:hover {
         background: rgba(220, 53, 69, 0.1);
         color: #dc3545;
     }
 
-    /* Monochrome Role Badges */
     .role-badge {
         padding: 5px 12px;
         border-radius: 20px;
@@ -261,14 +341,17 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
+
     .role-badge.admin {
         background: #000000;
         color: #ffffff;
     }
+
     .role-badge.teacher {
         background: #6c757d;
         color: #ffffff;
     }
+
     .role-badge.student {
         background: #f1f1f1;
         color: #333333;
@@ -278,6 +361,15 @@
         padding: 1rem 0.75rem;
         vertical-align: middle;
     }
+
+    .input-group .form-control:focus {
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
+
+    .input-group .form-control:focus + .input-group-text {
+        border-color: #dee2e6;
+    }
 </style>
 @endsection
 
@@ -285,31 +377,81 @@
 <script>
 let editingUserId = null;
 let viewModalInstance = null;
+let allUsers = [];
+let filteredUsers = [];
 
-// Get CSRF token from meta tag
 function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content || '';
 }
 
-// Load users on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
+    setupSearch();
 });
+
+function setupSearch() {
+    const searchInput = document.getElementById('searchUsers');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterUsers(query);
+        });
+    }
+}
+
+function filterUsers(query) {
+    if (!query) {
+        filteredUsers = allUsers;
+    } else {
+        filteredUsers = allUsers.filter(user => {
+            const username = (user.username || '').toLowerCase();
+            const email = (user.email || '').toLowerCase();
+            return username.includes(query) || email.includes(query);
+        });
+    }
+    renderUsers(filteredUsers);
+    updateUserCount(filteredUsers.length);
+}
+
+function updateUserCount(count) {
+    const countElement = document.getElementById('userCount');
+    if (countElement) {
+        if (count === 1) {
+            countElement.textContent = '1 user found';
+        } else {
+            countElement.textContent = count + ' users found';
+        }
+    }
+}
 
 // Load all users
 async function loadUsers() {
+    const skeleton = document.getElementById('users-skeleton');
+    const content = document.getElementById('users-content');
+
     try {
         const response = await fetch('/admin/api/users');
         const data = await response.json();
 
         if (data.success) {
-            renderUsers(data.data);
+            allUsers = data.data || [];
+            filteredUsers = allUsers;
+            renderUsers(filteredUsers);
+            updateUserCount(filteredUsers.length);
         } else {
             showToast('Failed to load users', 'danger');
+            renderUsers([]);
+            updateUserCount(0);
         }
     } catch (error) {
         console.error('Error loading users:', error);
         showToast('Error loading users', 'danger');
+        renderUsers([]);
+        updateUserCount(0);
+    } finally {
+        // Hide skeleton, show content
+        if (skeleton) skeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
     }
 }
 
@@ -324,7 +466,7 @@ function renderUsers(users) {
                     <div class="text-muted">
                         <i class="fas fa-users-slash fa-2x mb-3 d-block opacity-50"></i>
                         <p class="mb-0 fw-bold">No users found</p>
-                        <small>Click "Add User" to create one</small>
+                        <small>${allUsers.length > 0 ? 'Try a different search term' : 'Click "Add User" to create one'}</small>
                     </div>
                 </td>
             </tr>
@@ -335,7 +477,6 @@ function renderUsers(users) {
     let html = '';
     users.forEach((user, index) => {
         const roleClass = user.role || 'student';
-        // Fix: Handle both timestamp and string formats for createdAt
         let joinedDate = 'N/A';
         if (user.createdAt) {
             try {
@@ -618,7 +759,6 @@ document.getElementById('saveUserBtn').addEventListener('click', async function(
             body: JSON.stringify(userData)
         });
 
-        // Check if response is OK
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error response:', errorText);

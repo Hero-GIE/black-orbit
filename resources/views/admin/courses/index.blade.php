@@ -5,46 +5,127 @@
 @section('content')
 <div class="container-fluid py-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0"><i class="fas fa-book me-2"></i>Course Management</h4>
         <div>
-            <button class="btn btn-dark btn-sm me-2" onclick="openAddModal()">
-                <i class="fas fa-plus me-1"></i>Add Course
+            <h4 class="fw-bold mb-0"><i class="fas fa-book me-2"></i>Course Management</h4>
+            {{-- <small class="text-muted" id="recordCount">Loading...</small> --}}
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddModal()">
+                <i class="fas fa-plus me-2"></i>Add Course
             </button>
-            <button class="btn btn-outline-dark btn-sm" onclick="window.location.href='{{ route('admin.dashboard') }}'">
-                <i class="fas fa-arrow-left me-1"></i>Back
+            <button class="btn btn-outline-dark btn-sm d-flex align-items-center" onclick="window.location.href='{{ route('admin.dashboard') }}'">
+                <i class="fas fa-arrow-left me-2"></i>Back
             </button>
         </div>
     </div>
 
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text"
+                       class="form-control border-start-0"
+                       id="searchCourses"
+                       placeholder="Search by course name or category..."
+                       style="border-left: none; border-radius: 0 10px 10px 0;">
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-8 text-md-end">
+            <span class="text-muted small" id="recordCount">Loading...</span>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="coursesTable">
-                    <thead class="border-bottom-2">
-                        <tr>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Course</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Category</th>
-                            <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Level</th>
-                            <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Students</th>
-                            <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lessons</th>
-                            <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Certificate</th>
-                            <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="coursesTableBody">
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <div class="text-muted">
-                                    <div class="spinner-border text-dark mb-3" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mb-0">Loading courses...</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div class="card-body p-4">
+            <!-- SKELETON LOADING -->
+            <div id="courses-skeleton">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="border-bottom-2">
+                            <tr>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Course</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Category</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">Level</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Students</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lessons</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Certificate</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for($i = 0; $i < 6; $i++)
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="skeleton-box" style="width: 50px; height: 50px; border-radius: 8px;"></div>
+                                            <div>
+                                                <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 4px;"></div>
+                                                <div class="skeleton-box" style="width: 80px; height: 12px; border-radius: 4px;"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 80px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box mx-auto" style="width: 80px; height: 24px; border-radius: 20px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 40px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 40px; height: 20px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 50px; height: 16px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ACTUAL CONTENT -->
+            <div id="courses-content" style="display: none; animation: fadeIn 0.5s ease-in-out;">
+                <div class="table-responsive" id="coursesTableWrapper" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" id="coursesTable">
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
+                            <tr>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 220px;">Course</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Category</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Level</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">Students</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">Lessons</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Certificate</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 130px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Scroll indicator --}}
+                <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
+                    <i class="fas fa-chevron-down me-1"></i> Scroll for more records
+                </div>
             </div>
         </div>
     </div>
@@ -123,45 +204,45 @@
             </div>
             <div class="modal-body pt-2">
                 <!-- Course Info Header -->
-               <div class="bg-light p-3 rounded-3 mb-3">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h6 class="fw-bold mb-0" id="lessonCourseName">Course: Loading...</h6>
-            <small class="text-muted" id="lessonCourseId">Course ID: -</small>
-        </div>
-        <span class="badge bg-dark" id="lessonCountBadge">0 lessons</span>
-    </div>
-</div>
+                <div class="bg-light p-3 rounded-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="fw-bold mb-0" id="lessonCourseName">Course: Loading...</h6>
+                            <small class="text-muted" id="lessonCourseId">Course ID: -</small>
+                        </div>
+                        <span class="badge bg-dark" id="lessonCountBadge">0 lessons</span>
+                    </div>
+                </div>
 
-             <div class="bg-light p-3 rounded-3 mb-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="fw-bold mb-0"><i class="fas fa-plus-circle me-1"></i>Add New Lesson</h6>
-    </div>
-    <form id="lessonForm" class="row g-2">
-        <input type="hidden" id="lessonId" name="lessonId">
-        <input type="hidden" id="lessonCourseIdField" name="courseid">
-        <div class="col-md-6">
-            <input type="text" class="form-control form-control-custom" id="lessonTitle" name="title" placeholder="Lesson Title *" required>
-        </div>
-        <div class="col-md-6">
-            <input type="url" class="form-control form-control-custom" id="videourl" name="videourl" placeholder="Video URL">
-        </div>
-        <div class="col-12">
-            <textarea class="form-control form-control-custom" id="lessonDescription" name="description" rows="2" placeholder="Lesson Description"></textarea>
-        </div>
-        <div class="col-12">
-            <textarea class="form-control form-control-custom" id="resources" name="resources" rows="2" placeholder="Resources (one per line)"></textarea>
-        </div>
-        <div class="col-12 text-end">
-            <button type="button" class="btn btn-dark btn-sm" id="saveLessonBtn">
-                <i class="fas fa-save me-1"></i> Add Lesson
-            </button>
-            <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="cancelEditLessonBtn" onclick="cancelEditLesson()">
-                <i class="fas fa-times me-1"></i> Cancel
-            </button>
-        </div>
-    </form>
-</div>
+                <div class="bg-light p-3 rounded-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0"><i class="fas fa-plus-circle me-1"></i>Add New Lesson</h6>
+                    </div>
+                    <form id="lessonForm" class="row g-2">
+                        <input type="hidden" id="lessonId" name="lessonId">
+                        <input type="hidden" id="lessonCourseIdField" name="courseid">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control form-control-custom" id="lessonTitle" name="title" placeholder="Lesson Title *" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="url" class="form-control form-control-custom" id="videourl" name="videourl" placeholder="Video URL">
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control form-control-custom" id="lessonDescription" name="description" rows="2" placeholder="Lesson Description"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <textarea class="form-control form-control-custom" id="resources" name="resources" rows="2" placeholder="Resources (one per line)"></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="button" class="btn btn-dark btn-sm" id="saveLessonBtn">
+                                <i class="fas fa-save me-1"></i> Add Lesson
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="cancelEditLessonBtn" onclick="cancelEditLesson()">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
                 <!-- Lessons List -->
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
@@ -220,6 +301,25 @@
 </div>
 
 <style>
+    /* Skeleton Loading Animation */
+    @keyframes skeleton-pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    .skeleton-box {
+        display: block;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        animation: skeleton-pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .form-control-custom {
         border: 1px solid #e9ecef;
         background-color: #f8f9fa;
@@ -276,7 +376,7 @@
     }
 
     .table > :not(caption) > * > * {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem 0.75rem;
         vertical-align: middle;
     }
 
@@ -317,6 +417,38 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+
+    #coursesTableWrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+    #coursesTableWrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    #coursesTableWrapper::-webkit-scrollbar-thumb {
+        background: #d1d1d1;
+        border-radius: 10px;
+    }
+    #coursesTableWrapper::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .input-group .form-control:focus {
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
+
+    .input-group .form-control:focus + .input-group-text {
+        border-color: #dee2e6;
+    }
 </style>
 @endsection
 
@@ -325,6 +457,8 @@
 let editingCourseId = null;
 let editingLessonId = null;
 let currentCourseId = null;
+let allCourses = [];
+let filteredCourses = [];
 
 function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -332,27 +466,106 @@ function getCsrfToken() {
 
 document.addEventListener('DOMContentLoaded', function() {
     loadCourses();
+    setupSearch();
 });
+
+// Setup search functionality
+function setupSearch() {
+    const searchInput = document.getElementById('searchCourses');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterCourses(query);
+        });
+    }
+}
+
+// Filter courses based on search query
+function filterCourses(query) {
+    if (!query) {
+        filteredCourses = allCourses;
+    } else {
+        filteredCourses = allCourses.filter(course => {
+            const name = (course.coursename || '').toLowerCase();
+            const category = (course.category || '').toLowerCase();
+            const level = (course.courseLevel || '').toLowerCase();
+            return name.includes(query) || category.includes(query) || level.includes(query);
+        });
+    }
+    renderCourses(filteredCourses);
+    updateFilteredCount(filteredCourses.length);
+}
+
+// Update filtered count display
+function updateFilteredCount(count) {
+    const countElement = document.getElementById('filteredCount');
+    const recordCount = document.getElementById('recordCount');
+    if (countElement) {
+        if (count === 1) {
+            countElement.textContent = '1 record found';
+        } else {
+            countElement.textContent = count + ' records found';
+        }
+    }
+    if (recordCount) {
+        recordCount.textContent = `(${allCourses.length} total records)`;
+    }
+}
 
 // Load all courses
 async function loadCourses() {
+    const skeleton = document.getElementById('courses-skeleton');
+    const content = document.getElementById('courses-content');
+    const recordCount = document.getElementById('recordCount');
+
     try {
         const response = await fetch('/admin/api/courses');
         const data = await response.json();
 
         if (data.success) {
-            renderCourses(data.data);
+            allCourses = data.data || [];
+            filteredCourses = allCourses;
+            renderCourses(filteredCourses);
+            updateFilteredCount(filteredCourses.length);
+            recordCount.textContent = `(${allCourses.length} total records)`;
         } else {
             showToast('Failed to load courses', 'danger');
+            renderCourses([]);
+            updateFilteredCount(0);
+            recordCount.textContent = '(0 records)';
         }
     } catch (error) {
         console.error('Error loading courses:', error);
         showToast('Error loading courses', 'danger');
+        renderCourses([]);
+        updateFilteredCount(0);
+        recordCount.textContent = '(0 records)';
+    } finally {
+        // Hide skeleton, show content
+        if (skeleton) skeleton.style.display = 'none';
+        if (content) content.style.display = 'block';
     }
 }
 
 function renderCourses(courses) {
     const tbody = document.getElementById('coursesTableBody');
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    const tableWrapper = document.getElementById('coursesTableWrapper');
+
+    // Show/hide scroll indicator based on record count
+    if (courses && courses.length > 10) {
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = '600px';
+            tableWrapper.style.overflowY = 'auto';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'block';
+    } else {
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = 'none';
+            tableWrapper.style.overflowY = 'visible';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'none';
+    }
 
     if (!courses || courses.length === 0) {
         tbody.innerHTML = `
@@ -360,8 +573,8 @@ function renderCourses(courses) {
                 <td colspan="8" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-book fa-2x mb-3 d-block opacity-50"></i>
-                        <p class="mb-0 fw-bold">No courses found</p>
-                        <small>Click "Add Course" to create one</small>
+                        <p class="mb-0 fw-bold">${allCourses.length > 0 ? 'No matching courses found' : 'No courses found'}</p>
+                        <small>${allCourses.length > 0 ? 'Try a different search term' : 'Click "Add Course" to create one'}</small>
                     </div>
                 </td>
             </tr>
@@ -671,7 +884,7 @@ async function editLesson(lessonId) {
             document.getElementById('lessonDescription').value = lesson.description || '';
             document.getElementById('videourl').value = lesson.videourl || '';
             document.getElementById('resources').value = (lesson.resources || []).join('\n');
-            document.getElementById('lessonCourseIdField').value = lesson.courseid || currentCourseId; // ✅ fixed
+            document.getElementById('lessonCourseIdField').value = lesson.courseid || currentCourseId;
             document.getElementById('saveLessonBtn').innerHTML = '<i class="fas fa-save me-1"></i> Update Lesson';
             document.getElementById('cancelEditLessonBtn').classList.remove('d-none');
             document.getElementById('lessonModalTitle').textContent = '✏️ Edit Lesson';
@@ -786,7 +999,6 @@ async function deleteLesson(lessonId) {
         showToast('Error deleting lesson: ' + error.message, 'danger');
     }
 }
-
 
 function confirmDelete(courseId) {
     document.getElementById('deleteCourseId').value = courseId;

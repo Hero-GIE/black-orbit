@@ -5,10 +5,32 @@
 @section('content')
 <div class="container-fluid py-2">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0"><i class="fas fa-search me-2"></i>Cosmic Word Search Progress</h4>
-        <button class="btn btn-outline-dark btn-sm" onclick="window.location.href='{{ route('admin.dashboard') }}'">
-            <i class="fas fa-arrow-left me-1"></i>Back
+        <div>
+            <h4 class="fw-bold mb-0"><i class="fas fa-search me-2"></i>Cosmic Word Search Progress</h4>
+            {{-- <small class="text-muted" id="recordCount">Loading...</small> --}}
+        </div>
+        <button class="btn btn-outline-dark btn-sm d-flex align-items-center" onclick="window.location.href='{{ route('admin.dashboard') }}'">
+            <i class="fas fa-arrow-left me-2"></i>Back
         </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text"
+                       class="form-control border-start-0"
+                       id="searchProgress"
+                       placeholder="Search by username or email..."
+                       style="border-left: none; border-radius: 0 10px 10px 0;">
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-8 text-md-end">
+            <span class="text-muted small" id="recordCount">Loading...</span>
+        </div>
     </div>
 
     <!-- Skeleton Loading -->
@@ -40,38 +62,52 @@
 
         <!-- Table Skeleton -->
         <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="table-responsive">
+            <div class="card-body p-4">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
                     <table class="table align-middle mb-0">
-                        <thead>
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
                             <tr>
-                                <th class="skeleton-box" style="width: 40px; height: 16px;"></th>
-                                <th class="skeleton-box" style="width: 150px; height: 16px;"></th>
-                                <th class="skeleton-box" style="width: 60px; height: 16px;"></th>
-                                <th class="skeleton-box" style="width: 80px; height: 16px;"></th>
-                                <th class="skeleton-box" style="width: 60px; height: 16px;"></th>
-                                <th class="skeleton-box" style="width: 100px; height: 16px;"></th>
-                                <th class="skeleton-box" style="width: 60px; height: 16px;"></th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">User</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">Levels</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Completed</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">Stars</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 150px;">Progress</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @for($i = 0; $i < 5; $i++)
                                 <tr>
-                                    <td><div class="skeleton-box" style="width: 30px; height: 20px;"></div></td>
-                                    <td>
-                                        <div class="skeleton-box" style="width: 120px; height: 20px; margin-bottom: 4px;"></div>
-                                        <div class="skeleton-box" style="width: 150px; height: 14px;"></div>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
                                     </td>
-                                    <td><div class="skeleton-box" style="width: 40px; height: 24px; margin: 0 auto;"></div></td>
-                                    <td><div class="skeleton-box" style="width: 40px; height: 24px; margin: 0 auto;"></div></td>
-                                    <td><div class="skeleton-box" style="width: 50px; height: 24px; margin: 0 auto;"></div></td>
+                                    <td>
+                                        <div>
+                                            <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 4px;"></div>
+                                            <div class="skeleton-box" style="width: 150px; height: 12px; border-radius: 4px;"></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 40px; height: 24px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 40px; height: 24px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="skeleton-box mx-auto" style="width: 50px; height: 24px; border-radius: 4px;"></div>
+                                    </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="skeleton-box" style="width: 80px; height: 6px; border-radius: 10px;"></div>
-                                            <div class="skeleton-box" style="width: 30px; height: 14px;"></div>
+                                            <div class="skeleton-box" style="width: 30px; height: 14px; border-radius: 4px;"></div>
                                         </div>
                                     </td>
-                                    <td><div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px; margin-left: auto;"></div></td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endfor
                         </tbody>
@@ -134,33 +170,29 @@
 
         <!-- Users Table -->
         <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="table-responsive">
+            <div class="card-body p-4">
+                <div class="table-responsive" id="progressTableWrapper" style="max-height: 650px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="border-bottom-2">
+                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
                             <tr>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px;">User</th>
-                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Levels</th>
-                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Completed</th>
-                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stars</th>
-                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Progress</th>
-                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Actions</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">User</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">Levels</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Completed</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 80px;">Stars</th>
+                                <th class="text-muted text-uppercase fs-6 text-center" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 150px;">Progress</th>
+                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 100px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="progressTableBody">
-                            <tr>
-                                <td colspan="7" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <div class="spinner-border text-dark mb-3" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                        <p class="mb-0">Loading progress data...</p>
-                                    </div>
-                                </td>
-                            </tr>
+                            <!-- Dynamic content -->
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Scroll indicator --}}
+                <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
+                    <i class="fas fa-chevron-down me-1"></i> Scroll for more records
                 </div>
             </div>
         </div>
@@ -285,12 +317,44 @@
         color: #000;
     }
     .table > :not(caption) > * > * {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem 0.75rem;
         vertical-align: middle;
     }
     .progress-mini {
         height: 6px;
         border-radius: 10px;
+    }
+
+    #progressTableWrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+    #progressTableWrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    #progressTableWrapper::-webkit-scrollbar-thumb {
+        background: #d1d1d1;
+        border-radius: 10px;
+    }
+    #progressTableWrapper::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .input-group .form-control:focus {
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
+
+    .input-group .form-control:focus + .input-group-text {
+        border-color: #dee2e6;
     }
 </style>
 @endsection
@@ -302,6 +366,8 @@ function getCsrfToken() {
 }
 
 let isCosmicVisible = false;
+let allProgressData = [];
+let filteredProgressData = [];
 
 function revealCosmic() {
     if (isCosmicVisible) return;
@@ -314,6 +380,7 @@ function revealCosmic() {
 
 // Load progress data on page load
 document.addEventListener('DOMContentLoaded', function() {
+    setupSearch();
     // Set a timeout to reveal content even if API is slow
     const skeletonTimeout = setTimeout(revealCosmic, 3000);
 
@@ -329,6 +396,48 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 
+// Setup search functionality
+function setupSearch() {
+    const searchInput = document.getElementById('searchProgress');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            filterProgress(query);
+        });
+    }
+}
+
+// Filter progress data based on search query
+function filterProgress(query) {
+    if (!query) {
+        filteredProgressData = allProgressData;
+    } else {
+        filteredProgressData = allProgressData.filter(user => {
+            const username = (user.username || '').toLowerCase();
+            const email = (user.email || '').toLowerCase();
+            return username.includes(query) || email.includes(query);
+        });
+    }
+    renderUsers(filteredProgressData);
+    updateFilteredCount(filteredProgressData.length);
+}
+
+// Update filtered count display
+function updateFilteredCount(count) {
+    const countElement = document.getElementById('filteredCount');
+    const recordCount = document.getElementById('recordCount');
+    if (countElement) {
+        if (count === 1) {
+            countElement.textContent = '1 record found';
+        } else {
+            countElement.textContent = count + ' records found';
+        }
+    }
+    if (recordCount) {
+        recordCount.textContent = `(${allProgressData.length} total records)`;
+    }
+}
+
 // Load all progress data
 async function loadProgressData() {
     try {
@@ -336,14 +445,22 @@ async function loadProgressData() {
         const data = await response.json();
 
         if (data.success) {
+            allProgressData = data.data.users || [];
+            filteredProgressData = allProgressData;
             updateStats(data.data.stats);
-            renderUsers(data.data.users);
+            renderUsers(filteredProgressData);
+            updateFilteredCount(filteredProgressData.length);
+            document.getElementById('recordCount').textContent = `(${allProgressData.length} total records)`;
         } else {
             showToast('Failed to load progress data', 'danger');
+            renderUsers([]);
+            updateFilteredCount(0);
         }
     } catch (error) {
         console.error('Error loading progress:', error);
         showToast('Error loading progress data', 'danger');
+        renderUsers([]);
+        updateFilteredCount(0);
         throw error;
     }
 }
@@ -363,6 +480,23 @@ function updateStats(stats) {
 // Render users
 function renderUsers(users) {
     const tbody = document.getElementById('progressTableBody');
+    const scrollIndicator = document.getElementById('scrollIndicator');
+    const tableWrapper = document.getElementById('progressTableWrapper');
+
+    // Show/hide scroll indicator based on record count
+    if (users && users.length > 10) {
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = '650px';
+            tableWrapper.style.overflowY = 'auto';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'block';
+    } else {
+        if (tableWrapper) {
+            tableWrapper.style.maxHeight = 'none';
+            tableWrapper.style.overflowY = 'visible';
+        }
+        if (scrollIndicator) scrollIndicator.style.display = 'none';
+    }
 
     if (!users || users.length === 0) {
         tbody.innerHTML = `
@@ -370,8 +504,8 @@ function renderUsers(users) {
                 <td colspan="7" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-search fa-2x mb-3 d-block opacity-50"></i>
-                        <p class="mb-0 fw-bold">No progress data found</p>
-                        <small>Users will appear here when they start playing</small>
+                        <p class="mb-0 fw-bold">${allProgressData.length > 0 ? 'No matching users found' : 'No progress data found'}</p>
+                        <small>${allProgressData.length > 0 ? 'Try a different search term' : 'Users will appear here when they start playing'}</small>
                     </div>
                 </td>
             </tr>
