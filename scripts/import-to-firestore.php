@@ -1,9 +1,10 @@
-#!/usr/bin/env php
 <?php
 
 /**
  * CSV TO FIRESTORE IMPORTER - Personalities Collection
- * With Full Debug Logging
+ * REPLACE ALL DATA - Deletes existing documents before import
+ * With Auto-Generated Document IDs
+ * Slug is stored as a field inside the document
  */
 
 // ========== ENABLE ERROR REPORTING ==========
@@ -73,11 +74,12 @@ $firebaseVars = array_filter($env, function($key) {
 }, ARRAY_FILTER_USE_KEY);
 
 foreach ($firebaseVars as $key => $value) {
-    // Mask the API key for security
     if ($key === 'FIREBASE_API_KEY' && strlen($value) > 10) {
         $displayValue = substr($value, 0, 10) . '...' . substr($value, -5);
+    } elseif ($key === 'FIREBASE_CREDENTIALS') {
+        $displayValue = basename($value);
     } else {
-        $displayValue = $value;
+        $displayValue = $value ? '✅ SET' : '❌ EMPTY';
     }
     writeLog("  $key = $displayValue");
 }
@@ -92,7 +94,6 @@ writeLog("\n📋 Validating configuration...");
 
 if (!$PROJECT_ID) {
     writeLog("❌ ERROR: FIREBASE_PROJECT_ID not set in .env file");
-    writeLog("   Please add: FIREBASE_PROJECT_ID=your-project-id");
     die("❌ Missing FIREBASE_PROJECT_ID in .env\n");
 }
 
@@ -113,7 +114,6 @@ writeLog("📄 FIREBASE_CREDENTIALS: $CREDENTIALS_FILE");
 
 if (!file_exists($CREDENTIALS_FILE)) {
     writeLog("❌ ERROR: Credentials file not found at: $CREDENTIALS_FILE");
-    writeLog("   Please ensure the file exists and the path is correct");
     die("❌ Credentials file not found\n");
 }
 
@@ -124,7 +124,7 @@ writeLog("📄 CSV File: $CSV_FILE");
 
 if (!file_exists($CSV_FILE)) {
     writeLog("❌ CSV file not found: $CSV_FILE");
-    die("❌ CSV file not found: $CSV_FILE\n\nUsage: php import-to-firestore.php [path-to-csv]\n");
+    die("❌ CSV file not found\n");
 }
 
 writeLog("✅ CSV file exists");
@@ -145,10 +145,8 @@ writeLog("   Client Email: " . ($creds['client_email'] ?? 'NOT FOUND'));
 writeLog("   Project ID: " . ($creds['project_id'] ?? 'NOT FOUND'));
 writeLog("   Private Key: " . (isset($creds['private_key']) ? 'Found (length: ' . strlen($creds['private_key']) . ')' : 'NOT FOUND'));
 
-// Check if project IDs match
 if (isset($creds['project_id']) && $creds['project_id'] !== $PROJECT_ID) {
-    writeLog("⚠️  WARNING: Project ID in .env ($PROJECT_ID) doesn't match credentials file (" . $creds['project_id'] . ")");
-    writeLog("   Using project ID from .env: $PROJECT_ID");
+    writeLog("⚠️  WARNING: Project ID mismatch - using .env value: $PROJECT_ID");
 }
 
 // ========== START IMPORT ==========
@@ -162,22 +160,22 @@ try {
 
     if (!$token) {
         writeLog("❌ Failed to get access token");
-        die("❌ Failed to get access token. Check your credentials file.\n");
+        die("❌ Failed to get access token.\n");
     }
 
-    writeLog("✅ Access token obtained successfully (length: " . strlen($token) . " characters)");
-    writeLog("   Token preview: " . substr($token, 0, 30) . "...");
+    writeLog("✅ Access token obtained successfully");
 
-    // Test the token with a simple API call
+    // Test the token
     writeLog("\n🧪 Testing token with Firestore API...");
     testToken($PROJECT_ID, $token);
 
-    // Check if personalities collection exists
-    writeLog("\n📊 Checking personalities collection...");
-    checkExistingDocuments($PROJECT_ID, $token);
+    // ========== DELETE ALL EXISTING DOCUMENTS ==========
+    writeLog("\n🗑️ DELETE PHASE: Removing all existing documents...");
+    $deletedCount = deleteAllDocuments($PROJECT_ID, $token);
+    writeLog("   ✅ Deleted $deletedCount existing documents");
 
     // Import the CSV
-    writeLog("\n📥 Starting CSV import...");
+    writeLog("\n📥 IMPORT PHASE: Starting CSV import...");
     importCSV($CSV_FILE, $PROJECT_ID, $token);
 
     writeLog("\n✅ Import completed successfully!");
@@ -189,9 +187,17 @@ try {
     die("❌ Import failed: " . $e->getMessage() . "\n");
 }
 
-function getAccessToken($credsFile) {
-    global $logFile;
 
+// ============================================================
+// BASE64 URL ENCODER
+// ============================================================
+
+function base64UrlEncode($data) {
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+
+
+function getAccessToken($credsFile) {
     try {
         writeLog("   Reading credentials file...");
         $creds = json_decode(file_get_contents($credsFile), true);
@@ -204,20 +210,21 @@ function getAccessToken($credsFile) {
         writeLog("   ✅ Credentials loaded successfully");
         writeLog("   Client Email: " . ($creds['client_email'] ?? 'NOT FOUND'));
 
-        // Create JWT
-        writeLog("   Creating JWT...");
-        $header = base64_encode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
+        $header = base64UrlEncode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
         $now = time();
-        $payload = base64_encode(json_encode([
+
+        $payload = base64UrlEncode(json_encode([
             'iss' => $creds['client_email'],
             'sub' => $creds['client_email'],
-            'aud' => 'https://www.googleapis.com/oauth2/v4/token',
+            'scope' => 'https://www.googleapis.com/auth/datastore',
+            'aud' => 'https://oauth2.googleapis.com/token',
             'iat' => $now,
             'exp' => $now + 3600,
         ]));
 
         writeLog("   JWT created, signing with private key...");
         $signature = '';
+
         $signResult = openssl_sign($header . '.' . $payload, $signature, $creds['private_key'], OPENSSL_ALGO_SHA256);
 
         if (!$signResult) {
@@ -225,13 +232,13 @@ function getAccessToken($credsFile) {
             return null;
         }
 
-        $jwt = $header . '.' . $payload . '.' . base64_encode($signature);
+        $jwt = $header . '.' . $payload . '.' . base64UrlEncode($signature);
         writeLog("   ✅ JWT signed successfully");
 
-        // Exchange JWT for access token
         writeLog("   Exchanging JWT for access token...");
+
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://www.googleapis.com/oauth2/v4/token');
+        curl_setopt($ch, CURLOPT_URL, 'https://oauth2.googleapis.com/token');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
             'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -257,6 +264,7 @@ function getAccessToken($credsFile) {
         }
 
         $data = json_decode($response, true);
+
         if (!$data) {
             writeLog("   ❌ Failed to parse response JSON");
             return null;
@@ -298,71 +306,130 @@ function testToken($projectId, $token) {
     }
 }
 
-function checkExistingDocuments($projectId, $token) {
-    $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/personalities?pageSize=1";
+// ============================================================
+// DELETE ALL DOCUMENTS - FIXED
+// ============================================================
 
-    writeLog("   Checking URL: $url");
+function deleteAllDocuments($projectId, $token) {
+    $totalDeleted = 0;
+    $pageToken = null;
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $token,
-        'Content-Type: application/json',
-    ]);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    if ($error) {
-        writeLog("   ❌ CURL Error: $error");
-        return;
-    }
-
-    writeLog("   HTTP Status Code: $httpCode");
-
-    if ($httpCode === 200) {
-        $data = json_decode($response, true);
-        if (isset($data['documents']) && count($data['documents']) > 0) {
-            writeLog("   ⚠️  Personalities collection already has " . count($data['documents']) . " document(s)");
-            writeLog("   New documents will be added, existing ones will be updated if IDs match");
-        } else {
-            writeLog("   ✅ Personalities collection is empty or doesn't exist yet");
-            writeLog("   Will create the collection with new documents");
+    do {
+        $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/personalities";
+        if ($pageToken) {
+            $url .= "?pageToken=" . urlencode($pageToken);
         }
-    } elseif ($httpCode === 403) {
-        writeLog("   ❌ PERMISSION DENIED (403)");
-        writeLog("   This means the service account doesn't have access to this project");
-        writeLog("   Check that:");
-        writeLog("     1. The project ID '$projectId' is correct");
-        writeLog("     2. The service account has Firestore permissions");
-        writeLog("     3. Firestore API is enabled in Google Cloud Console");
-        writeLog("   Response: $response");
-    } else {
-        writeLog("   ❌ Unexpected response code: $httpCode");
-        writeLog("   Response: $response");
-    }
+
+        writeLog("   Fetching batch of documents...");
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token,
+            'Content-Type: application/json',
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            writeLog("   ❌ CURL Error fetching documents: $error");
+            break;
+        }
+
+        if ($httpCode !== 200) {
+            writeLog("   ❌ Failed to fetch documents: HTTP $httpCode");
+            writeLog("   Response: " . substr($response, 0, 300));
+            break;
+        }
+
+        $data = json_decode($response, true);
+
+        if (!isset($data['documents']) || empty($data['documents'])) {
+            writeLog("   No more documents to delete");
+            break;
+        }
+
+        // Build delete writes - FIXED: Use the correct format
+        $writes = [];
+        foreach ($data['documents'] as $doc) {
+            $docPath = $doc['name'];
+            $writes[] = [
+                'delete' => $docPath  // FIXED: Just the path, not an object
+            ];
+        }
+
+        $batchCount = count($writes);
+        writeLog("   Deleting $batchCount documents...");
+
+        // Execute batch delete
+        $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents:batchWrite";
+
+        $payload = json_encode(['writes' => $writes]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $token,
+            'Content-Type: application/json',
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            writeLog("   ❌ CURL Error deleting batch: $error");
+            break;
+        }
+
+        if ($httpCode !== 200) {
+            writeLog("   ❌ Batch delete failed: HTTP $httpCode");
+            writeLog("   Response: " . substr($response, 0, 300));
+            break;
+        }
+
+        $totalDeleted += $batchCount;
+        writeLog("   ✅ Deleted $batchCount documents (Total: $totalDeleted)");
+
+        $pageToken = $data['nextPageToken'] ?? null;
+
+    } while ($pageToken);
+
+    return $totalDeleted;
 }
+
+// ============================================================
+// IMPORT CSV
+// ============================================================
 
 function importCSV($csvFile, $projectId, $token) {
     $file = fopen($csvFile, 'r');
+
     if (!$file) {
         throw new Exception("Could not open CSV file");
     }
 
-    // Read header
     $header = fgetcsv($file);
+
     if (!$header) {
         fclose($file);
         throw new Exception("Empty CSV or no header");
     }
 
+    // Clean header
+    $header = array_map('trim', $header);
+
     writeLog("   CSV Header: " . implode(', ', $header));
 
     $total = 0;
-    $updated = 0;
     $created = 0;
     $batch = [];
     $batchSize = 0;
@@ -370,15 +437,29 @@ function importCSV($csvFile, $projectId, $token) {
     writeLog("   Starting to process rows...");
 
     while (($row = fgetcsv($file)) !== false) {
-        if (count($row) !== count($header)) {
-            writeLog("   ⚠️  Skipping row " . ($total + 1) . " - incorrect column count");
+        // Skip empty rows
+        if (count($row) === 1 && empty($row[0])) {
             continue;
+        }
+
+        // If row has fewer columns than header, pad with empty strings
+        if (count($row) < count($header)) {
+            $row = array_pad($row, count($header), '');
+        }
+
+        // If row has more columns than header, truncate
+        if (count($row) > count($header)) {
+            $row = array_slice($row, 0, count($header));
         }
 
         $data = array_combine($header, $row);
 
-        // Clean data
         $name = trim($data['name'] ?? '');
+
+        if (empty($name)) {
+            continue;
+        }
+
         $occupation = trim($data['occupation'] ?? '');
         $bio = trim($data['bio'] ?? '');
         $bio = str_replace(["\n", "\r"], ' ', $bio);
@@ -386,12 +467,16 @@ function importCSV($csvFile, $projectId, $token) {
 
         $achievements = trim($data['achievements'] ?? '');
         $achievementsArray = [];
+
         if (!empty($achievements)) {
+            // Handle achievements that might contain commas within quotes
             $achievementsArray = array_map('trim', explode(',', $achievements));
         }
 
         $image = trim($data['image'] ?? '');
-        $docId = generateSlug($name);
+
+        // Generate slug from name
+        $slug = generateSlug($name);
 
         // Prepare document data
         $docData = [
@@ -399,38 +484,36 @@ function importCSV($csvFile, $projectId, $token) {
                 'name' => ['stringValue' => $name],
                 'occupation' => ['stringValue' => $occupation],
                 'bio' => ['stringValue' => $bio],
-                'achievements' => ['arrayValue' => ['values' => array_map(function($a) {
-                    return ['stringValue' => $a];
-                }, $achievementsArray)]],
+                'achievements' => [
+                    'arrayValue' => [
+                        'values' => array_map(
+                            function($a) {
+                                return ['stringValue' => $a];
+                            },
+                            $achievementsArray
+                        )
+                    ]
+                ],
                 'image' => ['stringValue' => $image],
-                'id' => ['stringValue' => $docId],
+                'slug' => ['stringValue' => $slug],
                 'createdAt' => ['timestampValue' => date('c')],
                 'updatedAt' => ['timestampValue' => date('c')],
             ]
         ];
 
-        // Check if document exists
-        $exists = documentExists($docId, $projectId, $token);
-
-        $batch[$docId] = $docData;
+        $batch[] = $docData;
         $batchSize++;
         $total++;
-
-        if ($exists) {
-            $updated++;
-        } else {
-            $created++;
-        }
+        $created++;
 
         if ($batchSize >= 500) {
             commitBatch($batch, $projectId, $token);
             $batch = [];
             $batchSize = 0;
-            writeLog("   ✅ Processed $total records (Created: $created, Updated: $updated)");
+            writeLog("   ✅ Processed $total records (Created: $created)");
         }
     }
 
-    // Commit remaining
     if ($batchSize > 0) {
         commitBatch($batch, $projectId, $token);
     }
@@ -440,35 +523,19 @@ function importCSV($csvFile, $projectId, $token) {
     writeLog("\n📊 Import Summary:");
     writeLog("  - Total processed: $total");
     writeLog("  - New documents created: $created");
-    writeLog("  - Existing documents updated: $updated");
-}
-
-function documentExists($docId, $projectId, $token) {
-    $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/personalities/$docId";
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $token,
-        'Content-Type: application/json',
-    ]);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    return $httpCode === 200;
 }
 
 function commitBatch($batch, $projectId, $token) {
-    if (empty($batch)) return;
+    if (empty($batch)) {
+        return;
+    }
 
     $writes = [];
-    foreach ($batch as $docId => $docData) {
+
+    foreach ($batch as $docData) {
         $writes[] = [
             'update' => [
-                'name' => "projects/$projectId/databases/(default)/documents/personalities/$docId",
+                'name' => "projects/$projectId/databases/(default)/documents/personalities/" . uniqid(),
                 'fields' => $docData['fields'],
             ]
         ];
@@ -504,6 +571,33 @@ function commitBatch($batch, $projectId, $token) {
 
 function generateSlug($name) {
     $slug = strtolower(trim($name));
-    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
-    return trim($slug, '-');
+
+    $specialChars = [
+        ' ' => '-',
+        '—' => '-',
+        '–' => '-',
+        '&' => 'and',
+        'é' => 'e',
+        'è' => 'e',
+        'ê' => 'e',
+        'ë' => 'e',
+        'à' => 'a',
+        'â' => 'a',
+        'ä' => 'a',
+        'ô' => 'o',
+        'ö' => 'o',
+        'û' => 'u',
+        'ü' => 'u',
+        'ç' => 'c',
+        'ñ' => 'n',
+        "'" => '-',
+        '"' => '-',
+    ];
+
+    $slug = str_replace(array_keys($specialChars), array_values($specialChars), $slug);
+    $slug = preg_replace('/[^a-z0-9-]+/', '-', $slug);
+    $slug = preg_replace('/-+/', '-', $slug);
+    $slug = trim($slug, '-');
+
+    return $slug;
 }

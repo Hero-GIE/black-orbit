@@ -1,0 +1,395 @@
+[2026-08-31 13:22:43] =========================================
+[2026-08-31 13:22:43] 🚀 Starting Firestore Import Process
+[2026-08-31 13:22:43] =========================================
+[2026-08-31 13:22:43] 📁 Loading .env file...
+[2026-08-31 13:22:43] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-08-31 13:22:43] 🔍 Debug: Checking .env values...
+[2026-08-31 13:22:43]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-08-31 13:22:43]   FIREBASE_PROJECT_ID = black-orbit-e865b
+[2026-08-31 13:22:43]   FIREBASE_CREDENTIALS = /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 13:22:43] 
+📋 Validating configuration...
+[2026-08-31 13:22:43] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-08-31 13:22:43] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 13:22:43] ✅ Credentials file exists
+[2026-08-31 13:22:43] 📄 CSV File: /Users/teamwowlogbook/black-orbit/storage/app/innovators.csv
+[2026-08-31 13:22:43] ✅ CSV file exists
+[2026-08-31 13:22:43] 
+🔑 Validating credentials file...
+[2026-08-31 13:22:43] ✅ Credentials file is valid JSON
+[2026-08-31 13:22:43]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 13:22:43]    Project ID: black-orbit-e865b
+[2026-08-31 13:22:43]    Private Key: Found (length: 1704)
+[2026-08-31 13:22:43] 
+🚀 Starting import process...
+[2026-08-31 13:22:43] =========================================
+
+[2026-08-31 13:22:43] 🔑 Attempting to get access token...
+[2026-08-31 13:22:43]    Reading credentials file...
+[2026-08-31 13:22:43]    ✅ Credentials loaded successfully
+[2026-08-31 13:22:43]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 13:22:43]    Creating JWT...
+[2026-08-31 13:22:43]    JWT created, signing with private key...
+[2026-08-31 13:22:43]    ✅ JWT signed successfully
+[2026-08-31 13:22:43]    Exchanging JWT for access token...
+[2026-08-31 13:22:44]    ❌ HTTP Error: 400
+[2026-08-31 13:22:44]    Response: {"error":"invalid_scope","error_description":"Invalid OAuth scope or ID token audience provided."}
+[2026-08-31 13:22:44] ❌ Failed to get access token
+[2026-08-31 13:28:31] =========================================
+[2026-08-31 13:28:31] 🚀 Starting Firestore Import Process
+[2026-08-31 13:28:31] =========================================
+[2026-08-31 13:28:31] 📁 Loading .env file...
+[2026-08-31 13:28:31] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-08-31 13:28:31] 🔍 Debug: Checking .env values...
+[2026-08-31 13:28:31]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-08-31 13:28:31]   FIREBASE_PROJECT_ID = black-orbit-e865b
+[2026-08-31 13:28:31]   FIREBASE_CREDENTIALS = /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 13:28:31] 
+📋 Validating configuration...
+[2026-08-31 13:28:31] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-08-31 13:28:31] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 13:28:31] ✅ Credentials file exists
+[2026-08-31 13:28:31] 📄 CSV File: /Users/teamwowlogbook/black-orbit/storage/app/innovators.csv
+[2026-08-31 13:28:31] ✅ CSV file exists
+[2026-08-31 13:28:31] 
+🔑 Validating credentials file...
+[2026-08-31 13:28:31] ✅ Credentials file is valid JSON
+[2026-08-31 13:28:31]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 13:28:31]    Project ID: black-orbit-e865b
+[2026-08-31 13:28:31]    Private Key: Found (length: 1704)
+[2026-08-31 13:28:31] 
+🚀 Starting import process...
+[2026-08-31 13:28:31] =========================================
+
+[2026-08-31 13:28:31] 🔑 Attempting to get access token...
+[2026-08-31 13:28:31]    Reading credentials file...
+[2026-08-31 13:28:31]    ✅ Credentials loaded successfully
+[2026-08-31 13:28:31]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 13:28:31]    Creating JWT...
+[2026-08-31 13:28:31]    JWT created, signing with private key...
+[2026-08-31 13:28:31]    ✅ JWT signed successfully
+[2026-08-31 13:28:31]    Exchanging JWT for access token...
+[2026-08-31 13:28:32]    ✅ Access token obtained
+[2026-08-31 13:28:32] ✅ Access token obtained successfully (length: 1024 characters)
+[2026-08-31 13:28:32]    Token preview: ya29.c.c0AZ4bNpbGji9ucpRIh6RDW...
+[2026-08-31 13:28:32] 
+🧪 Testing token with Firestore API...
+[2026-08-31 13:28:32]    Testing token with project ID: black-orbit-e865b
+[2026-08-31 13:28:34]    ✅ Token works! Firestore database accessible
+[2026-08-31 13:28:34] 
+📊 Checking personalities collection...
+[2026-08-31 13:28:34]    Checking URL: https://firestore.googleapis.com/v1/projects/black-orbit-e865b/databases/(default)/documents/personalities?pageSize=1
+[2026-08-31 13:28:36]    HTTP Status Code: 200
+[2026-08-31 13:28:36]    ⚠️  Personalities collection already has 1 document(s)
+[2026-08-31 13:28:36]    New documents will be added, existing ones will be updated if IDs match
+[2026-08-31 13:28:36] 
+📥 Starting CSV import...
+[2026-08-31 13:28:36]    CSV Header: 
+[2026-08-31 13:28:36]    Starting to process rows...
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:39]    ⚠️  Skipping row 2 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:28:49]    ⚠️  Skipping row 8 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:15]    ⚠️  Skipping row 26 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:41]    ⚠️  Skipping row 42 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:29:57]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20]    ⚠️  Skipping row 69 - incorrect column count
+[2026-08-31 13:30:20] ❌ ERROR: Batch commit failed (HTTP 400): {
+  "error": {
+    "code": 400,
+    "message": "Document name \"projects/black-orbit-e865b/databases/(default)/documents/personalities/\" has invalid trailing \"/\".",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+
+[2026-08-31 13:30:20]    Stack trace: #0 /Users/teamwowlogbook/black-orbit/scripts/import-to-firestore.php(644): commitBatch(Array, 'black-orbit-e86...', 'ya29.c.c0AZ4bNp...')
+#1 /Users/teamwowlogbook/black-orbit/scripts/import-to-firestore.php(180): importCSV('/Users/teamwowl...', 'black-orbit-e86...', 'ya29.c.c0AZ4bNp...')
+#2 {main}
+[2026-08-31 13:37:37] =========================================
+[2026-08-31 13:37:37] 🚀 Starting Firestore Import Process
+[2026-08-31 13:37:37] =========================================
+[2026-08-31 13:37:37] 📁 Loading .env file...
+[2026-08-31 13:37:37] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-08-31 13:37:37] 🔍 Debug: Checking .env values...
+[2026-08-31 13:37:37]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-08-31 13:37:37]   FIREBASE_PROJECT_ID = black-orbit-e865b
+[2026-08-31 13:37:37]   FIREBASE_CREDENTIALS = /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 13:37:37] 
+📋 Validating configuration...
+[2026-08-31 13:37:37] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-08-31 13:37:37] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 13:37:37] ✅ Credentials file exists
+[2026-08-31 13:37:37] 📄 CSV File: /Users/teamwowlogbook/black-orbit/storage/app/innovators.csv
+[2026-08-31 13:37:37] ✅ CSV file exists
+[2026-08-31 13:37:37] 
+🔑 Validating credentials file...
+[2026-08-31 13:37:37] ✅ Credentials file is valid JSON
+[2026-08-31 13:37:37]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 13:37:37]    Project ID: black-orbit-e865b
+[2026-08-31 13:37:37]    Private Key: Found (length: 1704)
+[2026-08-31 13:37:37] 
+🚀 Starting import process...
+[2026-08-31 13:37:37] =========================================
+
+[2026-08-31 13:37:37] 🔑 Attempting to get access token...
+[2026-08-31 13:37:37]    Reading credentials file...
+[2026-08-31 13:37:37]    ✅ Credentials loaded successfully
+[2026-08-31 13:37:37]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 13:37:37]    Creating JWT...
+[2026-08-31 13:37:37]    JWT created, signing with private key...
+[2026-08-31 13:37:37]    ✅ JWT signed successfully
+[2026-08-31 13:37:37]    Exchanging JWT for access token...
+[2026-08-31 13:37:38]    ✅ Access token obtained
+[2026-08-31 13:37:38] ✅ Access token obtained successfully (length: 1024 characters)
+[2026-08-31 13:37:38]    Token preview: ya29.c.c0AZ4bNpboDMV-97nyoffOL...
+[2026-08-31 13:37:38] 
+🧪 Testing token with Firestore API...
+[2026-08-31 13:37:38]    Testing token with project ID: black-orbit-e865b
+[2026-08-31 13:37:40]    ✅ Token works! Firestore database accessible
+[2026-08-31 13:37:40] 
+📊 Checking personalities collection...
+[2026-08-31 13:37:40]    Checking URL: https://firestore.googleapis.com/v1/projects/black-orbit-e865b/databases/(default)/documents/personalities?pageSize=1
+[2026-08-31 13:37:41]    HTTP Status Code: 200
+[2026-08-31 13:37:41]    ⚠️  Personalities collection already has 1 document(s)
+[2026-08-31 13:37:41]    New documents will be added, existing ones will be updated if IDs match
+[2026-08-31 13:37:41] 
+📥 Starting CSV import...
+[2026-08-31 13:37:41]    CSV Header: name, occupation, bio, achievements, image
+[2026-08-31 13:37:41]    Starting to process rows...
+[2026-08-31 13:38:39]    ⚠️  Skipping row 43 - incorrect column count
+[2026-08-31 13:38:56]    📦 Batch of 51 documents committed
+[2026-08-31 13:38:56] 
+📊 Import Summary:
+[2026-08-31 13:38:56]   - Total processed: 51
+[2026-08-31 13:38:56]   - New documents created: 51
+[2026-08-31 13:38:56]   - Existing documents updated: 0
+[2026-08-31 13:38:56] 
+✅ Import completed successfully!
+[2026-08-31 13:38:56] =========================================
+[2026-08-31 14:11:57] =========================================
+[2026-08-31 14:11:57] 🚀 Starting Firestore Import Process
+[2026-08-31 14:11:57] =========================================
+[2026-08-31 14:11:57] 📁 Loading .env file...
+[2026-08-31 14:11:57] ❌ CRITICAL: .env file not found at: /Users/teamwowlogbook/black-orbit/scripts/.env
+[2026-08-31 14:13:51] =========================================
+[2026-08-31 14:13:51] 🚀 Starting Firestore Import Process
+[2026-08-31 14:13:51] =========================================
+[2026-08-31 14:13:51] 📁 Loading .env file...
+[2026-08-31 14:13:51] ❌ CRITICAL: .env file not found at: /Users/teamwowlogbook/black-orbit/scripts/.env
+[2026-08-31 14:15:50] =========================================
+[2026-08-31 14:15:50] 🚀 Starting Firestore Import Process
+[2026-08-31 14:15:50] =========================================
+[2026-08-31 14:15:50] 📁 Loading .env file...
+[2026-08-31 14:15:50] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-08-31 14:15:50] 🔍 Debug: Checking .env values...
+[2026-08-31 14:15:50]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-08-31 14:15:50]   FIREBASE_PROJECT_ID = ✅ SET
+[2026-08-31 14:15:50]   FIREBASE_CREDENTIALS = firebase-service-account.json
+[2026-08-31 14:15:50] 
+📋 Validating configuration...
+[2026-08-31 14:15:50] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-08-31 14:15:50] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 14:15:50] ✅ Credentials file exists
+[2026-08-31 14:15:50] 📄 CSV File: /Users/teamwowlogbook/black-orbit/scripts/storage/app/innovators.csv
+[2026-08-31 14:15:50] ❌ CSV file not found: /Users/teamwowlogbook/black-orbit/scripts/storage/app/innovators.csv
+[2026-08-31 14:15:50]    Please ensure the CSV file exists at: /Users/teamwowlogbook/black-orbit/scripts/storage/app/innovators.csv
+[2026-08-31 14:17:02] =========================================
+[2026-08-31 14:17:02] 🚀 Starting Firestore Import Process
+[2026-08-31 14:17:02] =========================================
+[2026-08-31 14:17:02] 📁 Loading .env file...
+[2026-08-31 14:17:02] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-08-31 14:17:02] 🔍 Debug: Checking .env values...
+[2026-08-31 14:17:02]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-08-31 14:17:02]   FIREBASE_PROJECT_ID = ✅ SET
+[2026-08-31 14:17:02]   FIREBASE_CREDENTIALS = firebase-service-account.json
+[2026-08-31 14:17:02] 
+📋 Validating configuration...
+[2026-08-31 14:17:02] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-08-31 14:17:02] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 14:17:02] ✅ Credentials file exists
+[2026-08-31 14:17:02] 📄 CSV File: /Users/teamwowlogbook/black-orbit/scripts/../storage/app/innovators.csv
+[2026-08-31 14:17:02] ✅ CSV file exists
+[2026-08-31 14:17:02] 
+🔑 Validating credentials file...
+[2026-08-31 14:17:02] ✅ Credentials file is valid JSON
+[2026-08-31 14:17:02]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 14:17:02]    Project ID: black-orbit-e865b
+[2026-08-31 14:17:02]    Private Key: Found (length: 1704)
+[2026-08-31 14:17:02] 
+🚀 Starting import process...
+[2026-08-31 14:17:02] =========================================
+
+[2026-08-31 14:17:02] 🔑 Attempting to get access token...
+[2026-08-31 14:17:02]    Reading credentials file...
+[2026-08-31 14:17:02]    ✅ Credentials loaded successfully
+[2026-08-31 14:17:02]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 14:17:02]    JWT created, signing with private key...
+[2026-08-31 14:17:02]    ✅ JWT signed successfully
+[2026-08-31 14:17:02]    Exchanging JWT for access token...
+[2026-08-31 14:17:03]    ✅ Access token obtained
+[2026-08-31 14:17:03] ✅ Access token obtained successfully (length: 1024 characters)
+[2026-08-31 14:17:03]    Token preview: ya29.c.c0AZ4bNpaB3tU536Z7Oo500...
+[2026-08-31 14:17:03] 
+🧪 Testing token with Firestore API...
+[2026-08-31 14:17:03]    Testing token with project ID: black-orbit-e865b
+[2026-08-31 14:17:05]    ✅ Token works! Firestore database accessible
+[2026-08-31 14:17:05] 
+🗑️ DELETE PHASE: Removing all existing documents...
+[2026-08-31 14:17:05]    Fetching batch of documents...
+[2026-08-31 14:17:07]    Deleting 100 documents...
+[2026-08-31 14:17:09]    ❌ Batch delete failed: HTTP 400
+[2026-08-31 14:17:09]    Response: {
+  "error": {
+    "code": 400,
+    "message": "Invalid value at 'writes[0]' (delete), Starting an object on a scalar field\nInvalid value at 'writes[1]' (delete), Starting an object on a scalar field\nInvalid value at 'writes[2]' (delete), Starting an object on a scalar field\nInvalid value at 'wri
+[2026-08-31 14:17:09]    ✅ Deleted 0 existing documents
+[2026-08-31 14:17:09] 
+📥 IMPORT PHASE: Starting CSV import...
+[2026-08-31 14:17:09]    CSV Header: name, occupation, bio, achievements, image
+[2026-08-31 14:17:09]    Starting to process rows...
+[2026-08-31 14:17:09]    ⚠️  Skipping row 1 - incorrect column count
+[2026-08-31 14:17:09]    ⚠️  Skipping row 55 - incorrect column count
+[2026-08-31 14:17:11]    📦 Batch of 63 documents committed
+[2026-08-31 14:17:11] 
+📊 Import Summary:
+[2026-08-31 14:17:11]   - Total processed: 63
+[2026-08-31 14:17:11]   - New documents created: 63
+[2026-08-31 14:17:11] 
+✅ Import completed successfully!
+[2026-08-31 14:17:11] =========================================
+[2026-08-31 14:19:23] =========================================
+[2026-08-31 14:19:23] 🚀 Starting Firestore Import Process
+[2026-08-31 14:19:23] =========================================
+[2026-08-31 14:19:23] 📁 Loading .env file...
+[2026-08-31 14:19:23] ❌ CRITICAL: .env file not found at: /Users/teamwowlogbook/black-orbit/scripts/.env
+[2026-08-31 14:22:44] =========================================
+[2026-08-31 14:22:44] 🚀 Starting Firestore Import Process
+[2026-08-31 14:22:44] =========================================
+[2026-08-31 14:22:44] 📁 Loading .env file...
+[2026-08-31 14:22:44] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-08-31 14:22:44] 🔍 Debug: Checking .env values...
+[2026-08-31 14:22:44]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-08-31 14:22:44]   FIREBASE_PROJECT_ID = ✅ SET
+[2026-08-31 14:22:44]   FIREBASE_CREDENTIALS = firebase-service-account.json
+[2026-08-31 14:22:44] 
+📋 Validating configuration...
+[2026-08-31 14:22:44] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-08-31 14:22:44] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-08-31 14:22:44] ✅ Credentials file exists
+[2026-08-31 14:22:44] 📄 CSV File: /Users/teamwowlogbook/black-orbit/scripts/../storage/app/innovators.csv
+[2026-08-31 14:22:44] ✅ CSV file exists
+[2026-08-31 14:22:44] 
+🔑 Validating credentials file...
+[2026-08-31 14:22:44] ✅ Credentials file is valid JSON
+[2026-08-31 14:22:44]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 14:22:44]    Project ID: black-orbit-e865b
+[2026-08-31 14:22:44]    Private Key: Found (length: 1704)
+[2026-08-31 14:22:44] 
+🚀 Starting import process...
+[2026-08-31 14:22:44] =========================================
+
+[2026-08-31 14:22:44] 🔑 Attempting to get access token...
+[2026-08-31 14:22:44]    Reading credentials file...
+[2026-08-31 14:22:44]    ✅ Credentials loaded successfully
+[2026-08-31 14:22:44]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-08-31 14:22:44]    JWT created, signing with private key...
+[2026-08-31 14:22:44]    ✅ JWT signed successfully
+[2026-08-31 14:22:44]    Exchanging JWT for access token...
+[2026-08-31 14:22:45]    ✅ Access token obtained
+[2026-08-31 14:22:45] ✅ Access token obtained successfully
+[2026-08-31 14:22:45] 
+🧪 Testing token with Firestore API...
+[2026-08-31 14:22:45]    Testing token with project ID: black-orbit-e865b
+[2026-08-31 14:22:47]    ✅ Token works! Firestore database accessible
+[2026-08-31 14:22:47] 
+🗑️ DELETE PHASE: Removing all existing documents...
+[2026-08-31 14:22:47]    Fetching batch of documents...
+[2026-08-31 14:22:50]    Deleting 100 documents...
+[2026-08-31 14:22:52]    ✅ Deleted 100 documents (Total: 100)
+[2026-08-31 14:22:52]    Fetching batch of documents...
+[2026-08-31 14:22:53]    Deleting 77 documents...
+[2026-08-31 14:22:56]    ✅ Deleted 77 documents (Total: 177)
+[2026-08-31 14:22:56]    ✅ Deleted 177 existing documents
+[2026-08-31 14:22:56] 
+📥 IMPORT PHASE: Starting CSV import...
+[2026-08-31 14:22:56]    CSV Header: name, occupation, bio, achievements, image
+[2026-08-31 14:22:56]    Starting to process rows...
+[2026-08-31 14:22:59]    📦 Batch of 64 documents committed
+[2026-08-31 14:22:59] 
+📊 Import Summary:
+[2026-08-31 14:22:59]   - Total processed: 64
+[2026-08-31 14:22:59]   - New documents created: 64
+[2026-08-31 14:22:59] 
+✅ Import completed successfully!
+[2026-08-31 14:22:59] =========================================
