@@ -7,7 +7,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-users me-2"></i>Personalities Management</h4>
-            {{-- <small class="text-muted" id="recordCount">Loading...</small> --}}
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddModal()">
@@ -19,9 +18,9 @@
         </div>
     </div>
 
-    <!-- Search Bar -->
+    <!-- Search & Filter Bar -->
     <div class="row mb-4">
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-5 col-lg-4">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0">
                     <i class="fas fa-search text-muted"></i>
@@ -29,11 +28,16 @@
                 <input type="text"
                        class="form-control border-start-0"
                        id="searchPersonalities"
-                       placeholder="Search by name or occupation..."
+                       placeholder="Search by name, occupation, or category..."
                        style="border-left: none; border-radius: 0 10px 10px 0;">
             </div>
         </div>
-        <div class="col-md-6 col-lg-8 text-md-end">
+        <div class="col-md-4 col-lg-3">
+            <select id="categoryFilter" class="form-select form-control-custom" style="border-radius: 10px;">
+                <option value="">All Categories</option>
+            </select>
+        </div>
+        <div class="col-md-3 col-lg-5 text-md-end">
             <span class="text-muted small" id="recordCount">Loading...</span>
         </div>
     </div>
@@ -50,6 +54,7 @@
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Category</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
                                 <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
@@ -69,6 +74,9 @@
                                     </td>
                                     <td>
                                         <div class="skeleton-box" style="width: 100px; height: 14px; border-radius: 4px;"></div>
+                                    </td>
+                                    <td>
+                                        <div class="skeleton-box" style="width: 80px; height: 14px; border-radius: 4px;"></div>
                                     </td>
                                     <td>
                                         <div class="skeleton-box" style="width: 150px; height: 20px; border-radius: 4px;"></div>
@@ -99,6 +107,7 @@
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
+                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Category</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
                                 <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
                                 <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
@@ -134,41 +143,37 @@
                         <label for="name" class="form-label text-muted small fw-bold">Name *</label>
                         <input type="text" class="form-control form-control-custom" id="name" name="name" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="occupation" class="form-label text-muted small fw-bold">Occupation</label>
-                        <input type="text" class="form-control form-control-custom" id="occupation" name="occupation" placeholder="e.g., Engineer & Inventor">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="occupation" class="form-label text-muted small fw-bold">Occupation</label>
+                            <input type="text" class="form-control form-control-custom" id="occupation" name="occupation" placeholder="e.g., Engineer & Inventor">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label text-muted small fw-bold">Category</label>
+                            <input type="text" class="form-control form-control-custom" id="category" name="category" placeholder="e.g., Inventor">
+                        </div>
                     </div>
-                <div class="mb-3">
-    <label for="image" class="form-label text-muted small fw-bold">Image</label>
-
-    {{-- Preview --}}
-    <div class="mb-2">
-        <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
-            <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light"
-                 style="width: 88px; height: 88px; object-fit: cover;">
-            <button type="button" id="removeImageBtn" title="Remove image"
-                    class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0"
-                    style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
-        </div>
-        <div id="imageEmptyState" class="text-muted small">
-            <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
-        </div>
-    </div>
-
-    {{-- URL --}}
-    <input type="url" class="form-control form-control-custom mb-2" id="image" name="image"
-           placeholder="https://res.cloudinary.com/...">
-
-    {{-- Upload from device --}}
-    <div class="d-flex align-items-center gap-2">
-        <input type="file" id="imageFile" accept="image/*" class="d-none">
-        <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
-            <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
-        </button>
-        <span id="imageUploadStatus" class="small text-muted"></span>
-    </div>
-    <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
-</div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label text-muted small fw-bold">Image</label>
+                        <div class="mb-2">
+                            <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
+                                <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light" style="width: 88px; height: 88px; object-fit: cover;">
+                                <button type="button" id="removeImageBtn" title="Remove image" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0" style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
+                            </div>
+                            <div id="imageEmptyState" class="text-muted small">
+                                <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
+                            </div>
+                        </div>
+                        <input type="url" class="form-control form-control-custom mb-2" id="image" name="image" placeholder="https://res.cloudinary.com/...">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="file" id="imageFile" accept="image/*" class="d-none">
+                            <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
+                                <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
+                            </button>
+                            <span id="imageUploadStatus" class="small text-muted"></span>
+                        </div>
+                        <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
+                    </div>
                     <div class="mb-3">
                         <label for="bio" class="form-label text-muted small fw-bold">Biography *</label>
                         <textarea class="form-control form-control-custom" id="bio" name="bio" rows="4" required></textarea>
@@ -236,7 +241,6 @@
 </div>
 
 <style>
-    /* Skeleton Loading Animation */
     @keyframes skeleton-pulse {
         0% { opacity: 0.6; }
         50% { opacity: 1; }
@@ -324,24 +328,10 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
-    /* Custom scrollbar */
-    #personalitiesTableWrapper::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    #personalitiesTableWrapper::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    #personalitiesTableWrapper::-webkit-scrollbar-thumb {
-        background: #d1d1d1;
-        border-radius: 10px;
-    }
-
-    #personalitiesTableWrapper::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+    #personalitiesTableWrapper::-webkit-scrollbar { width: 6px; }
+    #personalitiesTableWrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    #personalitiesTableWrapper::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+    #personalitiesTableWrapper::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
     .input-group .form-control:focus {
         border-color: #dee2e6;
@@ -372,7 +362,7 @@ const imageEmptyState = document.getElementById('imageEmptyState');
 const imageUploadStatus = document.getElementById('imageUploadStatus');
 const uploadImageBtn = document.getElementById('uploadImageBtn');
 
-const IMAGE_UPLOAD_URL = '/admin/api/images/upload'; // ← adjust if your route differs
+const IMAGE_UPLOAD_URL = '/admin/api/images/upload';
 
 uploadImageBtn.addEventListener('click', () => imageFileInput.click());
 
@@ -381,10 +371,7 @@ document.getElementById('removeImageBtn').addEventListener('click', () => {
     clearImagePreview();
 });
 
-// Preview when URL is typed/pasted manually
 imageInputEl.addEventListener('change', () => showImagePreview(imageInputEl.value));
-
-// If URL is broken, just hide the preview
 imagePreviewEl.addEventListener('error', () => clearImagePreview());
 
 function showImagePreview(url) {
@@ -414,7 +401,6 @@ imageFileInput.addEventListener('change', async function () {
         return;
     }
 
-    // Instant local preview while uploading
     const reader = new FileReader();
     reader.onload = (e) => showImagePreview(e.target.result);
     reader.readAsDataURL(file);
@@ -444,9 +430,7 @@ imageFileInput.addEventListener('change', async function () {
             imageUploadStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i> Uploaded';
             showToast('Image uploaded', 'success');
         } else {
-            const msg = data.message
-                || (data.errors ? Object.values(data.errors).flat().join(' ') : null)
-                || 'Upload failed';
+            const msg = data.message || (data.errors ? Object.values(data.errors).flat().join(' ') : null) || 'Upload failed';
             clearImagePreview();
             imageUploadStatus.textContent = '';
             showToast(msg, 'danger');
@@ -464,44 +448,44 @@ imageFileInput.addEventListener('change', async function () {
 
 document.addEventListener('DOMContentLoaded', function() {
     loadPersonalities();
-    setupSearch();
+    setupFilters();
 });
 
-// search functionality
-function setupSearch() {
+function setupFilters() {
     const searchInput = document.getElementById('searchPersonalities');
+    const categoryFilter = document.getElementById('categoryFilter');
+
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
-            filterPersonalities(query);
-        });
+        searchInput.addEventListener('input', applyFilters);
+    }
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', applyFilters);
     }
 }
 
-// Filter personalities based on search query
-function filterPersonalities(query) {
-    if (!query) {
-        filteredPersonalities = allPersonalities;
-    } else {
-        filteredPersonalities = allPersonalities.filter(p => {
-            const name = (p.name || '').toLowerCase();
-            const occupation = (p.occupation || '').toLowerCase();
-            return name.includes(query) || occupation.includes(query);
-        });
-    }
+function applyFilters() {
+    const query = document.getElementById('searchPersonalities').value.toLowerCase().trim();
+    const selectedCategory = document.getElementById('categoryFilter').value;
+
+    filteredPersonalities = allPersonalities.filter(p => {
+        const name = (p.name || '').toLowerCase();
+        const occupation = (p.occupation || '').toLowerCase();
+        const category = (p.category || '').toLowerCase();
+
+        const matchesQuery = !query || name.includes(query) || occupation.includes(query) || category.includes(query);
+        const matchesCategory = !selectedCategory || (p.category || '') === selectedCategory;
+
+        return matchesQuery && matchesCategory;
+    });
+
     renderPersonalities(filteredPersonalities);
     updateFilteredCount(filteredPersonalities.length);
 }
 
-// Update filtered count display
 function updateFilteredCount(count) {
-    const countElement = document.getElementById('filteredCount');
+    const countElement = document.getElementById('recordCount');
     if (countElement) {
-        if (count === 1) {
-            countElement.textContent = '1 record found';
-        } else {
-            countElement.textContent = count + ' records found';
-        }
+        countElement.textContent = count === 1 ? '1 record found' : count + ' records found';
     }
 }
 
@@ -517,23 +501,26 @@ async function loadPersonalities() {
         if (data.success) {
             allPersonalities = data.data || [];
             filteredPersonalities = allPersonalities;
+
+            // Populate Category Filter
+            const categories = [...new Set(allPersonalities.map(p => p.category).filter(Boolean))];
+            const categoryFilter = document.getElementById('categoryFilter');
+            categoryFilter.innerHTML = '<option value="">All Categories</option>' +
+                categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+
             renderPersonalities(filteredPersonalities);
             updateFilteredCount(filteredPersonalities.length);
-            recordCount.textContent = `(${allPersonalities.length} total records)`;
         } else {
             showToast('Failed to load personalities', 'danger');
             renderPersonalities([]);
             updateFilteredCount(0);
-            recordCount.textContent = '(0 records)';
         }
     } catch (error) {
         console.error('Error loading personalities:', error);
         showToast('Error loading personalities', 'danger');
         renderPersonalities([]);
         updateFilteredCount(0);
-        recordCount.textContent = '(0 records)';
     } finally {
-        // Hide skeleton, show content
         if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'block';
     }
@@ -544,7 +531,6 @@ function renderPersonalities(personalities) {
     const scrollIndicator = document.getElementById('scrollIndicator');
     const tableWrapper = document.getElementById('personalitiesTableWrapper');
 
-    // Show/hide scroll indicator based on record count
     if (personalities && personalities.length > 10) {
         if (tableWrapper) {
             tableWrapper.style.maxHeight = '650px';
@@ -562,11 +548,11 @@ function renderPersonalities(personalities) {
     if (!personalities || personalities.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center py-5">
+                <td colspan="7" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-user-slash fa-2x mb-3 d-block opacity-50"></i>
                         <p class="mb-0 fw-bold">${allPersonalities.length > 0 ? 'No matching personalities found' : 'No personalities found'}</p>
-                        <small>${allPersonalities.length > 0 ? 'Try a different search term' : 'Click "Add Personality" to create one'}</small>
+                        <small>${allPersonalities.length > 0 ? 'Try adjusting your search or filter' : 'Click "Add Personality" to create one'}</small>
                     </div>
                 </td>
             </tr>
@@ -576,7 +562,6 @@ function renderPersonalities(personalities) {
 
     let html = '';
     personalities.forEach((p, index) => {
-        // Format achievements for display
         let achievementsHtml = '';
         if (p.achievements && p.achievements.length > 0) {
             const displayAchievements = p.achievements.slice(0, 3);
@@ -593,6 +578,8 @@ function renderPersonalities(personalities) {
             achievementsHtml = '<span class="text-muted">—</span>';
         }
 
+        const categoryHtml = p.category ? escapeHtml(p.category) : '<span class="text-muted">—</span>';
+
         html += `
             <tr>
                 <td class="text-muted">${index + 1}</td>
@@ -603,6 +590,7 @@ function renderPersonalities(personalities) {
                     </div>
                 </td>
                 <td class="text-muted small">${escapeHtml(p.occupation || '—')}</td>
+                <td class="small">${categoryHtml}</td>
                 <td>
                     <div class="achievements-truncate">
                         ${achievementsHtml}
@@ -654,6 +642,7 @@ async function editPersonality(id) {
             document.getElementById('personalityId').value = id;
             document.getElementById('name').value = p.name || '';
             document.getElementById('occupation').value = p.occupation || '';
+            document.getElementById('category').value = p.category || '';
             document.getElementById('bio').value = p.bio || '';
             document.getElementById('image').value = p.image || '';
             showImagePreview(p.image || '');imageUploadStatus.textContent = '';
@@ -701,7 +690,8 @@ async function viewPersonality(id) {
                 <div class="text-center mb-4">
                     <img src="${escapeHtml(p.image || 'https://via.placeholder.com/120')}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
                     <h4 class="fw-bold mb-1">${escapeHtml(p.name)}</h4>
-                    ${p.occupation ? `<p class="text-muted mb-3"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
+                    ${p.occupation ? `<p class="text-muted mb-1"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
+                    ${p.category ? `<p class="text-muted mb-3"><i class="fas fa-tag me-2"></i>${escapeHtml(p.category)}</p>` : ''}
                 </div>
                 <div class="bg-light p-3 rounded-3 mb-3">
                     <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Biography</small>
@@ -747,6 +737,7 @@ document.getElementById('savePersonalityBtn').addEventListener('click', async fu
         occupation: formData.get('occupation'),
         bio: formData.get('bio'),
         image: formData.get('image'),
+        category: formData.get('category'),
         achievements: formData.get('achievements'),
     };
 

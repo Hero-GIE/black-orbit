@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\PersonalityController;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Api\ImageController;
+use App\Http\Controllers\Admin\FactController;
+
 
     Route::get('/', function () {
     return redirect('/login');
@@ -95,5 +97,14 @@ use App\Http\Controllers\Api\ImageController;
     Route::get('/api/players/{id}', [PlayerController::class, 'getPlayer'])->name('api.player.get');
     Route::put('/api/players/{id}', [PlayerController::class, 'update'])->name('api.players.update');
     Route::delete('/api/players/{id}', [PlayerController::class, 'destroy'])->name('api.players.delete');
+
+    // Fact Routes
+    Route::get('/facts', [FactController::class, 'index'])->name('facts.index');
+    Route::get('/api/facts', [FactController::class, 'fetchFacts'])->name('api.facts');
+    Route::get('/api/facts/{id}', [FactController::class, 'getFact'])->name('api.fact.get');
+    Route::post('/api/facts', [FactController::class, 'store'])->name('api.facts.store');
+    Route::put('/api/facts/{id}', [FactController::class, 'update'])->name('api.facts.update');
+    Route::delete('/api/facts/{id}', [FactController::class, 'destroy'])->name('api.facts.delete');
+
 
 });

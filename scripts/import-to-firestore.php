@@ -4,7 +4,8 @@
  * CSV TO FIRESTORE IMPORTER - Personalities Collection
  * REPLACE ALL DATA - Deletes existing documents before import
  * With Auto-Generated Document IDs
- * Slug is stored as a field inside the document
+ * Includes category field
+ * NO DUPLICATE CHECKING - imports all rows
  */
 
 // ========== ENABLE ERROR REPORTING ==========
@@ -87,7 +88,7 @@ foreach ($firebaseVars as $key => $value) {
 // ========== GET CONFIGURATION FROM .ENV ==========
 $PROJECT_ID = $env['FIREBASE_PROJECT_ID'] ?? null;
 $CREDENTIALS_FILE = $env['FIREBASE_CREDENTIALS'] ?? null;
-$CSV_FILE = $argv[1] ?? __DIR__ . '/../storage/app/innovators.csv';
+$CSV_FILE = $argv[1] ?? __DIR__ . '/../storage/app/personalities.csv';
 
 // ========== VALIDATE PROJECT_ID ==========
 writeLog("\n📋 Validating configuration...");
@@ -307,7 +308,7 @@ function testToken($projectId, $token) {
 }
 
 // ============================================================
-// DELETE ALL DOCUMENTS - FIXED
+// DELETE ALL DOCUMENTS
 // ============================================================
 
 function deleteAllDocuments($projectId, $token) {
@@ -353,19 +354,17 @@ function deleteAllDocuments($projectId, $token) {
             break;
         }
 
-        // Build delete writes - FIXED: Use the correct format
         $writes = [];
         foreach ($data['documents'] as $doc) {
             $docPath = $doc['name'];
             $writes[] = [
-                'delete' => $docPath  // FIXED: Just the path, not an object
+                'delete' => $docPath
             ];
         }
 
         $batchCount = count($writes);
         writeLog("   Deleting $batchCount documents...");
 
-        // Execute batch delete
         $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents:batchWrite";
 
         $payload = json_encode(['writes' => $writes]);
@@ -407,7 +406,7 @@ function deleteAllDocuments($projectId, $token) {
 }
 
 // ============================================================
-// IMPORT CSV
+// IMPORT CSV - WITH CATEGORY SUPPORT, NO DUPLICATE CHECKING
 // ============================================================
 
 function importCSV($csvFile, $projectId, $token) {
@@ -469,16 +468,18 @@ function importCSV($csvFile, $projectId, $token) {
         $achievementsArray = [];
 
         if (!empty($achievements)) {
-            // Handle achievements that might contain commas within quotes
             $achievementsArray = array_map('trim', explode(',', $achievements));
         }
 
         $image = trim($data['image'] ?? '');
 
+        // Get category from CSV
+        $category = trim($data['category'] ?? '');
+
         // Generate slug from name
         $slug = generateSlug($name);
 
-        // Prepare document data
+        // Prepare document data with category field
         $docData = [
             'fields' => [
                 'name' => ['stringValue' => $name],
@@ -488,13 +489,16 @@ function importCSV($csvFile, $projectId, $token) {
                     'arrayValue' => [
                         'values' => array_map(
                             function($a) {
-                                return ['stringValue' => $a];
+                                return ['stringValue' => trim($a)];
                             },
-                            $achievementsArray
+                            array_filter($achievementsArray, function($a) {
+                                return !empty(trim($a));
+                            })
                         )
                     ]
                 ],
                 'image' => ['stringValue' => $image],
+                'category' => ['stringValue' => $category],
                 'slug' => ['stringValue' => $slug],
                 'createdAt' => ['timestampValue' => date('c')],
                 'updatedAt' => ['timestampValue' => date('c')],
@@ -506,6 +510,11 @@ function importCSV($csvFile, $projectId, $token) {
         $total++;
         $created++;
 
+        // Log every 10 rows to show progress
+        if ($total % 10 === 0) {
+            writeLog("   📝 Processed $total records (Category: $category)");
+        }
+
         if ($batchSize >= 500) {
             commitBatch($batch, $projectId, $token);
             $batch = [];
@@ -514,6 +523,7 @@ function importCSV($csvFile, $projectId, $token) {
         }
     }
 
+    // Commit any remaining records
     if ($batchSize > 0) {
         commitBatch($batch, $projectId, $token);
     }
@@ -592,6 +602,12 @@ function generateSlug($name) {
         'ñ' => 'n',
         "'" => '-',
         '"' => '-',
+        ',' => '-',
+        '.' => '-',
+        '?' => '',
+        '!' => '',
+        ':' => '',
+        ';' => '',
     ];
 
     $slug = str_replace(array_keys($specialChars), array_values($specialChars), $slug);

@@ -1,6 +1,4 @@
 <?php
-// app/Http/Controllers/Admin/CosmicWordSearchController.php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;

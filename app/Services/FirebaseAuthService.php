@@ -36,7 +36,6 @@ class FirebaseAuthService
         if (!$this->apiKey) {
             Log::error('Firebase API key is missing');
 
-            // In local environment, return test user
             if (app()->environment('local')) {
                 return [
                     'uid' => 'test_user_' . time(),

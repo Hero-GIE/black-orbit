@@ -393,3 +393,67 @@
 [2026-08-31 14:22:59] 
 ✅ Import completed successfully!
 [2026-08-31 14:22:59] =========================================
+[2026-09-03 20:34:42] =========================================
+[2026-09-03 20:34:42] 🚀 Starting Firestore Import Process
+[2026-09-03 20:34:42] =========================================
+[2026-09-03 20:34:42] 📁 Loading .env file...
+[2026-09-03 20:34:42] ✅ .env file found at: /Users/teamwowlogbook/black-orbit/scripts/../.env
+[2026-09-03 20:34:42] 🔍 Debug: Checking .env values...
+[2026-09-03 20:34:42]   FIREBASE_API_KEY = AIzaSyAxZC...WHkvQ
+[2026-09-03 20:34:42]   FIREBASE_PROJECT_ID = ✅ SET
+[2026-09-03 20:34:42]   FIREBASE_CREDENTIALS = firebase-service-account.json
+[2026-09-03 20:34:42] 
+📋 Validating configuration...
+[2026-09-03 20:34:42] ✅ FIREBASE_PROJECT_ID: black-orbit-e865b
+[2026-09-03 20:34:42] 📄 FIREBASE_CREDENTIALS: /Users/teamwowlogbook/black-orbit/storage/firebase-service-account.json
+[2026-09-03 20:34:42] ✅ Credentials file exists
+[2026-09-03 20:34:42] 📄 CSV File: storage/app/innovators.csv
+[2026-09-03 20:34:42] ✅ CSV file exists
+[2026-09-03 20:34:42] 
+🔑 Validating credentials file...
+[2026-09-03 20:34:42] ✅ Credentials file is valid JSON
+[2026-09-03 20:34:42]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-09-03 20:34:42]    Project ID: black-orbit-e865b
+[2026-09-03 20:34:42]    Private Key: Found (length: 1704)
+[2026-09-03 20:34:42] 
+🚀 Starting import process...
+[2026-09-03 20:34:42] =========================================
+
+[2026-09-03 20:34:42] 🔑 Attempting to get access token...
+[2026-09-03 20:34:42]    Reading credentials file...
+[2026-09-03 20:34:42]    ✅ Credentials loaded successfully
+[2026-09-03 20:34:42]    Client Email: firebase-adminsdk-fbsvc@black-orbit-e865b.iam.gserviceaccount.com
+[2026-09-03 20:34:42]    JWT created, signing with private key...
+[2026-09-03 20:34:42]    ✅ JWT signed successfully
+[2026-09-03 20:34:42]    Exchanging JWT for access token...
+[2026-09-03 20:34:43]    ✅ Access token obtained
+[2026-09-03 20:34:43] ✅ Access token obtained successfully
+[2026-09-03 20:34:43] 
+🧪 Testing token with Firestore API...
+[2026-09-03 20:34:43]    Testing token with project ID: black-orbit-e865b
+[2026-09-03 20:34:44]    ✅ Token works! Firestore database accessible
+[2026-09-03 20:34:44] 
+🗑️ DELETE PHASE: Removing all existing documents...
+[2026-09-03 20:34:44]    Fetching batch of documents...
+[2026-09-03 20:34:45]    Deleting 63 documents...
+[2026-09-03 20:34:47]    ✅ Deleted 63 documents (Total: 63)
+[2026-09-03 20:34:47]    ✅ Deleted 63 existing documents
+[2026-09-03 20:34:47] 
+📥 IMPORT PHASE: Starting CSV import...
+[2026-09-03 20:34:47]    CSV Header: name, occupation, bio, achievements, image, category
+[2026-09-03 20:34:47]    Starting to process rows...
+[2026-09-03 20:34:47]    📝 Processed 10 records (Category: Early Achievers)
+[2026-09-03 20:34:47]    📝 Processed 20 records (Category: Researcher)
+[2026-09-03 20:34:47]    📝 Processed 30 records (Category: Technology Leader)
+[2026-09-03 20:34:47]    📝 Processed 40 records (Category: Researcher)
+[2026-09-03 20:34:47]    📝 Processed 50 records (Category: Entrepreneur)
+[2026-09-03 20:34:47]    📝 Processed 60 records (Category: Space Leader)
+[2026-09-03 20:34:47]    📝 Processed 70 records (Category: Space Leader)
+[2026-09-03 20:34:50]    📦 Batch of 70 documents committed
+[2026-09-03 20:34:50] 
+📊 Import Summary:
+[2026-09-03 20:34:50]   - Total processed: 70
+[2026-09-03 20:34:50]   - New documents created: 70
+[2026-09-03 20:34:50] 
+✅ Import completed successfully!
+[2026-09-03 20:34:50] =========================================

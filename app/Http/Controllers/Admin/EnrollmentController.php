@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Admin/EnrollmentController.php
 
 namespace App\Http\Controllers\Admin;
 

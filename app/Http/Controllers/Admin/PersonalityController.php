@@ -52,6 +52,7 @@ class PersonalityController extends Controller
                         'occupation' => $fields['occupation']['stringValue'] ?? '',
                         'bio' => $fields['bio']['stringValue'] ?? '',
                         'image' => $fields['image']['stringValue'] ?? '',
+                        'category' => $fields['category']['stringValue'] ?? '',
                         'achievements' => $achievements,
                         'createdAt' => $fields['createdAt']['timestampValue'] ?? '',
                     ];
@@ -96,6 +97,7 @@ class PersonalityController extends Controller
                     'occupation' => $fields['occupation']['stringValue'] ?? '',
                     'bio' => $fields['bio']['stringValue'] ?? '',
                     'image' => $fields['image']['stringValue'] ?? '',
+                    'category' => $fields['category']['stringValue'] ?? '',
                     'achievements' => $achievements,
                     'createdAt' => $fields['createdAt']['timestampValue'] ?? '',
                 ];
@@ -118,6 +120,7 @@ class PersonalityController extends Controller
                 'occupation' => 'nullable|string|max:255',
                 'bio' => 'required|string',
                 'image' => 'nullable|url',
+                'category' => 'nullable|string|max:255',
                 'achievements' => 'nullable|string',
             ]);
 
@@ -146,6 +149,7 @@ class PersonalityController extends Controller
                     'occupation' => ['stringValue' => $request->occupation ?? ''],
                     'bio' => ['stringValue' => $request->bio],
                     'image' => ['stringValue' => $request->image ?? ''],
+                    'category' => ['stringValue' => $request->category ?? ''],
                     'achievements' => ['arrayValue' => ['values' => $achievementsValues]],
                     'createdAt' => ['timestampValue' => now()->toISOString()],
                     'updatedAt' => ['timestampValue' => now()->toISOString()],
@@ -181,6 +185,7 @@ class PersonalityController extends Controller
                 'occupation' => 'nullable|string|max:255',
                 'bio' => 'required|string',
                 'image' => 'nullable|url',
+                'category' => 'nullable|string|max:255',
                 'achievements' => 'nullable|string',
             ]);
 
@@ -211,6 +216,7 @@ class PersonalityController extends Controller
                 'occupation' => ['stringValue' => $request->occupation ?? ''],
                 'bio' => ['stringValue' => $request->bio],
                 'image' => ['stringValue' => $request->image ?? ''],
+                'category' => ['stringValue' => $request->category ?? ''],
                 'achievements' => ['arrayValue' => ['values' => $achievementsValues]],
                 'updatedAt' => ['timestampValue' => now()->toISOString()],
             ];
