@@ -118,7 +118,12 @@
                 <li class="sb-divider"></li>
                 <li class="sb-label"><span>Management</span></li>
 
-
+                      <li>
+                    <a class="sb-link {{ request()->routeIs('admin.facts.*') ? 'active' : '' }}"
+                       href="{{ route('admin.facts.index') }}" data-label="Facts">
+                        <i class="fas fa-lightbulb"></i><span>Facts</span>
+                    </a>
+                </li>
 
                 {{-- Courses --}}
                 <li>

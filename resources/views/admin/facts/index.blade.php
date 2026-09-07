@@ -42,64 +42,18 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-
-            <!-- SKELETON LOADING -->
-            <div id="facts-skeleton">
-                <div class="table-responsive" style="max-height: 900px; overflow-y: auto;">
-                    <table class="table align-middle mb-0">
-                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
-                            <tr>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Title</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Category</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Author</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 250px;">Description</th>
-                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for($i = 0; $i < 6; $i++)
-                                <tr>
-                                    <td><div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div></td>
-                                    <td><div class="skeleton-box" style="width: 160px; height: 16px; border-radius: 4px;"></div></td>
-                                    <td><div class="skeleton-box" style="width: 100px; height: 14px; border-radius: 4px;"></div></td>
-                                    <td><div class="skeleton-box" style="width: 80px; height: 14px; border-radius: 4px;"></div></td>
-                                    <td><div class="skeleton-box" style="width: 200px; height: 14px; border-radius: 4px;"></div></td>
-                                    <td class="text-end">
-                                        <div class="d-inline-flex gap-1">
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endfor
-                        </tbody>
-                    </table>
-                </div>
+    <!-- SKELETON LOADING -->
+    <div id="facts-skeleton" class="row g-4">
+        @for($i = 0; $i < 8; $i++)
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="skeleton-box w-100" style="height: 350px; border-radius: 10px;"></div>
             </div>
+        @endfor
+    </div>
 
-            <!-- ACTUAL CONTENT -->
-            <div id="facts-content" style="display: none; animation: fadeIn 0.5s ease-in-out;">
-                <div class="table-responsive" id="factsTableWrapper" style="max-height: 600px; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
-                            <tr>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Title</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Category</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Author</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 250px;">Description</th>
-                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="factsTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <!-- ACTUAL CONTENT -->
+    <div id="facts-content" class="row g-4" style="display: none; animation: fadeIn 0.5s ease-in-out;">
+        <!-- Cards will be injected here via JS -->
     </div>
 </div>
 
@@ -214,20 +168,104 @@
     @keyframes skeleton-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     .skeleton-box { display: block; background-color: #e9ecef; border-radius: 4px; animation: skeleton-pulse 1.5s infinite ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     .form-control-custom { border: 1px solid #e9ecef; background-color: #f8f9fa; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; transition: all 0.2s ease; }
     .form-control-custom:focus { background-color: #fff; border-color: #000; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); outline: none; }
-    .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: transparent; color: #6c757d; transition: all 0.2s ease; }
-    .action-btn:hover { background: #f1f1f1; color: #000; }
-    .action-btn.delete:hover { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
-    .table > :not(caption) > * > * { padding: 0.75rem 0.75rem; vertical-align: middle; }
-    .desc-truncate { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .sticky-top { position: sticky; top: 0; z-index: 10; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    #factsTableWrapper::-webkit-scrollbar { width: 6px; }
-    #factsTableWrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    #factsTableWrapper::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
-    #factsTableWrapper::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-    .input-group .form-control:focus { border-color: #dee2e6; box-shadow: none; }
-    .input-group .form-control:focus + .input-group-text { border-color: #dee2e6; }
+
+    /* Card Styles - Image covers full card */
+    .fact-card {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 350px;
+        background: #f8f9fa;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .fact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
+    }
+
+    .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0; left: 0;
+        z-index: 1;
+        transition: transform 0.4s ease;
+    }
+    .fact-card:hover .card-img {
+        transform: scale(1.08);
+    }
+
+    .card-actions-overlay {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 10;
+    }
+    .fact-card:hover .card-actions-overlay {
+        opacity: 1;
+    }
+    .card-action-btn {
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .card-action-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
+    .card-action-btn.delete:hover { background: #dc3545; color: #fff; }
+
+    .card-overlay-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.25rem 1.25rem 2.5rem 1.25rem; /* Pushes text up from bottom edge */
+        z-index: 2;
+        background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0) 100%);
+        color: #fff;
+    }
+
+    .text-truncate-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Standout Description on Card */
+    .card-desc-text {
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        color: #ffffff !important;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        line-height: 1.4;
+        margin-bottom: 0;
+        margin-top: 0.5rem;
+    }
+
+    /* Scrollbar for View Modal Description */
+    .modal-desc-scroll {
+        max-height: 200px;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+    .modal-desc-scroll::-webkit-scrollbar { width: 6px; }
+    .modal-desc-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .modal-desc-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
 </style>
 @endsection
 
@@ -370,56 +408,53 @@ async function loadFacts() {
         renderFacts([]); updateFilteredCount(0);
     } finally {
         if (skeleton) skeleton.style.display = 'none';
-        if (content) content.style.display = 'block';
+        if (content) content.style.display = 'flex';
     }
 }
 
 function renderFacts(facts) {
-    const tbody = document.getElementById('factsTableBody');
+    const grid = document.getElementById('facts-content');
 
     if (!facts || facts.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="text-center py-5">
-                    <div class="text-muted">
-                        <i class="fas fa-lightbulb fa-2x mb-3 d-block opacity-50"></i>
-                        <p class="mb-0 fw-bold">${allFacts.length > 0 ? 'No matching facts found' : 'No facts found'}</p>
-                        <small>${allFacts.length > 0 ? 'Try adjusting your search or filter' : 'Click "Add Fact" to create one'}</small>
-                    </div>
-                </td>
-            </tr>
+        grid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-lightbulb fa-2x mb-3 d-block opacity-50"></i>
+                    <p class="mb-0 fw-bold">${allFacts.length > 0 ? 'No matching facts found' : 'No facts found'}</p>
+                    <small>${allFacts.length > 0 ? 'Try adjusting your search or filter' : 'Click "Add Fact" to create one'}</small>
+                </div>
+            </div>
         `;
         return;
     }
 
     let html = '';
-    facts.forEach((f, index) => {
-        const categoryHtml = f.category ? `<span class="badge bg-light text-dark border">${escapeHtml(f.category)}</span>` : '<span class="text-muted">—</span>';
+    facts.forEach((f) => {
+        const categoryHtml = f.category ? `<span class="badge bg-light text-dark mb-2"><i class="fas fa-tag me-1"></i>${escapeHtml(f.category)}</span>` : '';
+        const imgSrc = f.image || 'https://via.placeholder.com/400x300?text=No+Image';
 
         html += `
-            <tr>
-                <td class="text-muted">${index + 1}</td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <img src="${escapeHtml(f.image || 'https://via.placeholder.com/50')}" alt="${escapeHtml(f.title)}" class="rounded me-3" style="width: 40px; height: 40px; object-fit: cover;">
-                        <div class="fw-bold text-dark">${escapeHtml(f.title)}</div>
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="fact-card">
+                    <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(f.title)}" class="card-img">
+
+                    <div class="card-actions-overlay">
+                        <button class="card-action-btn" onclick="viewFact('${f.id}')" title="View"><i class="fas fa-eye"></i></button>
+                        <button class="card-action-btn" onclick="editFact('${f.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="card-action-btn delete" onclick="confirmDelete('${f.id}')" title="Delete"><i class="fas fa-trash"></i></button>
                     </div>
-                </td>
-                <td>${categoryHtml}</td>
-                <td class="text-muted small">${escapeHtml(f.author || '—')}</td>
-                <td class="text-muted small desc-truncate">${escapeHtml(f.description)}</td>
-                <td class="text-end">
-                    <div class="d-inline-flex gap-1">
-                        <button class="action-btn" onclick="viewFact('${f.id}')" title="View"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn" onclick="editFact('${f.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn delete" onclick="confirmDelete('${f.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+
+                    <div class="card-overlay-content">
+                        ${categoryHtml}
+                        <h5 class="fw-bold mb-0 text-white text-truncate-1">${escapeHtml(f.title)}</h5>
+                        <p class="card-desc-text">${escapeHtml(f.description)}</p>
                     </div>
-                </td>
-            </tr>
+                </div>
+            </div>
         `;
     });
 
-    tbody.innerHTML = html;
+    grid.innerHTML = html;
 }
 
 function openAddModal() {
@@ -478,9 +513,10 @@ async function viewFact(id) {
                     ${f.category ? `<p class="text-muted mb-1"><i class="fas fa-tag me-2"></i>${escapeHtml(f.category)}</p>` : ''}
                     ${f.author ? `<p class="text-muted mb-3"><i class="fas fa-user-edit me-2"></i>By ${escapeHtml(f.author)}</p>` : ''}
                 </div>
-                <div class="bg-light p-3 rounded-3">
-                    <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Description</small>
-                    <p class="mb-0" style="font-size: 0.9rem; line-height: 1.6;">${escapeHtml(f.description)}</p>
+
+                <div class="bg-white border-start border-4 border-dark p-3 rounded-3 modal-desc-scroll shadow-sm">
+                    <small class="text-muted d-block text-uppercase mb-2 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Description</small>
+                    <p class="mb-0 text-dark fw-medium" style="font-size: 1rem; line-height: 1.6;">${escapeHtml(f.description)}</p>
                 </div>
             `;
             document.getElementById('editFromViewBtn').onclick = () => editFact(id);

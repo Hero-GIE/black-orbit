@@ -42,89 +42,17 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-
-            <!-- SKELETON LOADING -->
-            <div id="personalities-skeleton">
-                <div class="table-responsive" style="max-height: 900px; overflow-y: auto;">
-                    <table class="table align-middle mb-0">
-                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
-                            <tr>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Category</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
-                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for($i = 0; $i < 6; $i++)
-                                <tr>
-                                    <td>
-                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="skeleton-box me-3" style="width: 40px; height: 40px; border-radius: 50%;"></div>
-                                            <div class="skeleton-box" style="width: 120px; height: 16px; border-radius: 4px;"></div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton-box" style="width: 100px; height: 14px; border-radius: 4px;"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton-box" style="width: 80px; height: 14px; border-radius: 4px;"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton-box" style="width: 150px; height: 20px; border-radius: 4px;"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton-box" style="width: 160px; height: 14px; border-radius: 4px;"></div>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="d-inline-flex gap-1">
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endfor
-                        </tbody>
-                    </table>
-                </div>
+    <!-- SKELETON LOADING -->
+    <div id="personalities-skeleton" class="row g-4">
+        @for($i = 0; $i < 8; $i++)
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="skeleton-box w-100" style="height: 350px; border-radius: 10px;"></div>
             </div>
+        @endfor
+    </div>
 
-            <!-- ACTUAL CONTENT -->
-            <div id="personalities-content" style="display: none; animation: fadeIn 0.5s ease-in-out;">
-                <div class="table-responsive" id="personalitiesTableWrapper" style="max-height: 600px; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="border-bottom-2 sticky-top bg-white" style="top: 0; z-index: 10;">
-                            <tr>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 50px;">#</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 180px;">Name</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 160px;">Occupation</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Category</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Achievements</th>
-                                <th class="text-muted text-uppercase fs-6" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 200px;">Bio</th>
-                                <th class="text-muted text-uppercase fs-6 text-end" style="font-size: 0.7rem; letter-spacing: 0.5px; min-width: 120px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="personalitiesTableBody">
-                            <!-- Dynamic content -->
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- Scroll indicator --}}
-                <div id="scrollIndicator" class="text-center text-muted small mt-2" style="display: none;">
-                    <i class="fas fa-chevron-down me-1"></i> Scroll for more records
-                </div>
-            </div>
-        </div>
+    <!-- ACTUAL CONTENT -->
+    <div id="personalities-content" class="row g-4" style="display: none; animation: fadeIn 0.5s ease-in-out;">
     </div>
 </div>
 
@@ -241,106 +169,111 @@
 </div>
 
 <style>
-    @keyframes skeleton-pulse {
-        0% { opacity: 0.6; }
-        50% { opacity: 1; }
-        100% { opacity: 0.6; }
-    }
+    @keyframes skeleton-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    .skeleton-box { display: block; background-color: #e9ecef; border-radius: 4px; animation: skeleton-pulse 1.5s infinite ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .skeleton-box {
-        display: block;
-        background-color: #e9ecef;
-        border-radius: 4px;
-        animation: skeleton-pulse 1.5s infinite ease-in-out;
-    }
+    .form-control-custom { border: 1px solid #e9ecef; background-color: #f8f9fa; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; transition: all 0.2s ease; }
+    .form-control-custom:focus { background-color: #fff; border-color: #000; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); outline: none; }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .form-control-custom {
-        border: 1px solid #e9ecef;
-        background-color: #f8f9fa;
+    /* Card Styles - Image covers full card */
+    .personality-card {
+        position: relative;
         border-radius: 10px;
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-        transition: all 0.2s ease;
-    }
-    .form-control-custom:focus {
-        background-color: #fff;
-        border-color: #000;
-        box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
-        outline: none;
-    }
-
-    .action-btn {
-        width: 32px;
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        border: none;
-        background: transparent;
-        color: #6c757d;
-        transition: all 0.2s ease;
-    }
-    .action-btn:hover {
-        background: #f1f1f1;
-        color: #000;
-    }
-    .action-btn.delete:hover {
-        background: rgba(220, 53, 69, 0.1);
-        color: #dc3545;
-    }
-
-    .table > :not(caption) > * > * {
-        padding: 0.75rem 0.75rem;
-        vertical-align: middle;
-    }
-
-    .bio-truncate {
-        max-width: 200px;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        height: 350px;
+        background: #f8f9fa;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .personality-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
     }
 
-    .achievements-truncate {
-        max-width: 200px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0; left: 0;
+        z-index: 1;
+        transition: transform 0.4s ease;
+    }
+    .personality-card:hover .card-img {
+        transform: scale(1.08);
     }
 
-    .achievements-truncate .badge {
-        margin-right: 2px;
-        font-size: 0.6rem;
-        padding: 2px 6px;
-    }
-
-    .sticky-top {
-        position: sticky;
-        top: 0;
+    .card-actions-overlay {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
         z-index: 10;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .personality-card:hover .card-actions-overlay {
+        opacity: 1;
+    }
+    .card-action-btn {
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .card-action-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
+    .card-action-btn.delete:hover { background: #dc3545; color: #fff; }
+
+    .card-overlay-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.25rem;
+        padding-top: 3rem; /* Extra top padding to allow gradient to fade out nicely */
+        z-index: 2;
+        background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
     }
 
-    #personalitiesTableWrapper::-webkit-scrollbar { width: 6px; }
-    #personalitiesTableWrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    #personalitiesTableWrapper::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
-    #personalitiesTableWrapper::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-
-    .input-group .form-control:focus {
-        border-color: #dee2e6;
-        box-shadow: none;
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 1.4rem;
+        max-width: 100%;
     }
 
-    .input-group .form-control:focus + .input-group-text {
-        border-color: #dee2e6;
+    .text-truncate-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
     }
+
+    /* Scrollbar for View Modal Bio */
+    .modal-bio-scroll {
+        max-height: 200px;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+    .modal-bio-scroll::-webkit-scrollbar { width: 6px; }
+    .modal-bio-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .modal-bio-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
 </style>
 @endsection
 
@@ -455,12 +388,8 @@ function setupFilters() {
     const searchInput = document.getElementById('searchPersonalities');
     const categoryFilter = document.getElementById('categoryFilter');
 
-    if (searchInput) {
-        searchInput.addEventListener('input', applyFilters);
-    }
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', applyFilters);
-    }
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
 }
 
 function applyFilters() {
@@ -484,15 +413,12 @@ function applyFilters() {
 
 function updateFilteredCount(count) {
     const countElement = document.getElementById('recordCount');
-    if (countElement) {
-        countElement.textContent = count === 1 ? '1 record found' : count + ' records found';
-    }
+    if (countElement) countElement.textContent = count === 1 ? '1 record found' : count + ' records found';
 }
 
 async function loadPersonalities() {
     const skeleton = document.getElementById('personalities-skeleton');
     const content = document.getElementById('personalities-content');
-    const recordCount = document.getElementById('recordCount');
 
     try {
         const response = await fetch('/admin/api/personalities');
@@ -522,99 +448,79 @@ async function loadPersonalities() {
         updateFilteredCount(0);
     } finally {
         if (skeleton) skeleton.style.display = 'none';
-        if (content) content.style.display = 'block';
+        if (content) content.style.display = 'flex'; // Use flex for row alignment
     }
 }
 
 function renderPersonalities(personalities) {
-    const tbody = document.getElementById('personalitiesTableBody');
-    const scrollIndicator = document.getElementById('scrollIndicator');
-    const tableWrapper = document.getElementById('personalitiesTableWrapper');
-
-    if (personalities && personalities.length > 10) {
-        if (tableWrapper) {
-            tableWrapper.style.maxHeight = '650px';
-            tableWrapper.style.overflowY = 'auto';
-        }
-        if (scrollIndicator) scrollIndicator.style.display = 'block';
-    } else {
-        if (tableWrapper) {
-            tableWrapper.style.maxHeight = 'none';
-            tableWrapper.style.overflowY = 'visible';
-        }
-        if (scrollIndicator) scrollIndicator.style.display = 'none';
-    }
+    const grid = document.getElementById('personalities-content');
 
     if (!personalities || personalities.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-5">
-                    <div class="text-muted">
-                        <i class="fas fa-user-slash fa-2x mb-3 d-block opacity-50"></i>
-                        <p class="mb-0 fw-bold">${allPersonalities.length > 0 ? 'No matching personalities found' : 'No personalities found'}</p>
-                        <small>${allPersonalities.length > 0 ? 'Try adjusting your search or filter' : 'Click "Add Personality" to create one'}</small>
-                    </div>
-                </td>
-            </tr>
+        grid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-user-slash fa-2x mb-3 d-block opacity-50"></i>
+                    <p class="mb-0 fw-bold">${allPersonalities.length > 0 ? 'No matching personalities found' : 'No personalities found'}</p>
+                    <small>${allPersonalities.length > 0 ? 'Try adjusting your search or filter' : 'Click "Add Personality" to create one'}</small>
+                </div>
+            </div>
         `;
         return;
     }
 
     let html = '';
-    personalities.forEach((p, index) => {
+    personalities.forEach((p) => {
         let achievementsHtml = '';
         if (p.achievements && p.achievements.length > 0) {
-            const displayAchievements = p.achievements.slice(0, 3);
-            const remaining = p.achievements.length - 3;
+            const displayAchievements = p.achievements.slice(0, 2);
+            const remaining = p.achievements.length - 2;
 
             achievementsHtml = displayAchievements.map(a =>
-                `<span class="badge bg-light text-dark border me-1">${escapeHtml(a)}</span>`
+                `<span class="badge bg-light text-dark me-1 mb-1">${escapeHtml(a)}</span>`
             ).join('');
 
             if (remaining > 0) {
-                achievementsHtml += `<span class="badge bg-secondary text-white">+${remaining} more</span>`;
+                achievementsHtml += `<span class="badge bg-dark text-white mb-1">+${remaining} more</span>`;
             }
         } else {
-            achievementsHtml = '<span class="text-muted">—</span>';
+            achievementsHtml = '<span class="badge bg-secondary text-white mb-1">No achievements listed</span>';
         }
 
-        const categoryHtml = p.category ? escapeHtml(p.category) : '<span class="text-muted">—</span>';
+        const categoryHtml = p.category ? `<span class="badge bg-light text-dark mb-2 align-self-start"><i class="fas fa-tag me-1"></i>${escapeHtml(p.category)}</span>` : '';
+        const imgSrc = p.image || 'https://via.placeholder.com/400x300?text=No+Image';
 
         html += `
-            <tr>
-                <td class="text-muted">${index + 1}</td>
-                <td>
-                    <div class="d-flex align-items-center">
-                        <img src="${escapeHtml(p.image || 'https://via.placeholder.com/50')}" alt="${escapeHtml(p.name)}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
-                        <div class="fw-bold text-dark">${escapeHtml(p.name)}</div>
-                    </div>
-                </td>
-                <td class="text-muted small">${escapeHtml(p.occupation || '—')}</td>
-                <td class="small">${categoryHtml}</td>
-                <td>
-                    <div class="achievements-truncate">
-                        ${achievementsHtml}
-                    </div>
-                </td>
-                <td class="text-muted small bio-truncate">${escapeHtml(p.bio)}</td>
-                <td class="text-end">
-                    <div class="d-inline-flex gap-1">
-                        <button class="action-btn" onclick="viewPersonality('${p.id}')" title="View">
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="personality-card">
+                    <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" class="card-img">
+
+                    <div class="card-actions-overlay">
+                        <button class="card-action-btn" onclick="viewPersonality('${p.id}')" title="View">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="action-btn" onclick="editPersonality('${p.id}')" title="Edit">
+                        <button class="card-action-btn" onclick="editPersonality('${p.id}')" title="Edit">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="action-btn delete" onclick="confirmDelete('${p.id}')" title="Delete">
+                        <button class="card-action-btn delete" onclick="confirmDelete('${p.id}')" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
-                </td>
-            </tr>
+
+                    <div class="card-overlay-content">
+                        ${categoryHtml}
+                        <h5 class="fw-bold mb-1 text-white text-truncate-1">${escapeHtml(p.name)}</h5>
+                        <p class="small mb-2 text-white text-truncate-1"><i class="fas fa-briefcase me-1"></i> ${escapeHtml(p.occupation || 'N/A')}</p>
+                        <p class="card-text small text-white text-truncate-2 mb-2">${escapeHtml(p.bio)}</p>
+                        <div class="d-flex flex-wrap">
+                            ${achievementsHtml}
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
     });
 
-    tbody.innerHTML = html;
+    grid.innerHTML = html;
 }
 
 function openAddModal() {
@@ -693,10 +599,12 @@ async function viewPersonality(id) {
                     ${p.occupation ? `<p class="text-muted mb-1"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
                     ${p.category ? `<p class="text-muted mb-3"><i class="fas fa-tag me-2"></i>${escapeHtml(p.category)}</p>` : ''}
                 </div>
-                <div class="bg-light p-3 rounded-3 mb-3">
+
+                <div class="bg-light p-3 rounded-3 mb-3 modal-bio-scroll">
                     <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Biography</small>
                     <p class="mb-0" style="font-size: 0.9rem; line-height: 1.6;">${escapeHtml(p.bio)}</p>
                 </div>
+
                 <div class="bg-light p-3 rounded-3">
                     <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Achievements</small>
                     <ul class="list-unstyled mb-0" style="font-size: 0.9rem;">
