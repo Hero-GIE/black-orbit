@@ -9,7 +9,7 @@
             <h4 class="fw-bold mb-0"><i class="fas fa-users me-2"></i>Personalities Management</h4>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddModal()">
+            <button class="btn btn-dark btn-sm d-flex align-items-center" onclick="openAddDrawer()">
                 <i class="fas fa-plus me-2"></i>Add Personality
             </button>
             <button class="btn btn-outline-dark btn-sm d-flex align-items-center" onclick="window.location.href='{{ route('admin.dashboard') }}'">
@@ -56,97 +56,89 @@
     </div>
 </div>
 
-{{-- Add/Edit Personality Modal --}}
-<div class="modal fade" id="personalityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="personalityModalTitle">Add Personality</h5>
-                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <form id="personalityForm">
-                    <input type="hidden" id="personalityId" name="personalityId">
-                    <div class="mb-3">
-                        <label for="name" class="form-label text-muted small fw-bold">Name *</label>
-                        <input type="text" class="form-control form-control-custom" id="name" name="name" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="occupation" class="form-label text-muted small fw-bold">Occupation</label>
-                            <input type="text" class="form-control form-control-custom" id="occupation" name="occupation" placeholder="e.g., Engineer & Inventor">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="category" class="form-label text-muted small fw-bold">Category</label>
-                            <input type="text" class="form-control form-control-custom" id="category" name="category" placeholder="e.g., Inventor">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="image" class="form-label text-muted small fw-bold">Image</label>
-                        <div class="mb-2">
-                            <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
-                                <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light" style="width: 88px; height: 88px; object-fit: cover;">
-                                <button type="button" id="removeImageBtn" title="Remove image" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0" style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
-                            </div>
-                            <div id="imageEmptyState" class="text-muted small">
-                                <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
-                            </div>
-                        </div>
-                        <input type="url" class="form-control form-control-custom mb-2" id="image" name="image" placeholder="https://res.cloudinary.com/...">
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="file" id="imageFile" accept="image/*" class="d-none">
-                            <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
-                                <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
-                            </button>
-                            <span id="imageUploadStatus" class="small text-muted"></span>
-                        </div>
-                        <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="bio" class="form-label text-muted small fw-bold">Biography *</label>
-                        <textarea class="form-control form-control-custom" id="bio" name="bio" rows="4" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="achievements" class="form-label text-muted small fw-bold">Achievements (One per line or comma separated)</label>
-                        <textarea class="form-control form-control-custom" id="achievements" name="achievements" rows="3" placeholder="Founded the Famous Association of Gents&#10;Won Nobel Prize in 2024"></textarea>
-                        <small class="text-muted">Enter each achievement on a new line, or separate with commas</small>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark px-4" id="savePersonalityBtn">Save Personality</button>
-            </div>
-        </div>
+{{-- Add/Edit Personality Drawer (Right Side) --}}
+<div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="personalityDrawer" aria-labelledby="personalityDrawerLabel" style="width: 500px; max-width: 90vw;">
+    <div class="offcanvas-header border-0 pb-0">
+        <h5 class="offcanvas-title fw-bold" id="personalityDrawerTitle">Add Personality</h5>
+        <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-</div>
-
-{{-- View Personality Modal --}}
-<div class="modal fade" id="viewPersonalityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold"><i class="fas fa-user-circle me-2 text-dark"></i>Personality Details</h5>
-                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="offcanvas-body pt-2 d-flex flex-column">
+        <form id="personalityForm" class="flex-grow-1">
+            <input type="hidden" id="personalityId" name="personalityId">
+            <div class="mb-3">
+                <label for="name" class="form-label text-muted small fw-bold">Name *</label>
+                <input type="text" class="form-control form-control-custom" id="name" name="name" required>
             </div>
-            <div class="modal-body pt-2" id="viewPersonalityContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-dark" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="occupation" class="form-label text-muted small fw-bold">Occupation</label>
+                    <input type="text" class="form-control form-control-custom" id="occupation" name="occupation" placeholder="e.g., Engineer & Inventor">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="category" class="form-label text-muted small fw-bold">Category</label>
+                    <input type="text" class="form-control form-control-custom" id="category" name="category" placeholder="e.g., Inventor">
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
-                    <i class="fas fa-edit me-1"></i> Edit
-                </button>
+            <div class="mb-3">
+                <label for="image" class="form-label text-muted small fw-bold">Image</label>
+                <div class="mb-2">
+                    <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
+                        <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light" style="width: 88px; height: 88px; object-fit: cover;">
+                        <button type="button" id="removeImageBtn" title="Remove image" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0" style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
+                    </div>
+                    <div id="imageEmptyState" class="text-muted small">
+                        <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
+                    </div>
+                </div>
+                <input type="url" class="form-control form-control-custom mb-2" id="image" name="image" placeholder="https://res.cloudinary.com/...">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="file" id="imageFile" accept="image/*" class="d-none">
+                    <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
+                        <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
+                    </button>
+                    <span id="imageUploadStatus" class="small text-muted"></span>
+                </div>
+                <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
             </div>
+            <div class="mb-3">
+                <label for="bio" class="form-label text-muted small fw-bold">Biography *</label>
+                <textarea class="form-control form-control-custom" id="bio" name="bio" rows="4" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="achievements" class="form-label text-muted small fw-bold">Achievements (One per line or comma separated)</label>
+                <textarea class="form-control form-control-custom" id="achievements" name="achievements" rows="3" placeholder="Founded the Famous Association of Gents&#10;Won Nobel Prize in 2024"></textarea>
+                <small class="text-muted">Enter each achievement on a new line, or separate with commas</small>
+            </div>
+        </form>
+        <div class="d-flex justify-content-end gap-2 mt-auto pt-3 border-top">
+            <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Cancel</button>
+            <button type="button" class="btn btn-dark px-4" id="savePersonalityBtn">Save Personality</button>
         </div>
     </div>
 </div>
 
-{{-- Delete Confirmation Modal --}}
+{{-- View Personality Drawer (Right Side) --}}
+<div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="viewPersonalityDrawer" aria-labelledby="viewPersonalityDrawerLabel" style="width: 500px; max-width: 90vw;">
+    <div class="offcanvas-header border-0 pb-0">
+        <h5 class="offcanvas-title fw-bold"><i class="fas fa-user-circle me-2 text-dark"></i>Personality Details</h5>
+        <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body pt-2 d-flex flex-column" id="viewPersonalityContent">
+        <div class="text-center py-5">
+            <div class="spinner-border text-dark" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-auto p-3 border-top">
+        <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Close</button>
+        <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
+            <i class="fas fa-edit me-1"></i> Edit
+        </button>
+    </div>
+</div>
+
+{{-- Delete Confirmation Modal (Stays Centered) --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
@@ -237,7 +229,7 @@
         left: 0;
         right: 0;
         padding: 1.25rem;
-        padding-top: 3rem; /* Extra top padding to allow gradient to fade out nicely */
+        padding-top: 3rem;
         z-index: 2;
         background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%);
         color: #fff;
@@ -265,22 +257,25 @@
         max-width: 100%;
     }
 
-    /* Scrollbar for View Modal Bio */
-    .modal-bio-scroll {
+    /* Scrollbar for View Drawer Bio */
+    .drawer-bio-scroll {
         max-height: 200px;
         overflow-y: auto;
         border-radius: 12px;
     }
-    .modal-bio-scroll::-webkit-scrollbar { width: 6px; }
-    .modal-bio-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    .modal-bio-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+    .drawer-bio-scroll::-webkit-scrollbar { width: 6px; }
+    .drawer-bio-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .drawer-bio-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+
+    /* Offcanvas Customization */
+    .offcanvas-end { border-left: none !important; }
 </style>
 @endsection
 
 @push('scripts')
 <script>
 let editingPersonalityId = null;
-let viewModalInstance = null;
+let viewDrawerInstance = null;
 let allPersonalities = [];
 let filteredPersonalities = [];
 
@@ -448,7 +443,7 @@ async function loadPersonalities() {
         updateFilteredCount(0);
     } finally {
         if (skeleton) skeleton.style.display = 'none';
-        if (content) content.style.display = 'flex'; // Use flex for row alignment
+        if (content) content.style.display = 'flex';
     }
 }
 
@@ -523,16 +518,16 @@ function renderPersonalities(personalities) {
     grid.innerHTML = html;
 }
 
-function openAddModal() {
+function openAddDrawer() {
     editingPersonalityId = null;
-    document.getElementById('personalityModalTitle').textContent = 'Add Personality';
+    document.getElementById('personalityDrawerTitle').textContent = 'Add Personality';
     document.getElementById('personalityForm').reset();
     clearImagePreview(); imageUploadStatus.textContent = '';
     document.getElementById('personalityId').value = '';
     document.getElementById('savePersonalityBtn').textContent = 'Save Personality';
 
-    const modal = new bootstrap.Modal(document.getElementById('personalityModal'));
-    modal.show();
+    const offcanvas = new bootstrap.Offcanvas(document.getElementById('personalityDrawer'));
+    offcanvas.show();
 }
 
 async function editPersonality(id) {
@@ -544,7 +539,7 @@ async function editPersonality(id) {
             const p = data.data;
             editingPersonalityId = id;
 
-            document.getElementById('personalityModalTitle').textContent = 'Edit Personality';
+            document.getElementById('personalityDrawerTitle').textContent = 'Edit Personality';
             document.getElementById('personalityId').value = id;
             document.getElementById('name').value = p.name || '';
             document.getElementById('occupation').value = p.occupation || '';
@@ -555,10 +550,10 @@ async function editPersonality(id) {
             document.getElementById('achievements').value = (p.achievements || []).join('\n');
             document.getElementById('savePersonalityBtn').textContent = 'Update Personality';
 
-            if (viewModalInstance) viewModalInstance.hide();
+            if (viewDrawerInstance) viewDrawerInstance.hide();
 
-            const modal = new bootstrap.Modal(document.getElementById('personalityModal'));
-            modal.show();
+            const offcanvas = new bootstrap.Offcanvas(document.getElementById('personalityDrawer'));
+            offcanvas.show();
         } else {
             showToast('Failed to load data', 'danger');
         }
@@ -578,8 +573,8 @@ async function viewPersonality(id) {
         </div>
     `;
 
-    viewModalInstance = new bootstrap.Modal(document.getElementById('viewPersonalityModal'));
-    viewModalInstance.show();
+    viewDrawerInstance = new bootstrap.Offcanvas(document.getElementById('viewPersonalityDrawer'));
+    viewDrawerInstance.show();
 
     try {
         const response = await fetch(`/admin/api/personalities/${id}`);
@@ -600,7 +595,7 @@ async function viewPersonality(id) {
                     ${p.category ? `<p class="text-muted mb-3"><i class="fas fa-tag me-2"></i>${escapeHtml(p.category)}</p>` : ''}
                 </div>
 
-                <div class="bg-light p-3 rounded-3 mb-3 modal-bio-scroll">
+                <div class="bg-light p-3 rounded-3 mb-3 drawer-bio-scroll">
                     <small class="text-muted d-block text-uppercase mb-2" style="font-size: 0.65rem; letter-spacing: 0.5px;">Biography</small>
                     <p class="mb-0" style="font-size: 0.9rem; line-height: 1.6;">${escapeHtml(p.bio)}</p>
                 </div>
@@ -674,8 +669,8 @@ document.getElementById('savePersonalityBtn').addEventListener('click', async fu
 
         if (data.success) {
             showToast(data.message, 'success');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('personalityModal'));
-            modal.hide();
+            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('personalityDrawer'));
+            offcanvas.hide();
             loadPersonalities();
         } else {
             showToast(data.message || 'Failed to save', 'danger');

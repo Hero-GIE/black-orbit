@@ -57,92 +57,88 @@
     </div>
 </div>
 
-{{-- Add/Edit Fact Modal --}}
-<div class="modal fade" id="factModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="factModalTitle">Add Fact</h5>
-                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <form id="factForm">
-                    <input type="hidden" id="factId" name="factId">
-                    <div class="mb-3">
-                        <label for="title" class="form-label text-muted small fw-bold">Title *</label>
-                        <input type="text" class="form-control form-control-custom" id="title" name="title" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="category" class="form-label text-muted small fw-bold">Category</label>
-                            <input type="text" class="form-control form-control-custom" id="category" name="category" placeholder="e.g., Space Travel">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="author" class="form-label text-muted small fw-bold">Author</label>
-                            <input type="text" class="form-control form-control-custom" id="author" name="author" placeholder="e.g., dev">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="image" class="form-label text-muted small fw-bold">Image</label>
-                        <div class="mb-2">
-                            <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
-                                <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light" style="width: 88px; height: 88px; object-fit: cover;">
-                                <button type="button" id="removeImageBtn" title="Remove image" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0" style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
-                            </div>
-                            <div id="imageEmptyState" class="text-muted small">
-                                <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
-                            </div>
-                        </div>
-                        <input type="url" class="form-control form-control-custom mb-2" id="image" name="image" placeholder="https://res.cloudinary.com/...">
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="file" id="imageFile" accept="image/*" class="d-none">
-                            <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
-                                <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
-                            </button>
-                            <span id="imageUploadStatus" class="small text-muted"></span>
-                        </div>
-                        <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label text-muted small fw-bold">Description *</label>
-                        <textarea class="form-control form-control-custom" id="description" name="description" rows="4" required></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark px-4" id="saveFactBtn">Save Fact</button>
-            </div>
-        </div>
+{{-- Add/Edit Fact Drawer (Right) --}}
+<div class="offcanvas offcanvas-end fact-drawer" tabindex="-1" id="factModal" aria-labelledby="factModalTitle">
+    <div class="offcanvas-header border-0 pb-0">
+        <h5 class="offcanvas-title fw-bold" id="factModalTitle">Add Fact</h5>
+        <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-</div>
-
-{{-- View Fact Modal --}}
-<div class="modal fade" id="viewFactModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold"><i class="fas fa-info-circle me-2 text-dark"></i>Fact Details</h5>
-                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="offcanvas-body pt-2">
+        <form id="factForm">
+            <input type="hidden" id="factId" name="factId">
+            <div class="mb-3">
+                <label for="title" class="form-label text-muted small fw-bold">Title *</label>
+                <input type="text" class="form-control form-control-custom" id="title" name="title" required>
             </div>
-            <div class="modal-body pt-2" id="viewFactContent">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-dark" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="category" class="form-label text-muted small fw-bold">Category</label>
+                    <input type="text" class="form-control form-control-custom" id="category" name="category" placeholder="e.g., Space Travel">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="author" class="form-label text-muted small fw-bold">Author</label>
+                    <input type="text" class="form-control form-control-custom" id="author" name="author" placeholder="e.g., dev">
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
-                    <i class="fas fa-edit me-1"></i> Edit
-                </button>
+            <div class="mb-3">
+                <label for="image" class="form-label text-muted small fw-bold">Image</label>
+                <div class="mb-2">
+                    <div id="imagePreviewWrapper" class="position-relative d-inline-block" style="display: none;">
+                        <img id="imagePreview" src="" alt="Preview" class="rounded border bg-light" style="width: 88px; height: 88px; object-fit: cover;">
+                        <button type="button" id="removeImageBtn" title="Remove image" class="btn btn-sm btn-light border rounded-circle position-absolute top-0 end-0" style="width: 22px; height: 22px; padding: 0; font-size: 0.7rem; line-height: 1;">&times;</button>
+                    </div>
+                    <div id="imageEmptyState" class="text-muted small">
+                        <i class="fas fa-image me-1 opacity-50"></i>No image selected yet
+                    </div>
+                </div>
+                <input type="url" class="form-control form-control-custom mb-2" id="image" name="image" placeholder="https://res.cloudinary.com/...">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="file" id="imageFile" accept="image/*" class="d-none">
+                    <button type="button" class="btn btn-outline-dark btn-sm" id="uploadImageBtn">
+                        <i class="fas fa-cloud-upload-alt me-1"></i>Upload from device
+                    </button>
+                    <span id="imageUploadStatus" class="small text-muted"></span>
+                </div>
+                <small class="text-muted">Paste a URL, or upload a file (JPG, PNG, GIF, WebP — max 10 MB)</small>
             </div>
+            <div class="mb-3">
+                <label for="description" class="form-label text-muted small fw-bold">Description *</label>
+                <textarea class="form-control form-control-custom" id="description" name="description" rows="4" required></textarea>
+            </div>
+        </form>
+    </div>
+    <div class="offcanvas-footer border-0 pt-0 px-4 pb-4">
+        <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Cancel</button>
+            <button type="button" class="btn btn-dark px-4" id="saveFactBtn">Save Fact</button>
         </div>
     </div>
 </div>
 
-{{-- Delete Confirmation Modal --}}
+{{-- View Fact Drawer (Right) --}}
+<div class="offcanvas offcanvas-end fact-drawer" tabindex="-1" id="viewFactModal" aria-labelledby="viewFactTitle">
+    <div class="offcanvas-header border-0 pb-0">
+        <h5 class="offcanvas-title fw-bold" id="viewFactTitle"><i class="fas fa-info-circle me-2 text-dark"></i>Fact Details</h5>
+        <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body pt-2" id="viewFactContent">
+        <div class="text-center py-5">
+            <div class="spinner-border text-dark" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div class="offcanvas-footer border-0 pt-0 px-4 pb-4">
+        <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Close</button>
+            <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
+                <i class="fas fa-edit me-1"></i> Edit
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Delete Confirmation Modal (stays as modal) --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
@@ -232,7 +228,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 1.25rem 1.25rem 2.5rem 1.25rem; /* Pushes text up from bottom edge */
+        padding: 1.25rem 1.25rem 2.5rem 1.25rem;
         z-index: 2;
         background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0) 100%);
         color: #fff;
@@ -246,7 +242,6 @@
         text-overflow: ellipsis;
     }
 
-    /* Standout Description on Card */
     .card-desc-text {
         font-size: 0.95rem !important;
         font-weight: 500 !important;
@@ -257,7 +252,6 @@
         margin-top: 0.5rem;
     }
 
-    /* Scrollbar for View Modal Description */
     .modal-desc-scroll {
         max-height: 200px;
         overflow-y: auto;
@@ -266,13 +260,34 @@
     .modal-desc-scroll::-webkit-scrollbar { width: 6px; }
     .modal-desc-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .modal-desc-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+
+    /* === Right Drawer Styles === */
+    .fact-drawer {
+        width: 480px !important;
+        max-width: 90vw;
+        border-left: none !important; /* Changed from border-right to border-left */
+        box-shadow: -8px 0 30px rgba(0,0,0,0.12); /* Shadow cast towards the left */
+    }
+    .fact-drawer .offcanvas-header {
+        padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    }
+    .fact-drawer .offcanvas-body {
+        padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .fact-drawer .offcanvas-footer {
+        background-color: #fff;
+        border-top: 1px solid #f1f1f1;
+        padding-top: 1rem !important;
+    }
 </style>
 @endsection
 
 @push('scripts')
 <script>
 let editingFactId = null;
-let viewModalInstance = null;
+let viewDrawerInstance = null;
 let allFacts = [];
 let filteredFacts = [];
 
@@ -464,8 +479,8 @@ function openAddModal() {
     clearImagePreview(); imageUploadStatus.textContent = '';
     document.getElementById('factId').value = '';
     document.getElementById('saveFactBtn').textContent = 'Save Fact';
-    const modal = new bootstrap.Modal(document.getElementById('factModal'));
-    modal.show();
+    const drawer = new bootstrap.Offcanvas(document.getElementById('factModal'));
+    drawer.show();
 }
 
 async function editFact(id) {
@@ -487,9 +502,9 @@ async function editFact(id) {
             showImagePreview(f.image || ''); imageUploadStatus.textContent = '';
             document.getElementById('saveFactBtn').textContent = 'Update Fact';
 
-            if (viewModalInstance) viewModalInstance.hide();
-            const modal = new bootstrap.Modal(document.getElementById('factModal'));
-            modal.show();
+            if (viewDrawerInstance) viewDrawerInstance.hide();
+            const drawer = new bootstrap.Offcanvas(document.getElementById('factModal'));
+            drawer.show();
         } else { showToast('Failed to load data', 'danger'); }
     } catch (error) { console.error('Error:', error); showToast('Error loading data', 'danger'); }
 }
@@ -497,8 +512,8 @@ async function editFact(id) {
 async function viewFact(id) {
     const content = document.getElementById('viewFactContent');
     content.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
-    viewModalInstance = new bootstrap.Modal(document.getElementById('viewFactModal'));
-    viewModalInstance.show();
+    viewDrawerInstance = new bootstrap.Offcanvas(document.getElementById('viewFactModal'));
+    viewDrawerInstance.show();
 
     try {
         const response = await fetch(`/admin/api/facts/${id}`);
@@ -556,8 +571,8 @@ document.getElementById('saveFactBtn').addEventListener('click', async function(
 
         if (data.success) {
             showToast(data.message, 'success');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('factModal'));
-            modal.hide();
+            const drawer = bootstrap.Offcanvas.getInstance(document.getElementById('factModal'));
+            drawer.hide();
             loadFacts();
         } else { showToast(data.message || 'Failed to save', 'danger'); }
     } catch (error) { showToast('Error saving fact', 'danger'); }
