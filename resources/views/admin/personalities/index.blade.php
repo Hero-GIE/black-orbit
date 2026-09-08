@@ -57,12 +57,12 @@
 </div>
 
 {{-- Add/Edit Personality Drawer (Right Side) --}}
-<div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="personalityDrawer" aria-labelledby="personalityDrawerLabel" style="width: 500px; max-width: 90vw;">
+<div class="offcanvas offcanvas-end personality-drawer" tabindex="-1" id="personalityDrawer" aria-labelledby="personalityDrawerLabel">
     <div class="offcanvas-header border-0 pb-0">
         <h5 class="offcanvas-title fw-bold" id="personalityDrawerTitle">Add Personality</h5>
         <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body pt-2 d-flex flex-column">
+    <div class="offcanvas-body pt-2">
         <form id="personalityForm" class="flex-grow-1">
             <input type="hidden" id="personalityId" name="personalityId">
             <div class="mb-3">
@@ -110,7 +110,9 @@
                 <small class="text-muted">Enter each achievement on a new line, or separate with commas</small>
             </div>
         </form>
-        <div class="d-flex justify-content-end gap-2 mt-auto pt-3 border-top">
+    </div>
+    <div class="offcanvas-footer border-0 pt-0 px-4 pb-4">
+        <div class="d-flex gap-2 justify-content-end">
             <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Cancel</button>
             <button type="button" class="btn btn-dark px-4" id="savePersonalityBtn">Save Personality</button>
         </div>
@@ -118,23 +120,25 @@
 </div>
 
 {{-- View Personality Drawer (Right Side) --}}
-<div class="offcanvas offcanvas-end shadow-lg" tabindex="-1" id="viewPersonalityDrawer" aria-labelledby="viewPersonalityDrawerLabel" style="width: 500px; max-width: 90vw;">
+<div class="offcanvas offcanvas-end personality-drawer" tabindex="-1" id="viewPersonalityDrawer" aria-labelledby="viewPersonalityDrawerLabel">
     <div class="offcanvas-header border-0 pb-0">
         <h5 class="offcanvas-title fw-bold"><i class="fas fa-user-circle me-2 text-dark"></i>Personality Details</h5>
         <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body pt-2 d-flex flex-column" id="viewPersonalityContent">
+    <div class="offcanvas-body pt-2" id="viewPersonalityContent">
         <div class="text-center py-5">
             <div class="spinner-border text-dark" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-end gap-2 mt-auto p-3 border-top">
-        <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Close</button>
-        <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
-            <i class="fas fa-edit me-1"></i> Edit
-        </button>
+    <div class="offcanvas-footer border-0 pt-0 px-4 pb-4">
+        <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-light" data-bs-dismiss="offcanvas">Close</button>
+            <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
+                <i class="fas fa-edit me-1"></i> Edit
+            </button>
+        </div>
     </div>
 </div>
 
@@ -267,8 +271,26 @@
     .drawer-bio-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .drawer-bio-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
 
-    /* Offcanvas Customization */
-    .offcanvas-end { border-left: none !important; }
+    /* === Right Drawer Styles === */
+    .personality-drawer {
+        width: 480px !important;
+        max-width: 90vw;
+        border-left: none !important;
+        box-shadow: -8px 0 30px rgba(0,0,0,0.12);
+    }
+    .personality-drawer .offcanvas-header {
+        padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    }
+    .personality-drawer .offcanvas-body {
+        padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .personality-drawer .offcanvas-footer {
+        background-color: #fff;
+        border-top: 1px solid #f1f1f1;
+        padding-top: 1rem !important;
+    }
 </style>
 @endsection
 
@@ -588,11 +610,13 @@ async function viewPersonality(id) {
                 : '<li class="text-muted">No achievements listed</li>';
 
             content.innerHTML = `
-                <div class="text-center mb-4">
-                    <img src="${escapeHtml(p.image || 'https://via.placeholder.com/120')}" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
-                    <h4 class="fw-bold mb-1">${escapeHtml(p.name)}</h4>
-                    ${p.occupation ? `<p class="text-muted mb-1"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
-                    ${p.category ? `<p class="text-muted mb-3"><i class="fas fa-tag me-2"></i>${escapeHtml(p.category)}</p>` : ''}
+                <div class="mb-4">
+                    <img src="${escapeHtml(p.image || 'https://via.placeholder.com/480x300?text=No+Image')}" class="w-100 mb-4 shadow-sm" style="height: 300px; object-fit: cover; border-radius: 12px;">
+                    <div class="text-center">
+                        <h4 class="fw-bold mb-1">${escapeHtml(p.name)}</h4>
+                        ${p.occupation ? `<p class="text-muted mb-1"><i class="fas fa-briefcase me-2"></i>${escapeHtml(p.occupation)}</p>` : ''}
+                        ${p.category ? `<p class="text-muted mb-3"><i class="fas fa-tag me-2"></i>${escapeHtml(p.category)}</p>` : ''}
+                    </div>
                 </div>
 
                 <div class="bg-light p-3 rounded-3 mb-3 drawer-bio-scroll">

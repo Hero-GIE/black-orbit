@@ -265,8 +265,8 @@
     .fact-drawer {
         width: 480px !important;
         max-width: 90vw;
-        border-left: none !important; /* Changed from border-right to border-left */
-        box-shadow: -8px 0 30px rgba(0,0,0,0.12); /* Shadow cast towards the left */
+        border-left: none !important;
+        box-shadow: -8px 0 30px rgba(0,0,0,0.12);
     }
     .fact-drawer .offcanvas-header {
         padding: 1.5rem 1.5rem 0.5rem 1.5rem;
@@ -522,11 +522,13 @@ async function viewFact(id) {
         if (data.success) {
             const f = data.data;
             content.innerHTML = `
-                <div class="text-center mb-4">
-                    <img src="${escapeHtml(f.image || 'https://via.placeholder.com/120')}" class="rounded mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #f8f9fa;">
-                    <h4 class="fw-bold mb-1">${escapeHtml(f.title)}</h4>
-                    ${f.category ? `<p class="text-muted mb-1"><i class="fas fa-tag me-2"></i>${escapeHtml(f.category)}</p>` : ''}
-                    ${f.author ? `<p class="text-muted mb-3"><i class="fas fa-user-edit me-2"></i>By ${escapeHtml(f.author)}</p>` : ''}
+                <div class="mb-4">
+                    <img src="${escapeHtml(f.image || 'https://via.placeholder.com/480x300?text=No+Image')}" class="w-100 mb-4 shadow-sm" style="height: 300px; object-fit: cover; border-radius: 12px;">
+                    <div class="text-center">
+                        <h4 class="fw-bold mb-1">${escapeHtml(f.title)}</h4>
+                        ${f.category ? `<p class="text-muted mb-1"><i class="fas fa-tag me-2"></i>${escapeHtml(f.category)}</p>` : ''}
+                        ${f.author ? `<p class="text-muted mb-3"><i class="fas fa-user-edit me-2"></i>By ${escapeHtml(f.author)}</p>` : ''}
+                    </div>
                 </div>
 
                 <div class="bg-white border-start border-4 border-dark p-3 rounded-3 modal-desc-scroll shadow-sm">
