@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\PersonalityController;
 use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Admin\FactController;
+use App\Http\Controllers\Admin\NotificationController;
 
 
     Route::get('/', function () {
@@ -107,4 +108,11 @@ use App\Http\Controllers\Admin\FactController;
     Route::delete('/api/facts/{id}', [FactController::class, 'destroy'])->name('api.facts.delete');
 
 
+    // Notification Routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/api/notifications', [NotificationController::class, 'fetchNotifications'])->name('api.notifications');
+    Route::get('/api/notifications/{id}', [NotificationController::class, 'getNotification'])->name('api.notification.get');
+    Route::post('/api/notifications', [NotificationController::class, 'store'])->name('api.notifications.store');
+    Route::put('/api/notifications/{id}', [NotificationController::class, 'update'])->name('api.notifications.update');
+    Route::delete('/api/notifications/{id}', [NotificationController::class, 'destroy'])->name('api.notifications.delete');
 });

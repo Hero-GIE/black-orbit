@@ -156,6 +156,13 @@
                         <i class="fas fa-user-tie"></i><span>Players</span>
                     </a>
                 </li>
+                {{-- Notifications --}}
+                  <li>
+                    <a class="sb-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}"
+                       href="{{ route('admin.notifications.index') }}" data-label="Notifications">
+                        <i class="fas fa-bell"></i><span>Notifications</span>
+                    </a>
+                </li>
 
 
             </ul>
