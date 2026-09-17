@@ -46,7 +46,7 @@ class ArticleController extends Controller
         ];
     }
 
-    // GET /api/articles
+    // ---------- GET /api/articles ----------
     public function index()
     {
         try {
@@ -59,7 +59,10 @@ class ArticleController extends Controller
                 ->get($url);
 
             if (!$response->successful()) {
-                return response()->json(['success' => false, 'message' => 'Failed to fetch articles'], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch articles',
+                ], 500);
             }
 
             $articles = [];
@@ -69,19 +72,26 @@ class ArticleController extends Controller
 
                 if (empty($article['slug'])) continue;
 
-                // unset($article['content']);
                 $articles[] = $article;
             }
 
             usort($articles, fn($a, $b) => strcmp($b['publishedAt'] ?? '', $a['publishedAt'] ?? ''));
 
-            return response()->json(['success' => true, 'data' => $articles]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Articles fetched successfully',
+                'count'   => count($articles),
+                'data'    => $articles,
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
-    // GET /api/articles/{id}
+    // ---------- GET /api/articles/{id} ----------
     public function show($id)
     {
         try {
@@ -94,73 +104,175 @@ class ArticleController extends Controller
                 ->get($url);
 
             if (!$response->successful()) {
-                return response()->json(['success' => false, 'message' => 'Article not found'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Article not found',
+                ], 404);
             }
 
             return response()->json([
                 'success' => true,
+                'message' => 'Article fetched successfully',
                 'data'    => $this->fieldsToArticle($id, $response->json()['fields'] ?? []),
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
-public function recordView(Request $request, $id)
-{
-    try {
-        $projectId = $this->projectId();
-        $token = $this->token();
+    // ---------- POST /api/articles/{id}/view ----------
+    public function recordView(Request $request, $id)
+    {
+        try {
+            $projectId = $this->projectId();
+            $token = $this->token();
 
-        $uid = $request->input('user_id');
+            $uid = $request->input('user_id');
 
-        if (!$uid) {
-            return response()->json(['success' => false, 'message' => 'No user identity'], 401);
-        }
+            if (!$uid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No user identity',
+                ], 401);
+            }
 
-        $uid = preg_replace('#[/\\\\]#', '_', $uid);
+            $uid = preg_replace('#[/\\\\]#', '_', $uid);
+            $auth = ['Authorization' => "Bearer {$token}"];
+            $base = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}";
 
-        $auth = ['Authorization' => "Bearer {$token}"];
-        $base = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}";
+            // 1. Check if this user already viewed this article
+            $viewDocUrl = "{$base}/views/{$uid}";
+            $existing = Http::withHeaders($auth)->timeout(15)->get($viewDocUrl);
 
-        $viewDocUrl = "{$base}/views/{$uid}";
-        $existing = Http::withHeaders($auth)->timeout(15)->get($viewDocUrl);
+            if ($existing->successful()) {
+                $article = Http::withHeaders($auth)->timeout(15)->get($base);
+                $current = (int) ($article->json()['fields']['viewcount']['integerValue'] ?? 0);
 
-        if ($existing->successful()) {
-            $article = Http::withHeaders($auth)->timeout(15)->get($base);
-            $current = (int) ($article->json()['fields']['viewcount']['integerValue'] ?? 0);
+                return response()->json([
+                    'success'     => true,
+                    'message'     => 'Article already viewed by this user',
+                    'incremented' => false,
+                    'viewcount'   => $current,
+                ]);
+            }
+
+            // 2. Record the view on the article's subcollection
+            Http::withHeaders($auth)->timeout(15)->patch($viewDocUrl, [
+                'fields' => [
+                    'viewedAt' => ['timestampValue' => now()->toISOString()],
+                    'source'   => ['stringValue' => 'mobile'],
+                ],
+            ]);
+
+            // 3. Also write to the user's history so we can list viewed articles per user
+            $articleDoc = Http::withHeaders($auth)->timeout(15)->get($base);
+            $articleFields = $articleDoc->json()['fields'] ?? [];
+            $articleSlug = $articleFields['slug']['stringValue'] ?? $id;
+
+            $historyUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/users/{$uid}/history/{$articleSlug}";
+            Http::withHeaders($auth)->timeout(15)->patch($historyUrl, [
+                'fields' => [
+                    'articleId'   => ['stringValue' => $id],
+                    'slug'        => ['stringValue' => $articleSlug],
+                    'title'       => ['stringValue' => $articleFields['title']['stringValue'] ?? ''],
+                    'image'       => ['stringValue' => $articleFields['image']['stringValue'] ?? ''],
+                    'category'    => ['stringValue' => $articleFields['category']['stringValue'] ?? ''],
+                    'excerpt'     => ['stringValue' => $articleFields['excerpt']['stringValue'] ?? ''],
+                    'readingTime' => ['stringValue' => $articleFields['readingTime']['stringValue'] ?? ''],
+                    'viewedAt'    => ['timestampValue' => now()->toISOString()],
+                ],
+            ]);
+
+            // 4. Increment the article's viewcount
+            $current = (int) ($articleFields['viewcount']['integerValue'] ?? 0);
+            $newCount = $current + 1;
+
+            Http::withHeaders($auth)
+                ->timeout(15)
+                ->patch($base . '?updateMask.fieldPaths=viewcount', [
+                    'fields' => ['viewcount' => ['integerValue' => $newCount]],
+                ]);
 
             return response()->json([
                 'success'     => true,
-                'incremented' => false,
-                'viewcount'   => $current,
+                'message'     => 'View recorded successfully',
+                'incremented' => true,
+                'viewcount'   => $newCount,
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
-
-        Http::withHeaders($auth)->timeout(15)->patch($viewDocUrl, [
-            'fields' => [
-                'viewedAt' => ['timestampValue' => now()->toISOString()],
-                'source'   => ['stringValue' => 'mobile'],
-            ],
-        ]);
-
-        $article = Http::withHeaders($auth)->timeout(15)->get($base);
-        $current = (int) ($article->json()['fields']['viewcount']['integerValue'] ?? 0);
-        $newCount = $current + 1;
-
-        Http::withHeaders($auth)
-            ->timeout(15)
-            ->patch($base . '?updateMask.fieldPaths=viewcount', [
-                'fields' => ['viewcount' => ['integerValue' => $newCount]],
-            ]);
-
-        return response()->json([
-            'success'     => true,
-            'incremented' => true,
-            'viewcount'   => $newCount,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
     }
-}
+
+    // ---------- GET /api/articles/viewed ----------
+    // Returns the list of articles the current user has viewed.
+    public function viewed(Request $request)
+    {
+        try {
+            $projectId = $this->projectId();
+            $token = $this->token();
+
+            $uid = $request->input('user_id');
+
+            if (!$uid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No user identity',
+                ], 401);
+            }
+
+            $uid = preg_replace('#[/\\\\]#', '_', $uid);
+            $auth = ['Authorization' => "Bearer {$token}"];
+
+            $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/users/{$uid}/history";
+            $response = Http::withHeaders($auth)->timeout(30)->get($url);
+
+            if (!$response->successful()) {
+                // No history yet — return empty, not an error
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No viewed articles yet',
+                    'count'   => 0,
+                    'data'    => [],
+                ]);
+            }
+
+            $articles = [];
+            foreach ($response->json()['documents'] ?? [] as $doc) {
+                $fields = $doc['fields'] ?? [];
+
+                $articles[] = [
+                    'id'          => $fields['articleId']['stringValue']  ?? basename($doc['name']),
+                    'slug'        => $fields['slug']['stringValue']       ?? '',
+                    'title'       => $fields['title']['stringValue']      ?? '',
+                    'image'       => $fields['image']['stringValue']      ?? '',
+                    'category'    => $fields['category']['stringValue']   ?? '',
+                    'excerpt'     => $fields['excerpt']['stringValue']    ?? '',
+                    'readingTime' => $fields['readingTime']['stringValue'] ?? '',
+                    'viewedAt'    => $fields['viewedAt']['timestampValue'] ?? '',
+                ];
+            }
+
+            // Most recently viewed first
+            usort($articles, fn($a, $b) => strcmp($b['viewedAt'] ?? '', $a['viewedAt'] ?? ''));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Viewed articles fetched successfully',
+                'count'   => count($articles),
+                'data'    => $articles,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

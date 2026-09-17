@@ -14,6 +14,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
 
 Route::get('/articles', [ArticleController::class, 'index']);
+
+Route::get('/articles/viewed', [ArticleController::class, 'viewed'])
+    ->middleware('firebase.auth');
+
 Route::get('/articles/{id}', [ArticleController::class, 'show']);
 
 // Protected routes
