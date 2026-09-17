@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class ArticleController extends Controller
@@ -41,6 +42,7 @@ class ArticleController extends Controller
             'viewcount'   => (int)($fields['viewcount']['integerValue'] ?? 0),
             'publishedAt' => $fields['publishedAt']['timestampValue'] ?? ($fields['createdAt']['timestampValue'] ?? ''),
             'updatedAt'   => $fields['updatedAt']['timestampValue'] ?? '',
+            'source'      => $fields['source']['stringValue']      ?? 'wordpress',
         ];
     }
 
@@ -66,8 +68,8 @@ class ArticleController extends Controller
                 $article = $this->fieldsToArticle($id, $doc['fields'] ?? []);
 
                 if (empty($article['slug'])) continue;
-                // unset($article['content']);
 
+                // unset($article['content']);
                 $articles[] = $article;
             }
 
@@ -79,6 +81,7 @@ class ArticleController extends Controller
         }
     }
 
+    // GET /api/articles/{id}
     public function show($id)
     {
         try {
@@ -102,4 +105,62 @@ class ArticleController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+public function recordView(Request $request, $id)
+{
+    try {
+        $projectId = $this->projectId();
+        $token = $this->token();
+
+        $uid = $request->input('user_id');
+
+        if (!$uid) {
+            return response()->json(['success' => false, 'message' => 'No user identity'], 401);
+        }
+
+        $uid = preg_replace('#[/\\\\]#', '_', $uid);
+
+        $auth = ['Authorization' => "Bearer {$token}"];
+        $base = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}";
+
+        $viewDocUrl = "{$base}/views/{$uid}";
+        $existing = Http::withHeaders($auth)->timeout(15)->get($viewDocUrl);
+
+        if ($existing->successful()) {
+            $article = Http::withHeaders($auth)->timeout(15)->get($base);
+            $current = (int) ($article->json()['fields']['viewcount']['integerValue'] ?? 0);
+
+            return response()->json([
+                'success'     => true,
+                'incremented' => false,
+                'viewcount'   => $current,
+            ]);
+        }
+
+        Http::withHeaders($auth)->timeout(15)->patch($viewDocUrl, [
+            'fields' => [
+                'viewedAt' => ['timestampValue' => now()->toISOString()],
+                'source'   => ['stringValue' => 'mobile'],
+            ],
+        ]);
+
+        $article = Http::withHeaders($auth)->timeout(15)->get($base);
+        $current = (int) ($article->json()['fields']['viewcount']['integerValue'] ?? 0);
+        $newCount = $current + 1;
+
+        Http::withHeaders($auth)
+            ->timeout(15)
+            ->patch($base . '?updateMask.fieldPaths=viewcount', [
+                'fields' => ['viewcount' => ['integerValue' => $newCount]],
+            ]);
+
+        return response()->json([
+            'success'     => true,
+            'incremented' => true,
+            'viewcount'   => $newCount,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+}
 }

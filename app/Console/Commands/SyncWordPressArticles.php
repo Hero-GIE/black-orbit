@@ -2,28 +2,37 @@
 
 namespace App\Console\Commands;
 
+use App\Services\FirebaseTokenService;
 use App\Services\WordPressService;
-use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
 class SyncWordPressArticles extends Command
 {
     protected $signature = 'articles:sync-wordpress';
-    protected $description = 'Pull posts from WordPress and cache them into Firestore';
+    protected $description = 'Pull published posts from WordPress and cache them into Firestore';
 
-    public function handle(WordPressService $wp): int
+    public function handle(WordPressService $wp, FirebaseTokenService $tokenService): int
     {
         $projectId = config('services.firebase.project_id');
-        $token     = $this->getServiceToken();
 
-        if (!$token) {
-            $this->error('Failed to obtain Firebase access token.');
+        if (!$projectId) {
+            $this->error('FIREBASE_PROJECT_ID is not set.');
             return self::FAILURE;
         }
 
+        try {
+            $token = $tokenService->getToken();
+        } catch (\Exception $e) {
+            $this->error('Failed to obtain Firebase token: ' . $e->getMessage());
+            return self::FAILURE;
+        }
+
+        $authHeader = ['Authorization' => "Bearer {$token}"];
         $page  = 1;
         $total = 0;
+        $skipped = 0;
+        $failed  = 0;
 
         do {
             try {
@@ -33,44 +42,80 @@ class SyncWordPressArticles extends Command
                 return self::FAILURE;
             }
 
-            if (empty($posts)) break;
+            if (empty($posts)) {
+                break;
+            }
 
             foreach ($posts as $post) {
                 $slug = $post['slug'] ?? null;
-                if (!$slug) continue;
+                if (!$slug) {
+                    continue;
+                }
 
                 $fields = $wp->mapToFirestoreFields($post);
 
-                $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$slug}";
-                $existing = Http::withHeaders(['Authorization' => "Bearer {$token}"])->get($url);
+                // Look up any existing doc with this slug (regardless of doc ID)
+                $existingDocId = null;
+                $existingFields = [];
 
-                if ($existing->successful()) {
-                    $existingUpdated = $existing->json()['fields']['updatedAt']['timestampValue'] ?? '';
-                    if ($existingUpdated >= ($fields['updatedAt']['timestampValue'] ?? '')) {
-                        continue;
+                $queryRes = Http::withHeaders($authHeader)->timeout(30)->post(
+                    "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents:runQuery",
+                    [
+                        'structuredQuery' => [
+                            'from'  => [['collectionId' => 'articles']],
+                            'where' => [
+                                'fieldFilter' => [
+                                    'field' => ['fieldPath' => 'slug'],
+                                    'op'    => 'EQUAL',
+                                    'value' => ['stringValue' => $slug],
+                                ],
+                            ],
+                            'limit' => 1,
+                        ],
+                    ]
+                );
+
+                if ($queryRes->successful()) {
+                    foreach ($queryRes->json() as $row) {
+                        if (!empty($row['document'])) {
+                            $existingDocId  = basename($row['document']['name']);
+                            $existingFields = $row['document']['fields'] ?? [];
+                            break;
+                        }
                     }
                 }
 
-                $res = Http::withHeaders(['Authorization' => "Bearer {$token}"])
-                    ->timeout(30)
-                    ->patch($url, ['fields' => $fields]);
+                $docId = $existingDocId ?: $slug;
+
+                if ($existingDocId) {
+                    $existingSource = $existingFields['source']['stringValue'] ?? 'wordpress';
+
+                    if ($existingSource === 'admin') {
+                        $skipped++;
+                        continue;
+                    }
+
+                    // Preserve viewcount across re-syncs
+                    if (isset($existingFields['viewcount'])) {
+                        $fields['viewcount'] = $existingFields['viewcount'];
+                    }
+                }
+
+                $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$docId}";
+                $res = Http::withHeaders($authHeader)->timeout(30)->patch($url, ['fields' => $fields]);
 
                 if ($res->successful()) {
                     $total++;
                 } else {
-                    $this->warn("Failed to save {$slug}: HTTP {$res->status()}");
+                    $this->warn("Failed to save {$docId}: HTTP {$res->status()}");
+                    $failed++;
                 }
             }
 
             $page++;
         } while (count($posts) === 20);
 
-        $this->info("Synced {$total} articles from WordPress.");
+        $this->info("Synced {$total} article(s). Skipped {$skipped}. Failed {$failed}.");
         return self::SUCCESS;
     }
-
-    private function getServiceToken(): string
-   {
-    return app(\App\Services\FirebaseTokenService::class)->getToken();
-   }
 }

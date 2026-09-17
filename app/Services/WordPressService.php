@@ -10,7 +10,7 @@ class WordPressService
 
     public function __construct()
     {
-    $this->baseUrl = rtrim(config('services.wordpress.base_url'), '/');
+        $this->baseUrl = rtrim(config('services.wordpress.base_url'), '/');
     }
 
     public function fetchPosts(int $page = 1, int $perPage = 20): array
@@ -39,7 +39,7 @@ class WordPressService
         }
 
         $contentHtml = $post['content']['rendered'] ?? '';
-        $contentText = trim(strip_tags($contentHtml));
+        $contentText = $this->htmlToPlainText($contentHtml);
         $wordCount   = str_word_count($contentText);
         $readingTime = max(1, (int) ceil($wordCount / 200)) . ' min read';
 
@@ -57,7 +57,7 @@ class WordPressService
                 fn($c) => ['stringValue' => $c], $categories
             )]],
             'excerpt'     => ['stringValue' => $excerpt],
-            'content'     => ['stringValue' => $contentHtml],
+            'content'     => ['stringValue' => $contentText],
             'image'       => ['stringValue' => $featuredImage],
             'link'        => ['stringValue' => $post['link'] ?? ''],
             'readingTime' => ['stringValue' => $readingTime],
@@ -68,6 +68,36 @@ class WordPressService
             'createdAt'   => ['timestampValue' => $this->toIso($post['date_gmt'] ?? null)],
             'source'      => ['stringValue' => 'wordpress'],
         ];
+    }
+
+    /**
+     * Strip HTML tags while keeping paragraph breaks as \n\n.
+     * Same shape as personality bios.
+     */
+    public function htmlToPlainText(string $html): string
+    {
+        if ($html === '') return '';
+
+        // Drop script, style, and figure blocks with their contents
+        $html = preg_replace('#<(script|style|figure)[^>]*>.*?</\1>#is', '', $html);
+
+        // Drop images
+        $html = preg_replace('#<img[^>]*>#i', '', $html);
+
+        // Block-level tags become paragraph breaks
+        $html = preg_replace('#</?(p|div|h[1-6]|li|tr|blockquote)[^>]*>#i', "\n\n", $html);
+        $html = preg_replace('#<br\s*/?>#i', "\n", $html);
+
+        // Strip remaining tags and decode entities
+        $text = strip_tags($html);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Collapse blank lines
+        $text = preg_replace("#\n{3,}#", "\n\n", $text);
+        $text = preg_replace('#[ \t]+\n#', "\n", $text);
+        $text = preg_replace("#\n[ \t]+#", "\n", $text);
+
+        return trim($text);
     }
 
     private function toIso(?string $date): string

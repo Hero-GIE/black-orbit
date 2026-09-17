@@ -15,11 +15,15 @@ class ArticleController extends Controller
         return view('admin.articles.index');
     }
 
+    private function projectId(): string
+    {
+        return config('services.firebase.project_id');
+    }
+
     private function token() { return session('firebase_token'); }
 
     private function fieldsToArticle($id, $fields)
     {
-        // Category array
         $cats = [];
         foreach ($fields['categories']['arrayValue']['values'] ?? [] as $v) {
             $cats[] = $v['stringValue'] ?? '';
@@ -42,15 +46,36 @@ class ArticleController extends Controller
             'viewcount'   => (int)($fields['viewcount']['integerValue'] ?? 0),
             'publishedAt' => $fields['publishedAt']['timestampValue'] ?? ($fields['createdAt']['timestampValue'] ?? ''),
             'updatedAt'   => $fields['updatedAt']['timestampValue'] ?? '',
-            'source'      => $fields['source']['stringValue']      ?? 'admin', // ← NEW
+            'source'      => $fields['source']['stringValue']      ?? 'admin',
         ];
+    }
+
+    /**
+     * Strip HTML tags while keeping paragraph breaks as \n\n.
+     */
+    private function htmlToPlainText(string $html): string
+    {
+        if ($html === '') return '';
+
+        $html = preg_replace('#<(script|style|figure)[^>]*>.*?</\1>#is', '', $html);
+        $html = preg_replace('#<img[^>]*>#i', '', $html);
+        $html = preg_replace('#</?(p|div|h[1-6]|li|tr|blockquote)[^>]*>#i', "\n\n", $html);
+        $html = preg_replace('#<br\s*/?>#i', "\n", $html);
+
+        $text = strip_tags($html);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace("#\n{3,}#", "\n\n", $text);
+        $text = preg_replace('#[ \t]+\n#', "\n", $text);
+        $text = preg_replace("#\n[ \t]+#", "\n", $text);
+
+        return trim($text);
     }
 
     // ---------- LIST (Firestore) ----------
     public function fetchArticles()
     {
         try {
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId = $this->projectId();
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
@@ -70,7 +95,7 @@ class ArticleController extends Controller
 
                 if (empty($article['slug'])) continue;
 
-                unset($article['content']);
+                // unset($article['content']);
                 $articles[] = $article;
             }
 
@@ -85,7 +110,7 @@ class ArticleController extends Controller
         }
     }
 
-    // ---------- LIST (WordPress, published only) ---------- ← NEW
+    // ---------- LIST (WordPress, published only) ----------
     public function fetchFromWordPress(WordPressService $wp)
     {
         try {
@@ -114,7 +139,7 @@ class ArticleController extends Controller
                     'category'    => $fields['category']['stringValue'] ?? '',
                     'categories'  => array_map(fn($v) => $v['stringValue'], $fields['categories']['arrayValue']['values'] ?? []),
                     'excerpt'     => $plainExcerpt,
-                    'content'     => $post['content']['rendered'] ?? '',
+                    'content'     => $this->htmlToPlainText($post['content']['rendered'] ?? ''),
                     'image'       => $fields['image']['stringValue'] ?? '',
                     'link'        => $post['link'] ?? '',
                     'readingTime' => $fields['readingTime']['stringValue'] ?? '',
@@ -138,7 +163,7 @@ class ArticleController extends Controller
     public function getArticle($id)
     {
         try {
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId = $this->projectId();
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
@@ -171,7 +196,7 @@ class ArticleController extends Controller
                 'image'   => 'nullable|url',
             ]);
 
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId = $this->projectId();
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
@@ -193,13 +218,13 @@ class ArticleController extends Controller
                 'categories'  => ['arrayValue' => ['values' => $request->category
                                     ? [['stringValue' => $request->category]] : []]],
                 'excerpt'     => ['stringValue' => $request->excerpt ?? ''],
-                'content'     => ['stringValue' => $request->content],
+                'content'     => ['stringValue' => $this->htmlToPlainText($request->content)],
                 'image'       => ['stringValue' => $request->image ?? ''],
                 'viewcount'   => ['integerValue' => 0],
                 'publishedAt' => ['timestampValue' => $now],
                 'createdAt'   => ['timestampValue' => $now],
                 'updatedAt'   => ['timestampValue' => $now],
-                'source'      => ['stringValue' => 'admin'], // ← NEW
+                'source'      => ['stringValue' => 'admin'],
             ];
 
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$docId}";
@@ -237,7 +262,7 @@ class ArticleController extends Controller
                 'image'   => 'nullable|url',
             ]);
 
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId = $this->projectId();
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
@@ -252,12 +277,11 @@ class ArticleController extends Controller
                 'categories' => ['arrayValue' => ['values' => $request->category
                                     ? [['stringValue' => $request->category]] : []]],
                 'excerpt'    => ['stringValue' => $request->excerpt ?? ''],
-                'content'    => ['stringValue' => $request->content],
+                'content'    => ['stringValue' => $this->htmlToPlainText($request->content)],
                 'image'      => ['stringValue' => $request->image ?? ''],
                 'updatedAt'  => ['timestampValue' => now()->toISOString()],
             ];
 
-            // Preserve immutable fields (including source)
             foreach (['createdAt', 'publishedAt', 'viewcount', 'slug', 'source'] as $preserve) {
                 if (isset($existingFields[$preserve])) {
                     $updateFields[$preserve] = $existingFields[$preserve];
@@ -290,7 +314,7 @@ class ArticleController extends Controller
     public function destroy($id)
     {
         try {
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId = $this->projectId();
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
@@ -320,7 +344,7 @@ class ArticleController extends Controller
         try {
             $request->validate(['newSlug' => 'required|string|max:255|regex:/^[a-z0-9-]+$/']);
 
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId = $this->projectId();
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 

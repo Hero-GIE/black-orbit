@@ -15,28 +15,37 @@ use App\Http\Controllers\Admin\FactController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ArticleController;
 
-
-    Route::get('/', function () {
+Route::get('/', function () {
     return redirect('/login');
-    });
+});
 
-    // Auth Routes
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+// Auth Routes
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
-    Route::get('/forgot-password', function () {
+Route::get('/forgot-password', function () {
     return view('auth.forgot-password');
-    })->name('password.request');
+})->name('password.request');
 
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Redirect /dashboard to /admin/dashboard
-    Route::get('/dashboard', function () {
+
+Route::get('/dashboard', function () {
     return redirect('/admin/dashboard');
-    })->middleware('auth')->name('dashboard.redirect');
+})->middleware('auth')->name('dashboard.redirect');
 
-    // Admin Routes (Protected)
-    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+
+Route::prefix('admin')->group(function () {
+    Route::get('/api/personalities', [PersonalityController::class, 'fetchPersonalities'])
+        ->name('public.api.personalities');
+    Route::get('/api/personalities/{id}', [PersonalityController::class, 'getPersonality'])
+        ->name('public.api.personality.get');
+});
+
+
+// Admin Routes (Protected)
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::post('/api/images/upload', [ImageController::class, 'upload']);
 
@@ -85,10 +94,8 @@ use App\Http\Controllers\Admin\ArticleController;
     Route::get('/api/chats', [ChatController::class, 'fetchChats'])->name('api.chats');
     Route::get('/api/chats/{id}', [ChatController::class, 'getChat'])->name('api.chat.get');
 
-    // Personality Routes
+    // Personality Routes (write + admin UI — still protected)
     Route::get('/personalities', [PersonalityController::class, 'index'])->name('personalities.index');
-    Route::get('/api/personalities', [PersonalityController::class, 'fetchPersonalities'])->name('api.personalities');
-    Route::get('/api/personalities/{id}', [PersonalityController::class, 'getPersonality'])->name('api.personality.get');
     Route::post('/api/personalities', [PersonalityController::class, 'store'])->name('api.personalities.store');
     Route::put('/api/personalities/{id}', [PersonalityController::class, 'update'])->name('api.personalities.update');
     Route::delete('/api/personalities/{id}', [PersonalityController::class, 'destroy'])->name('api.personalities.delete');
@@ -108,7 +115,6 @@ use App\Http\Controllers\Admin\ArticleController;
     Route::put('/api/facts/{id}', [FactController::class, 'update'])->name('api.facts.update');
     Route::delete('/api/facts/{id}', [FactController::class, 'destroy'])->name('api.facts.delete');
 
-
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/api/notifications', [NotificationController::class, 'fetchNotifications'])->name('api.notifications');
@@ -116,7 +122,6 @@ use App\Http\Controllers\Admin\ArticleController;
     Route::post('/api/notifications', [NotificationController::class, 'store'])->name('api.notifications.store');
     Route::put('/api/notifications/{id}', [NotificationController::class, 'update'])->name('api.notifications.update');
     Route::delete('/api/notifications/{id}', [NotificationController::class, 'destroy'])->name('api.notifications.delete');
-
 
     // Article Routes
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');

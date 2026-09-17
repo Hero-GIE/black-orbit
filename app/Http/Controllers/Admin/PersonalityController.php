@@ -14,10 +14,11 @@ class PersonalityController extends Controller
         return view('admin.personalities.index');
     }
 
-    private function getFirebaseToken()
-    {
-        return session('firebase_token');
-    }
+  private function getFirebaseToken()
+{
+    return session('firebase_token')
+        ?? app(\App\Services\FirebaseTokenService::class)->getToken();
+}
 
     public function fetchPersonalities()
     {
