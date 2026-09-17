@@ -1,12 +1,5 @@
 <?php
 
-/**
- * CSV TO FIRESTORE IMPORTER - Personalities Collection
- * REPLACE ALL DATA - Deletes existing documents before import
- * With Auto-Generated Document IDs
- * Includes category field
- * NO DUPLICATE CHECKING - imports all rows
- */
 
 // ========== ENABLE ERROR REPORTING ==========
 error_reporting(E_ALL);

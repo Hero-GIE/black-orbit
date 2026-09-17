@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Admin\FactController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\ArticleController;
 
 
     Route::get('/', function () {
@@ -115,4 +116,14 @@ use App\Http\Controllers\Admin\NotificationController;
     Route::post('/api/notifications', [NotificationController::class, 'store'])->name('api.notifications.store');
     Route::put('/api/notifications/{id}', [NotificationController::class, 'update'])->name('api.notifications.update');
     Route::delete('/api/notifications/{id}', [NotificationController::class, 'destroy'])->name('api.notifications.delete');
+
+
+    // Article Routes
+    Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+    Route::get('/api/articles', [ArticleController::class, 'fetchArticles'])->name('api.articles');
+    Route::get('/api/articles/{id}', [ArticleController::class, 'getArticle'])->name('api.article.get');
+    Route::post('/api/articles', [ArticleController::class, 'store'])->name('api.articles.store');
+    Route::put('/api/articles/{id}', [ArticleController::class, 'update'])->name('api.articles.update');
+    Route::delete('/api/articles/{id}', [ArticleController::class, 'destroy'])->name('api.articles.delete');
+    Route::post('/api/articles/{id}/rename', [ArticleController::class, 'rename'])->name('api.articles.rename');
 });

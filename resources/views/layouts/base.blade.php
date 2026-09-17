@@ -143,3 +143,48 @@
     @yield('scripts')
 </body>
 </html>
+<script>
+    (function () {
+
+        function getToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content || '';
+        }
+
+        // Patch fetch()
+        const origFetch = window.fetch;
+        window.fetch = function (url, opts = {}) {
+            const method = (opts.method || 'GET').toUpperCase();
+            if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+                opts.headers = Object.assign({}, opts.headers, {
+                    'X-CSRF-TOKEN': getToken(),
+                    'Accept': 'application/json',
+                });
+                opts.credentials = 'same-origin';
+            }
+            return origFetch.call(this, url, opts);
+        };
+
+        function patchAxios() {
+            if (window.axios) {
+                window.axios.defaults.headers.common['X-CSRF-TOKEN'] = getToken();
+                window.axios.defaults.withCredentials = true;
+                window.axios.interceptors.request.use(function (config) {
+                    const m = (config.method || '').toUpperCase();
+                    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(m)) {
+                        config.headers['X-CSRF-TOKEN'] = getToken();
+                    }
+                    return config;
+                });
+            }
+        }
+        document.addEventListener('DOMContentLoaded', patchAxios);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.jQuery) {
+                jQuery.ajaxSetup({
+                    headers: { 'X-CSRF-TOKEN': getToken() }
+                });
+            }
+        });
+    })();
+</script>

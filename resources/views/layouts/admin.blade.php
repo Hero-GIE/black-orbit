@@ -115,6 +115,14 @@
                     </a>
                 </li>
 
+                     {{-- Articles --}}
+                <li>
+                    <a class="sb-link {{ request()->routeIs('admin.articles.*') ? 'active' : '' }}"
+                       href="{{ route('admin.articles.index') }}" data-label="Articles">
+                        <i class="fas fa-newspaper"></i><span>Articles</span>
+                    </a>
+                </li>
+
                 <li class="sb-divider"></li>
                 <li class="sb-label"><span>Management</span></li>
 

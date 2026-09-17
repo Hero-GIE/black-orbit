@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ArticleController;
 
 // Public routes (no authentication needed)
 Route::get('/health', function () {
@@ -11,6 +12,8 @@ Route::get('/health', function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
+Route::get('/articles', [ArticleController::class, 'index']);
+Route::get('/articles/{id}', [ArticleController::class, 'show']);
 
 // Protected routes (require Firebase token)
 Route::middleware(['firebase.auth'])->group(function () {
