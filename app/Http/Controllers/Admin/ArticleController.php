@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\ActivityLogger;
+use App\Services\WordPressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -41,10 +42,11 @@ class ArticleController extends Controller
             'viewcount'   => (int)($fields['viewcount']['integerValue'] ?? 0),
             'publishedAt' => $fields['publishedAt']['timestampValue'] ?? ($fields['createdAt']['timestampValue'] ?? ''),
             'updatedAt'   => $fields['updatedAt']['timestampValue'] ?? '',
+            'source'      => $fields['source']['stringValue']      ?? 'admin', // ← NEW
         ];
     }
 
-    // ---------- LIST ----------
+    // ---------- LIST (Firestore) ----------
     public function fetchArticles()
     {
         try {
@@ -66,18 +68,64 @@ class ArticleController extends Controller
                 $fields = $doc['fields'] ?? [];
                 $article = $this->fieldsToArticle($id, $fields);
 
-                // Skip legacy docs with no slug (the two old ones)
                 if (empty($article['slug'])) continue;
 
-                // Strip content from list response — too heavy
                 unset($article['content']);
                 $articles[] = $article;
             }
 
-            // Sort by publishedAt desc
             usort($articles, function ($a, $b) {
                 return strcmp($b['publishedAt'] ?? '', $a['publishedAt'] ?? '');
             });
+
+            return response()->json(['success' => true, 'data' => $articles]);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // ---------- LIST (WordPress, published only) ---------- ← NEW
+    public function fetchFromWordPress(WordPressService $wp)
+    {
+        try {
+            $token = $this->token();
+            if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+
+            $page    = (int) request('page', 1);
+            $perPage = (int) request('per_page', 20);
+
+            $posts = $wp->fetchPosts($page, $perPage);
+
+            $articles = array_map(function ($post) use ($wp) {
+                $fields = $wp->mapToFirestoreFields($post);
+
+                $plainExcerpt = trim(strip_tags($post['excerpt']['rendered'] ?? ''));
+                if ($plainExcerpt === '') {
+                    $plainExcerpt = mb_substr(trim(strip_tags($post['content']['rendered'] ?? '')), 0, 160) . '…';
+                }
+
+                return [
+                    'id'          => $post['slug'],
+                    'wpId'        => $post['id'],
+                    'title'       => html_entity_decode($post['title']['rendered'] ?? ''),
+                    'slug'        => $post['slug'],
+                    'author'      => $fields['author']['stringValue'] ?? '',
+                    'category'    => $fields['category']['stringValue'] ?? '',
+                    'categories'  => array_map(fn($v) => $v['stringValue'], $fields['categories']['arrayValue']['values'] ?? []),
+                    'excerpt'     => $plainExcerpt,
+                    'content'     => $post['content']['rendered'] ?? '',
+                    'image'       => $fields['image']['stringValue'] ?? '',
+                    'link'        => $post['link'] ?? '',
+                    'readingTime' => $fields['readingTime']['stringValue'] ?? '',
+                    'wordCount'   => $fields['wordCount']['integerValue'] ?? 0,
+                    'viewcount'   => 0,
+                    'publishedAt' => $fields['publishedAt']['timestampValue'] ?? '',
+                    'updatedAt'   => $fields['updatedAt']['timestampValue'] ?? '',
+                    'source'      => 'wordpress',
+                    'status'      => 'publish',
+                ];
+            }, $posts);
 
             return response()->json(['success' => true, 'data' => $articles]);
 
@@ -127,11 +175,9 @@ class ArticleController extends Controller
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
-            // Build slug from title if not given
             $slug = $request->slug ?: \Str::slug($request->title);
             $docId = $slug;
 
-            // Check if exists
             $checkUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$docId}";
             $existing = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->get($checkUrl);
             if ($existing->successful()) {
@@ -153,6 +199,7 @@ class ArticleController extends Controller
                 'publishedAt' => ['timestampValue' => $now],
                 'createdAt'   => ['timestampValue' => $now],
                 'updatedAt'   => ['timestampValue' => $now],
+                'source'      => ['stringValue' => 'admin'], // ← NEW
             ];
 
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$docId}";
@@ -194,7 +241,6 @@ class ArticleController extends Controller
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
-            // Preserve createdAt, publishedAt, viewcount, slug
             $getUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}";
             $existing = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->get($getUrl);
             $existingFields = $existing->successful() ? $existing->json()['fields'] ?? [] : [];
@@ -211,8 +257,8 @@ class ArticleController extends Controller
                 'updatedAt'  => ['timestampValue' => now()->toISOString()],
             ];
 
-            // Preserve immutable fields
-            foreach (['createdAt', 'publishedAt', 'viewcount', 'slug'] as $preserve) {
+            // Preserve immutable fields (including source)
+            foreach (['createdAt', 'publishedAt', 'viewcount', 'slug', 'source'] as $preserve) {
                 if (isset($existingFields[$preserve])) {
                     $updateFields[$preserve] = $existingFields[$preserve];
                 }
@@ -283,7 +329,6 @@ class ArticleController extends Controller
                 return response()->json(['success' => true, 'message' => 'Slug unchanged']);
             }
 
-            // Read old doc
             $getUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}";
             $getRes = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->get($getUrl);
             if (!$getRes->successful()) {
@@ -294,7 +339,6 @@ class ArticleController extends Controller
             $fields['slug'] = ['stringValue' => $newSlug];
             $fields['updatedAt'] = ['timestampValue' => now()->toISOString()];
 
-            // Write to new ID + delete old ID via batchWrite
             $writes = [
                 [
                     'update' => [

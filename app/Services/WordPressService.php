@@ -10,7 +10,7 @@ class WordPressService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(env('WORDPRESS_BASE_URL'), '/');
+    $this->baseUrl = rtrim(config('services.wordpress.base_url'), '/');
     }
 
     public function fetchPosts(int $page = 1, int $perPage = 20): array

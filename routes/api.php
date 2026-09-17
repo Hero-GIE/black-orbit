@@ -15,7 +15,7 @@ Route::post('/refresh', [AuthController::class, 'refresh']);
 Route::get('/articles', [ArticleController::class, 'index']);
 Route::get('/articles/{id}', [ArticleController::class, 'show']);
 
-// Protected routes (require Firebase token)
+// Protected routes
 Route::middleware(['firebase.auth'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/upload', [ImageController::class, 'upload']);

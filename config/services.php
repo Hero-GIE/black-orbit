@@ -39,4 +39,8 @@ return [
     'project_id' => env('FIREBASE_PROJECT_ID'),
     ],
 
+    'wordpress' => [
+    'base_url' => env('WORDPRESS_BASE_URL', ''),
+],
+
 ];

@@ -66,7 +66,7 @@ class ArticleController extends Controller
                 $article = $this->fieldsToArticle($id, $doc['fields'] ?? []);
 
                 if (empty($article['slug'])) continue;
-                unset($article['content']);
+                // unset($article['content']);
 
                 $articles[] = $article;
             }

@@ -126,4 +126,5 @@ use App\Http\Controllers\Admin\ArticleController;
     Route::put('/api/articles/{id}', [ArticleController::class, 'update'])->name('api.articles.update');
     Route::delete('/api/articles/{id}', [ArticleController::class, 'destroy'])->name('api.articles.delete');
     Route::post('/api/articles/{id}/rename', [ArticleController::class, 'rename'])->name('api.articles.rename');
+    Route::get('/api/articles/wordpress', [ArticleController::class, 'fetchFromWordPress'])->name('api.articles.wordpress');
 });
