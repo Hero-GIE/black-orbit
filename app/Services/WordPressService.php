@@ -70,10 +70,7 @@ class WordPressService
         ];
     }
 
-    /**
-     * Strip HTML tags while keeping paragraph breaks as \n\n.
-     * Same shape as personality bios.
-     */
+
     public function htmlToPlainText(string $html): string
     {
         if ($html === '') return '';
@@ -84,15 +81,12 @@ class WordPressService
         // Drop images
         $html = preg_replace('#<img[^>]*>#i', '', $html);
 
-        // Block-level tags become paragraph breaks
         $html = preg_replace('#</?(p|div|h[1-6]|li|tr|blockquote)[^>]*>#i', "\n\n", $html);
         $html = preg_replace('#<br\s*/?>#i', "\n", $html);
 
-        // Strip remaining tags and decode entities
         $text = strip_tags($html);
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        // Collapse blank lines
         $text = preg_replace("#\n{3,}#", "\n\n", $text);
         $text = preg_replace('#[ \t]+\n#', "\n", $text);
         $text = preg_replace("#\n[ \t]+#", "\n", $text);

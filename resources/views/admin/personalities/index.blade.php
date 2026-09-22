@@ -240,6 +240,7 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
+        min-width: 0; /* allows ellipsis to work inside flex children */
     }
 
     .text-truncate-2 {
@@ -250,6 +251,7 @@
         text-overflow: ellipsis;
         min-height: 1.4rem;
         max-width: 100%;
+        overflow-wrap: anywhere;
     }
 
     .text-truncate-1 {
@@ -259,6 +261,40 @@
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    /* === Achievement badges — single line with ellipsis, never overflow === */
+    .achievements-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .achievement-badge {
+        display: block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        line-height: 1.2;
+    }
+
+    .achievement-badge.is-light {
+        background: rgba(255, 255, 255, 0.92);
+        color: #212529;
+    }
+
+    .achievement-badge.is-more {
+        background: #212529;
+        color: #fff;
+        width: fit-content;
     }
 
     /* Scrollbar for View Drawer Bio */
@@ -493,14 +529,14 @@ function renderPersonalities(personalities) {
             const remaining = p.achievements.length - 2;
 
             achievementsHtml = displayAchievements.map(a =>
-                `<span class="badge bg-light text-dark me-1 mb-1">${escapeHtml(a)}</span>`
+                `<span class="achievement-badge is-light" title="${escapeHtml(a)}">${escapeHtml(a)}</span>`
             ).join('');
 
             if (remaining > 0) {
-                achievementsHtml += `<span class="badge bg-dark text-white mb-1">+${remaining} more</span>`;
+                achievementsHtml += `<span class="achievement-badge is-more">+${remaining} more</span>`;
             }
         } else {
-            achievementsHtml = '<span class="badge bg-secondary text-white mb-1">No achievements listed</span>';
+            achievementsHtml = '<span class="achievement-badge is-light">No achievements listed</span>';
         }
 
         const categoryHtml = p.category ? `<span class="badge bg-light text-dark mb-2 align-self-start"><i class="fas fa-tag me-1"></i>${escapeHtml(p.category)}</span>` : '';
@@ -528,7 +564,7 @@ function renderPersonalities(personalities) {
                         <h5 class="fw-bold mb-1 text-white text-truncate-1">${escapeHtml(p.name)}</h5>
                         <p class="small mb-2 text-white text-truncate-1"><i class="fas fa-briefcase me-1"></i> ${escapeHtml(p.occupation || 'N/A')}</p>
                         <p class="card-text small text-white text-truncate-2 mb-2">${escapeHtml(p.bio)}</p>
-                        <div class="d-flex flex-wrap">
+                        <div class="achievements-stack">
                             ${achievementsHtml}
                         </div>
                     </div>

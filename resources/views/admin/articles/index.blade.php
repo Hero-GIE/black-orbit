@@ -254,6 +254,7 @@
         z-index: 2;
         background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0) 100%);
         color: #fff;
+        min-width: 0; /* allows ellipsis on flex/child elements */
     }
 
     .text-truncate-1 {
@@ -262,6 +263,8 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-wrap: anywhere;
     }
     .text-truncate-2 {
         display: -webkit-box;
@@ -269,6 +272,26 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    /* === Category badge — single line, ellipsis, never overflows the card === */
+    .category-badge {
+        display: inline-block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        line-height: 1.2;
+        background: rgba(255, 255, 255, 0.92);
+        color: #212529;
+        margin-bottom: 0.5rem;
+        vertical-align: middle;
     }
 
     .card-desc-text {
@@ -288,8 +311,17 @@
         margin-top: 0.5rem;
         font-size: 0.72rem;
         color: rgba(255,255,255,0.85);
+        flex-wrap: wrap;
     }
-    .card-meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .card-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
     .modal-desc-scroll {
         max-height: 200px;
@@ -526,7 +558,7 @@ function renderArticles(articles) {
     articles.forEach(a => {
         const imgSrc = a.image || 'https://via.placeholder.com/400x300?text=No+Image';
         const catBadge = a.category
-            ? `<span class="badge bg-light text-dark mb-2"><i class="fas fa-tag me-1"></i>${escapeHtml(a.category)}</span>`
+            ? `<span class="category-badge" title="${escapeHtml(a.category)}"><i class="fas fa-tag me-1"></i>${escapeHtml(a.category)}</span>`
             : '';
 
         const rawText = a.excerpt ? a.excerpt : (a.title || '');
