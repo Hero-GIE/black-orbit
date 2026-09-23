@@ -166,15 +166,16 @@
                 </div>
 
                 <div id="quillEditor"
-                     style="min-height: 320px; background: #fff; border: 1px solid #e9ecef; border-radius: 0 0 10px 10px; font-size: 0.95rem; line-height: 1.7;"></div>
+                     style="min-height: 320px; background: #fff; border: 1px solid #e9ecef; border-radius: 0 0 10px 10px; font-size: 0.95rem; line-height: 1.55;"></div>
 
                 <textarea id="content" name="content" class="d-none"></textarea>
 
-               <small class="text-muted d-block mt-2">
-    <i class="fas fa-info-circle me-1"></i>
-    <strong>Hover over any image</strong> in the editor to reveal a remove button.
-    You can also double-click an image, right-click it, or click it and press Delete.
-</small>
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Press <kbd>Enter</kbd> for a new paragraph, <kbd>Shift</kbd>+<kbd>Enter</kbd> for a soft line break.
+                    Long pasted text is auto-split into paragraphs.
+                    <strong>Hover over any image</strong> to remove it.
+                </small>
             </div>
         </form>
     </div>
@@ -257,7 +258,7 @@
     .card-meta { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.72rem; color: rgba(255,255,255,0.85); flex-wrap: wrap; }
     .card-meta span { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .article-content-preview { max-height: 500px; overflow-y: auto; padding: 1.25rem 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #f1f1f1; font-size: 0.95rem; line-height: 1.7; color: #2c2c2c; }
+    .article-content-preview { max-height: 500px; overflow-y: auto; padding: 1.25rem 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #f1f1f1; font-size: 0.95rem; line-height: 1.55; color: #2c2c2c; }
     .article-content-preview::-webkit-scrollbar { width: 8px; }
     .article-content-preview::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .article-content-preview::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
@@ -274,16 +275,8 @@
     .article-content-preview a { color: #0d6efd; text-decoration: underline; }
     .article-content-preview a:hover { color: #0a58ca; }
 
-    .article-content-preview img {
-        max-width: 100%; height: auto; display: block;
-        margin: 1rem auto; border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .article-content-preview blockquote {
-        border-left: 4px solid #dee2e6; padding: 0.5rem 0 0.5rem 1.25rem;
-        color: #6c757d; font-style: italic; margin: 1.25rem 0;
-        background: #f8f9fa; border-radius: 4px;
-    }
+    .article-content-preview img { max-width: 100%; height: auto; display: block; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .article-content-preview blockquote { border-left: 4px solid #dee2e6; padding: 0.5rem 0 0.5rem 1.25rem; color: #6c757d; font-style: italic; margin: 1.25rem 0; background: #f8f9fa; border-radius: 4px; }
     .article-content-preview ul, .article-content-preview ol { padding-left: 1.5rem; margin: 0 0 1rem; }
     .article-content-preview li { margin-bottom: 0.35rem; }
     .article-content-preview ol, .article-content-preview ul { list-style: none; padding-left: 1.5rem; }
@@ -298,18 +291,10 @@
     .article-content-preview .ql-align-center  { text-align: center; }
     .article-content-preview .ql-align-right   { text-align: right; }
     .article-content-preview .ql-align-justify { text-align: justify; }
-    .article-content-preview pre, .article-content-preview pre.ql-syntax {
-        background: #1e1e1e; color: #f8f8f2; padding: 1rem 1.25rem;
-        border-radius: 8px; overflow-x: auto; font-size: 0.85rem;
-        font-family: 'SF Mono', Menlo, Consolas, monospace;
-        margin: 1rem 0; white-space: pre;
-    }
+    .article-content-preview pre, .article-content-preview pre.ql-syntax { background: #1e1e1e; color: #f8f8f2; padding: 1rem 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; font-family: 'SF Mono', Menlo, Consolas, monospace; margin: 1rem 0; white-space: pre; }
     .article-content-preview code { background: #f1f1f1; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; font-family: 'SF Mono', Menlo, Consolas, monospace; }
     .article-content-preview pre code { background: transparent; padding: 0; color: inherit; }
-    .article-content-preview iframe, .article-content-preview video {
-        max-width: 100%; width: 100%; aspect-ratio: 16 / 9; height: auto;
-        border: 0; border-radius: 8px; margin: 1rem 0;
-    }
+    .article-content-preview iframe, .article-content-preview video { max-width: 100%; width: 100%; aspect-ratio: 16 / 9; height: auto; border: 0; border-radius: 8px; margin: 1rem 0; }
     .article-content-preview hr { border: 0; border-top: 1px solid #dee2e6; margin: 1.5rem 0; }
 
     .fact-drawer { width: 560px !important; max-width: 92vw; border-left: none !important; box-shadow: -8px 0 30px rgba(0,0,0,0.12); }
@@ -332,22 +317,57 @@
     .ql-editor .ql-video { width: 100%; aspect-ratio: 16/9; height: auto; border-radius: 8px; margin: 1rem 0; }
 
     /* ---------- Image removal affordances in editor ---------- */
-    .ql-editor img {
-        cursor: pointer;
-        transition: outline 0.15s ease, box-shadow 0.15s ease;
-        border-radius: 8px;
-    }
-    .ql-editor img:hover {
-        outline: 2px dashed #dc3545;
-        outline-offset: 3px;
-        box-shadow: 0 4px 16px rgba(220, 53, 69, 0.15);
-    }
-    .ql-editor img.ql-image-selected,
-    .ql-editor .ql-editor-image-selected {
-        outline: 2px solid #0d6efd;
-        outline-offset: 3px;
-    }
+    .ql-editor img { cursor: pointer; transition: outline 0.15s ease, box-shadow 0.15s ease; border-radius: 8px; }
+    .ql-editor img:hover { outline: 2px dashed #dc3545; outline-offset: 3px; box-shadow: 0 4px 16px rgba(220, 53, 69, 0.15); }
+    .ql-editor img.ql-image-selected, .ql-editor .ql-editor-image-selected { outline: 2px solid #0d6efd; outline-offset: 3px; }
 
+    /* ==============================================================
+       Paragraph consistency — editor and view modal render identically
+       ============================================================== */
+    .ql-editor p,
+    .article-content-preview p {
+        margin: 0 0 1rem;
+        line-height: 1.55;
+    }
+    .ql-editor > *:first-child,
+    .article-content-preview > *:first-child {
+        margin-top: 0;
+    }
+    .ql-editor p:empty,
+    .ql-editor p:has(> br:only-child),
+    .article-content-preview p:empty,
+    .article-content-preview p:has(> br:only-child) {
+        min-height: 1em;
+        margin: 0 0 1rem;
+    }
+    .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4,
+    .article-content-preview h1,
+    .article-content-preview h2,
+    .article-content-preview h3,
+    .article-content-preview h4 {
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .ql-editor ul, .ql-editor ol,
+    .article-content-preview ul,
+    .article-content-preview ol {
+        padding-left: 1.5rem;
+        margin: 0 0 1rem;
+    }
+    .ql-editor li,
+    .article-content-preview li {
+        margin-bottom: 0.35rem;
+    }
+    .ql-editor blockquote,
+    .article-content-preview blockquote {
+        border-left: 4px solid #dee2e6;
+        padding: 0.5rem 0 0.5rem 1.25rem;
+        color: #6c757d;
+        font-style: italic;
+        margin: 1rem 0;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
 </style>
 @endsection
 
@@ -362,6 +382,8 @@ if (window.__articlesAdminScriptLoaded) {
     (function () {
         'use strict';
         window.__articlesAdminScriptLoaded = true;
+
+        const Delta = Quill.import('delta');
 
         let editingArticleId   = null;
         let viewDrawerInstance = null;
@@ -516,15 +538,54 @@ if (window.__articlesAdminScriptLoaded) {
                         container: '#quillToolbar',
                         handlers: { image: quillImageHandler },
                     },
+                    clipboard: {
+                        matchers: [
+                            [Node.TEXT_NODE, function (node, delta) {
+                                if (!node.data || node.data.indexOf('\n') === -1) return delta;
+                                const parts = node.data.split(/\r?\n/);
+                                const out = new Delta();
+                                parts.forEach((line, i) => {
+                                    if (i > 0) out.insert('\n');
+                                    out.insert(line);
+                                });
+                                return out;
+                            }],
+                            ['div', function (node, delta) {
+                                const out = new Delta();
+                                delta.ops.forEach(op => out.insert(op.insert, op.attributes));
+                                out.insert('\n');
+                                return out;
+                            }],
+                            ['span', function (node, delta) {
+                                const allowed = ['bold','italic','underline','strike','color','background','link','code'];
+                                const out = new Delta();
+                                delta.ops.forEach(op => {
+                                    if (typeof op.insert === 'string') {
+                                        const attrs = {};
+                                        Object.keys(op.attributes || {}).forEach(k => {
+                                            if (allowed.includes(k)) attrs[k] = op.attributes[k];
+                                        });
+                                        out.insert(op.insert, Object.keys(attrs).length ? attrs : undefined);
+                                    } else {
+                                        out.insert(op.insert, op.attributes);
+                                    }
+                                });
+                                return out;
+                            }],
+                        ],
+                    },
                 },
             });
 
+            // Existing image-paste listener (kept)
             quill.root.addEventListener('paste', handleQuillPaste, true);
+
+            // NEW: long-prose paste listener — auto-splits wall-of-text
+            quill.root.addEventListener('paste', handleLongProsePaste, true);
 
             quillReady = true;
             console.log('[Quill] ✅ initialized');
 
-            // Wire up image removal
             setupImageRemoval();
         }
 
@@ -598,46 +659,135 @@ if (window.__articlesAdminScriptLoaded) {
         }
 
         // ---------------------------------------------------------------
-        // Image removal — inline in the Quill editor
+        // Long-prose paste — auto-split into paragraphs
+        // ---------------------------------------------------------------
+        function handleLongProsePaste(e) {
+            const clipboard = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData);
+            if (!clipboard) return;
+
+            // If the paste contains HTML blocks, let Quill handle it.
+            const htmlData = clipboard.getData('text/html');
+            if (htmlData && /<(p|div|h[1-6]|ul|ol|li|br)\b/i.test(htmlData)) return;
+
+            const text = clipboard.getData('text/plain');
+            if (!text) return;
+
+            // Skip content that already has newlines (Quill's matchers split it)
+            if (/\n/.test(text.trim())) return;
+
+            // Skip short one-liners
+            if (text.length < 300) return;
+
+            const sentences = splitIntoSentences(text);
+            if (sentences.length < 4) return;
+
+            const paragraphs = groupSentencesIntoParagraphs(sentences, {
+                maxSentencesPerParagraph: 4,
+                maxCharsPerParagraph: 500,
+            });
+
+            const html = paragraphs.map(p => `<p>${escapeHtmlBasic(p)}</p>`).join('');
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const range = quill.getSelection(true) || { index: quill.getLength() };
+            quill.clipboard.dangerouslyPasteHTML(range.index, html, 'user');
+            quill.setSelection(range.index + html.length, 0);
+
+            showToast(`Inserted ${paragraphs.length} paragraphs`, 'info');
+        }
+
+        // Split text into sentences, respecting common abbreviations
+        function splitIntoSentences(text) {
+            const abbreviations = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof', 'Inc', 'Ltd', 'Co',
+                                   'vs', 'etc', 'e.g', 'i.e', 'cf', 'al', 'Jr', 'Sr',
+                                   'St', 'Ave', 'No', 'Fig', 'Ph.D', 'U.S', 'U.K'];
+
+            let protectedText = text;
+            abbreviations.forEach((abbr, i) => {
+                const re = new RegExp(`\\b${abbr.replace(/\./g, '\\.')}\\.`, 'g');
+                protectedText = protectedText.replace(re, `__ABBR${i}__`);
+            });
+
+            const rawParts = protectedText
+                .split(/(?<=[.!?])\s+/)
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            return rawParts.map(part => {
+                let restored = part;
+                abbreviations.forEach((abbr, i) => {
+                    restored = restored.replace(new RegExp(`__ABBR${i}__`, 'g'), `${abbr}.`);
+                });
+                return restored;
+            });
+        }
+
+        // Group sentences into readable paragraph-sized chunks
+        function groupSentencesIntoParagraphs(sentences, opts) {
+            const { maxSentencesPerParagraph, maxCharsPerParagraph } = opts;
+            const paragraphs = [];
+            let buffer = [];
+            let bufferChars = 0;
+
+            for (const sentence of sentences) {
+                buffer.push(sentence);
+                bufferChars += sentence.length + 1;
+
+                const tooManySentences = buffer.length >= maxSentencesPerParagraph;
+                const tooLong = bufferChars >= maxCharsPerParagraph;
+
+                if (tooManySentences || tooLong) {
+                    paragraphs.push(buffer.join(' '));
+                    buffer = [];
+                    bufferChars = 0;
+                }
+            }
+
+            if (buffer.length > 0) {
+                paragraphs.push(buffer.join(' '));
+            }
+
+            return paragraphs;
+        }
+
+        function escapeHtmlBasic(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ---------------------------------------------------------------
+        // Image removal
         // ---------------------------------------------------------------
         function setupImageRemoval() {
             if (!quill) return;
 
-            // Double-click an image → remove it (with confirm)
             quill.root.addEventListener('dblclick', function (e) {
                 if (e.target && e.target.tagName === 'IMG') {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (window.confirm('Remove this image?')) {
-                        removeImageFromQuill(e.target);
-                    }
+                    if (window.confirm('Remove this image?')) removeImageFromQuill(e.target);
                 }
             });
 
-            // Right-click an image → remove via confirm
             quill.root.addEventListener('contextmenu', function (e) {
                 if (e.target && e.target.tagName === 'IMG') {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (window.confirm('Remove this image from the content?')) {
-                        removeImageFromQuill(e.target);
-                    }
+                    if (window.confirm('Remove this image from the content?')) removeImageFromQuill(e.target);
                 }
             });
         }
 
         function removeImageFromQuill(imgEl) {
             if (!quill) return;
-
-            // Use Quill's native blot removal so the internal Delta is updated
             const blot = Quill.find(imgEl);
-            if (blot) {
-                blot.remove();
-            } else {
-                // Fallback — remove the DOM node directly
-                imgEl.remove();
-            }
-
+            if (blot) blot.remove(); else imgEl.remove();
             syncQuillToTextarea();
             console.log('[Quill] image removed');
             showToast('Image removed', 'info');
@@ -672,6 +822,14 @@ if (window.__articlesAdminScriptLoaded) {
                 return;
             }
 
+            // Legacy plain-text → wrap each line in <p>
+            if (!/<[a-z][\s\S]*>/i.test(html)) {
+                html = html.split(/\r?\n/)
+                    .filter(line => line.trim() !== '')
+                    .map(line => `<p>${line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`)
+                    .join('');
+            }
+
             const tempContainer = document.createElement('div');
             const tempQuill = new Quill(tempContainer, { modules: { toolbar: false } });
             tempQuill.clipboard.dangerouslyPasteHTML(html);
@@ -693,14 +851,21 @@ if (window.__articlesAdminScriptLoaded) {
 
             let html = quill.root.innerHTML;
 
-            if (html === '<p><br></p>' || html === '<p></p>' || html === '') html = '';
+            // Cleanup pass — same treatment the bio field gets
+            html = html.replace(/<div(\s[^>]*)?>/gi, '<p>').replace(/<\/div>/gi, '</p>');
+            html = html.replace(/<span\s*>\s*<\/span>/gi, '');
+            html = html.replace(/\s+style="[^"]*"/gi, '');
+            html = html.replace(/(<p>(?:\s|<br\s*\/?>|&nbsp;)*<\/p>\s*){2,}/gi, '<p><br></p>');
+            html = html.replace(/(<p>(?:\s|<br\s*\/?>|&nbsp;)*<\/p>\s*)+$/i, '');
+            html = html.replace(/^(?:\s*<p>(?:\s|<br\s*\/?>|&nbsp;)*<\/p>)+/i, '');
+
+            if (/^(<p><br\s*\/?><\/p>)?\s*$/i.test(html)) html = '';
 
             console.groupCollapsed('[Save] 📝 Quill getContent()');
             console.log('Length:', html.length);
+            console.log('Paragraph count:', (html.match(/<p\b/gi) || []).length);
             console.log('Has <img>:', /<img\b/i.test(html));
             console.log('Has src="":', /src="/i.test(html));
-            console.log('Has <strong>/<b>:', /<(strong|b)\b/i.test(html));
-            console.log('Has <h1>-<h4>:', /<h[1-4]\b/i.test(html));
             console.log('First 500 chars:', html.substring(0, 500));
             console.groupEnd();
 
@@ -879,14 +1044,6 @@ if (window.__articlesAdminScriptLoaded) {
                 const a = data.data;
                 editingArticleId = id;
 
-                console.groupCollapsed('[Edit] 📥 Article fetched');
-                console.log('id:', id);
-                console.log('content.length:', (a.content || '').length);
-                console.log('has <img>:', /<img\b/i.test(a.content || ''));
-                console.log('has src="":', /src="/i.test(a.content || ''));
-                console.log('preview:', (a.content || '').substring(0, 500));
-                console.groupEnd();
-
                 document.getElementById('articleModalTitle').textContent = 'Edit Article';
                 document.getElementById('articleId').value = id;
                 document.getElementById('title').value = a.title || '';
@@ -934,16 +1091,17 @@ if (window.__articlesAdminScriptLoaded) {
                 if (data.success) {
                     const a = data.data;
 
-                    console.groupCollapsed('[View] 📥 Article fetched');
-                    console.log('id:', id);
-                    console.log('content.length:', (a.content || '').length);
-                    console.log('has <img>:', /<img\b/i.test(a.content || ''));
-                    console.log('has src="":', /src="/i.test(a.content || ''));
-                    console.log('preview:', (a.content || '').substring(0, 500));
-                    console.groupEnd();
-
                     const imgSrc = a.image || 'https://via.placeholder.com/480x300?text=No+Image';
-                    const contentHtml = a.content || '<em class="text-muted">No content</em>';
+                    let contentHtml = a.content || '<em class="text-muted">No content</em>';
+
+                    // Legacy plain-text → wrap into paragraphs
+                    if (a.content && !/<[a-z][\s\S]*>/i.test(a.content)) {
+                        contentHtml = a.content
+                            .split(/\r?\n/)
+                            .filter(line => line.trim() !== '')
+                            .map(line => `<p>${escapeHtml(line)}</p>`)
+                            .join('');
+                    }
 
                     content.innerHTML = `
                         <div class="mb-4">
@@ -1009,15 +1167,6 @@ if (window.__articlesAdminScriptLoaded) {
                 image:    formData.get('image'),
             };
 
-            console.groupCollapsed('[Save] 📤 Payload being sent');
-            console.log('URL:', id ? `/admin/api/articles/${id}` : '/admin/api/articles', '| method:', id ? 'PUT' : 'POST');
-            console.log('content.length:', (payload.content || '').length);
-            console.log('JSON.stringify(payload).length:', JSON.stringify(payload).length);
-            console.log('content has <img>:', /<img\b/i.test(payload.content || ''));
-            console.log('content has src="":', /src="/i.test(payload.content || ''));
-            console.log('content preview:', (payload.content || '').substring(0, 500));
-            console.groupEnd();
-
             if (!payload.title || !payload.title.trim()) {
                 showToast('Title is required', 'danger');
                 return;
@@ -1042,11 +1191,6 @@ if (window.__articlesAdminScriptLoaded) {
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
-
-                console.groupCollapsed('[Save] 📥 Server response');
-                console.log('HTTP status:', response.status);
-                console.log('body:', data);
-                console.groupEnd();
 
                 if (data.success) {
                     showToast(data.message, 'success');
