@@ -297,7 +297,6 @@
         width: fit-content;
     }
 
-    /* Scrollbar for View Drawer Bio */
     .drawer-bio-scroll {
         max-height: 200px;
         overflow-y: auto;
@@ -337,9 +336,7 @@ let viewDrawerInstance = null;
 let allPersonalities = [];
 let filteredPersonalities = [];
 
-// ==========================
 // IMAGE UPLOAD
-// ==========================
 const imageInputEl = document.getElementById('image');
 const imageFileInput = document.getElementById('imageFile');
 const imagePreviewEl = document.getElementById('imagePreview');

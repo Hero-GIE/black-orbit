@@ -81,7 +81,6 @@
             <ul class="sb-nav">
                 <li class="sb-label"><span>Main Menu</span></li>
 
-                {{-- Dashboard --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                        href="{{ route('admin.dashboard') }}" data-label="Dashboard">
@@ -89,8 +88,6 @@
                     </a>
                 </li>
 
-
-                   {{-- Users --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
                        href="{{ route('admin.users.index') }}" data-label="Users">
@@ -98,8 +95,6 @@
                     </a>
                 </li>
 
-
-                  {{-- Personalities --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.personalities.*') ? 'active' : '' }}"
                        href="{{ route('admin.personalities.index') }}" data-label="Personalities">
@@ -107,7 +102,6 @@
                     </a>
                 </li>
 
-                {{-- Chats --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.chats.*') ? 'active' : '' }}"
                        href="{{ route('admin.chats.index') }}" data-label="Chats">
@@ -115,7 +109,6 @@
                     </a>
                 </li>
 
-                     {{-- Articles --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.articles.*') ? 'active' : '' }}"
                        href="{{ route('admin.articles.index') }}" data-label="Articles">
@@ -126,14 +119,13 @@
                 <li class="sb-divider"></li>
                 <li class="sb-label"><span>Management</span></li>
 
-                      <li>
+                <li>
                     <a class="sb-link {{ request()->routeIs('admin.facts.*') ? 'active' : '' }}"
                        href="{{ route('admin.facts.index') }}" data-label="Facts">
                         <i class="fas fa-lightbulb"></i><span>Facts</span>
                     </a>
                 </li>
 
-                {{-- Courses --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}"
                        href="{{ route('admin.courses.index') }}" data-label="Courses">
@@ -141,7 +133,6 @@
                     </a>
                 </li>
 
-                  {{-- Cosmic Word Search Progress --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.cosmic.*') ? 'active' : '' }}"
                        href="{{ route('admin.cosmic.index') }}" data-label="Cosmic Word Search">
@@ -149,7 +140,6 @@
                     </a>
                 </li>
 
-                {{-- Enrollments --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.enrollments.*') ? 'active' : '' }}"
                        href="{{ route('admin.enrollments.index') }}" data-label="Enrollments">
@@ -157,21 +147,19 @@
                     </a>
                 </li>
 
-                {{-- Personalities --}}
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.players.*') ? 'active' : '' }}"
                        href="{{ route('admin.players.index') }}" data-label="Players">
                         <i class="fas fa-user-tie"></i><span>Players</span>
                     </a>
                 </li>
-                {{-- Notifications --}}
-                  <li>
+
+                <li>
                     <a class="sb-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}"
                        href="{{ route('admin.notifications.index') }}" data-label="Notifications">
                         <i class="fas fa-bell"></i><span>Notifications</span>
                     </a>
                 </li>
-
 
             </ul>
         </div>
@@ -189,8 +177,6 @@
 
 </div>
 
-@stack('scripts')
-@yield('scripts')
 
 @endsection
 

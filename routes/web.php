@@ -125,11 +125,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Article Routes
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+    Route::get('/api/articles/wordpress', [ArticleController::class, 'fetchFromWordPress'])->name('api.articles.wordpress');
     Route::get('/api/articles', [ArticleController::class, 'fetchArticles'])->name('api.articles');
     Route::get('/api/articles/{id}', [ArticleController::class, 'getArticle'])->name('api.article.get');
     Route::post('/api/articles', [ArticleController::class, 'store'])->name('api.articles.store');
     Route::put('/api/articles/{id}', [ArticleController::class, 'update'])->name('api.articles.update');
     Route::delete('/api/articles/{id}', [ArticleController::class, 'destroy'])->name('api.articles.delete');
     Route::post('/api/articles/{id}/rename', [ArticleController::class, 'rename'])->name('api.articles.rename');
-    Route::get('/api/articles/wordpress', [ArticleController::class, 'fetchFromWordPress'])->name('api.articles.wordpress');
 });
