@@ -65,7 +65,6 @@ class ImageService
 
         $allFiles = Storage::disk('public')->allFiles($basePath);
 
-        // Filter only image files (optional but recommended)
         $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
         $imageFiles = array_filter($allFiles, function ($file) use ($imageExtensions) {
             $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));

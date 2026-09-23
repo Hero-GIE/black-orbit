@@ -94,7 +94,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/api/chats', [ChatController::class, 'fetchChats'])->name('api.chats');
     Route::get('/api/chats/{id}', [ChatController::class, 'getChat'])->name('api.chat.get');
 
-    // Personality Routes (write + admin UI — still protected)
+    // Personality Routes
     Route::get('/personalities', [PersonalityController::class, 'index'])->name('personalities.index');
     Route::post('/api/personalities', [PersonalityController::class, 'store'])->name('api.personalities.store');
     Route::put('/api/personalities/{id}', [PersonalityController::class, 'update'])->name('api.personalities.update');

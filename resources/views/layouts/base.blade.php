@@ -26,6 +26,53 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- CSRF auto-injection for fetch / axios / jQuery (runs before page scripts) -->
+    <script>
+        (function () {
+            function getToken() {
+                return document.querySelector('meta[name="csrf-token"]')?.content || '';
+            }
+
+            // Patch fetch()
+            const origFetch = window.fetch;
+            window.fetch = function (url, opts = {}) {
+                const method = (opts.method || 'GET').toUpperCase();
+                if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+                    opts.headers = Object.assign({}, opts.headers, {
+                        'X-CSRF-TOKEN': getToken(),
+                        'Accept': 'application/json',
+                    });
+                    opts.credentials = 'same-origin';
+                }
+                return origFetch.call(this, url, opts);
+            };
+
+            function patchAxios() {
+                if (window.axios) {
+                    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = getToken();
+                    window.axios.defaults.withCredentials = true;
+                    window.axios.interceptors.request.use(function (config) {
+                        const m = (config.method || '').toUpperCase();
+                        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(m)) {
+                            config.headers['X-CSRF-TOKEN'] = getToken();
+                        }
+                        return config;
+                    });
+                }
+            }
+            document.addEventListener('DOMContentLoaded', patchAxios);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                if (window.jQuery) {
+                    jQuery.ajaxSetup({
+                        headers: { 'X-CSRF-TOKEN': getToken() }
+                    });
+                }
+            });
+        })();
+    </script>
+
+    <!-- Layout chrome: sidebar toggle, user menu, theme toggle -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -73,6 +120,7 @@
                     }
                 }
             });
+
             const userBtn = document.getElementById('userMenuBtn');
             const userPanel = document.getElementById('userMenuPanel');
 
@@ -117,6 +165,7 @@
                     if (isUserMenuOpen) showUserMenu();
                 }, true);
             }
+
             const lightDarkBtn = document.getElementById('light-dark-mode');
             if (lightDarkBtn) {
                 const savedTheme = localStorage.getItem('theme');
@@ -135,56 +184,11 @@
             }
 
             document.querySelectorAll('img').forEach(img => img.classList.add('img-fluid'));
-
         });
     </script>
 
+    {{-- Page-specific scripts pushed from child views. --}}
+    {{-- Rendered exactly once. Do NOT add another @stack('scripts') in layouts/admin.blade.php. --}}
     @stack('scripts')
-    @yield('scripts')
 </body>
 </html>
-<script>
-    (function () {
-
-        function getToken() {
-            return document.querySelector('meta[name="csrf-token"]')?.content || '';
-        }
-
-        // Patch fetch()
-        const origFetch = window.fetch;
-        window.fetch = function (url, opts = {}) {
-            const method = (opts.method || 'GET').toUpperCase();
-            if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-                opts.headers = Object.assign({}, opts.headers, {
-                    'X-CSRF-TOKEN': getToken(),
-                    'Accept': 'application/json',
-                });
-                opts.credentials = 'same-origin';
-            }
-            return origFetch.call(this, url, opts);
-        };
-
-        function patchAxios() {
-            if (window.axios) {
-                window.axios.defaults.headers.common['X-CSRF-TOKEN'] = getToken();
-                window.axios.defaults.withCredentials = true;
-                window.axios.interceptors.request.use(function (config) {
-                    const m = (config.method || '').toUpperCase();
-                    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(m)) {
-                        config.headers['X-CSRF-TOKEN'] = getToken();
-                    }
-                    return config;
-                });
-            }
-        }
-        document.addEventListener('DOMContentLoaded', patchAxios);
-
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.jQuery) {
-                jQuery.ajaxSetup({
-                    headers: { 'X-CSRF-TOKEN': getToken() }
-                });
-            }
-        });
-    })();
-</script>

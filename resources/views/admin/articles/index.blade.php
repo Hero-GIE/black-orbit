@@ -18,16 +18,13 @@
         </div>
     </div>
 
-    <!-- Search & Filter Bar -->
     <div class="row mb-4">
         <div class="col-md-5 col-lg-4">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0">
                     <i class="fas fa-search text-muted"></i>
                 </span>
-                <input type="text"
-                       class="form-control border-start-0"
-                       id="searchArticles"
+                <input type="text" class="form-control border-start-0" id="searchArticles"
                        placeholder="Search by title, category, or author..."
                        style="border-left: none; border-radius: 0 10px 10px 0;">
             </div>
@@ -42,7 +39,6 @@
         </div>
     </div>
 
-    <!-- SKELETON LOADING -->
     <div id="articles-skeleton" class="row g-4">
         @for($i = 0; $i < 8; $i++)
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
@@ -51,13 +47,10 @@
         @endfor
     </div>
 
-    <!-- ACTUAL CONTENT -->
-    <div id="articles-content" class="row g-4" style="display: none; animation: fadeIn 0.5s ease-in-out;">
-        <!-- Cards injected via JS -->
-    </div>
+    <div id="articles-content" class="row g-4" style="display: none; animation: fadeIn 0.5s ease-in-out;"></div>
 </div>
 
-{{-- Add/Edit Article Drawer (Right) --}}
+{{-- Add/Edit Article Drawer --}}
 <div class="offcanvas offcanvas-end fact-drawer" tabindex="-1" id="articleModal" aria-labelledby="articleModalTitle">
     <div class="offcanvas-header border-0 pb-0">
         <h5 class="offcanvas-title fw-bold" id="articleModalTitle">Add Article</h5>
@@ -118,12 +111,70 @@
             </div>
 
             <div class="mb-3">
-                <label for="content" class="form-label text-muted small fw-bold">Content *</label>
-                <textarea class="form-control" id="content" name="content" rows="14"
-                          placeholder="Write your article..."></textarea>
-                <small class="text-muted">
-                    <i class="fas fa-pen me-1"></i>Use the toolbar to format: headings, bold, italic, links, images, lists, tables.
-                </small>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label text-muted small fw-bold mb-0">Content *</label>
+                    <button type="button" id="clearContentBtn" class="btn btn-outline-danger btn-sm"
+                            style="font-size: 0.72rem; padding: 2px 10px;">
+                        <i class="fas fa-eraser me-1"></i>Clear content
+                    </button>
+                </div>
+
+                <div id="quillToolbar" class="rounded-top" style="border: 1px solid #e9ecef; border-bottom: none; background: #fff;">
+                    <span class="ql-formats">
+                        <select class="ql-header">
+                            <option value="1">Heading 1</option>
+                            <option value="2">Heading 2</option>
+                            <option value="3">Heading 3</option>
+                            <option value="4">Heading 4</option>
+                            <option selected>Normal</option>
+                        </select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-bold" type="button"></button>
+                        <button class="ql-italic" type="button"></button>
+                        <button class="ql-underline" type="button"></button>
+                        <button class="ql-strike" type="button"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-color"></select>
+                        <select class="ql-background"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-list" value="ordered" type="button"></button>
+                        <button class="ql-list" value="bullet" type="button"></button>
+                        <button class="ql-indent" value="-1" type="button"></button>
+                        <button class="ql-indent" value="+1" type="button"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-blockquote" type="button"></button>
+                        <button class="ql-code-block" type="button"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-link" type="button"></button>
+                        <button class="ql-image" type="button"></button>
+                        <button class="ql-video" type="button"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-align" value="" type="button"></button>
+                        <button class="ql-align" value="center" type="button"></button>
+                        <button class="ql-align" value="right" type="button"></button>
+                        <button class="ql-align" value="justify" type="button"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-clean" type="button"></button>
+                    </span>
+                </div>
+
+                <div id="quillEditor"
+                     style="min-height: 320px; background: #fff; border: 1px solid #e9ecef; border-radius: 0 0 10px 10px; font-size: 0.95rem; line-height: 1.7;"></div>
+
+                <textarea id="content" name="content" class="d-none"></textarea>
+
+               <small class="text-muted d-block mt-2">
+    <i class="fas fa-info-circle me-1"></i>
+    <strong>Hover over any image</strong> in the editor to reveal a remove button.
+    You can also double-click an image, right-click it, or click it and press Delete.
+</small>
             </div>
         </form>
     </div>
@@ -135,7 +186,7 @@
     </div>
 </div>
 
-{{-- View Article Drawer (Right) --}}
+{{-- View Article Drawer --}}
 <div class="offcanvas offcanvas-end fact-drawer" tabindex="-1" id="viewArticleModal" aria-labelledby="viewArticleTitle">
     <div class="offcanvas-header border-0 pb-0">
         <h5 class="offcanvas-title fw-bold" id="viewArticleTitle"><i class="fas fa-info-circle me-2 text-dark"></i>Article Details</h5>
@@ -167,9 +218,7 @@
                     <i class="fas fa-trash-alt fa-2x"></i>
                 </div>
                 <h4 class="fw-bold mb-2">Delete Article?</h4>
-                <p class="text-muted mb-4">
-                    Are you sure you want to delete this article? This action cannot be undone.
-                </p>
+                <p class="text-muted mb-4">Are you sure you want to delete this article? This action cannot be undone.</p>
                 <input type="hidden" id="deleteArticleId">
                 <div class="d-flex justify-content-center gap-3">
                     <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
@@ -190,161 +239,139 @@
     .form-control-custom { border: 1px solid #e9ecef; background-color: #f8f9fa; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; transition: all 0.2s ease; }
     .form-control-custom:focus { background-color: #fff; border-color: #000; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); outline: none; }
 
-    .fact-card {
-        position: relative;
-        border-radius: 10px;
-        overflow: hidden;
-        height: 350px;
-        background: #f8f9fa;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+    .fact-card { position: relative; border-radius: 10px; overflow: hidden; height: 350px; background: #f8f9fa; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .fact-card:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important; }
     .card-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: transform 0.4s ease; }
     .fact-card:hover .card-img { transform: scale(1.08); }
     .card-actions-overlay { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; opacity: 0; transition: opacity 0.3s ease; z-index: 10; }
     .fact-card:hover .card-actions-overlay { opacity: 1; }
-    .card-action-btn {
-        width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-        border-radius: 50%; border: none; background: rgba(255,255,255,0.9); color: #333;
-        backdrop-filter: blur(4px); transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+    .card-action-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: none; background: rgba(255,255,255,0.9); color: #333; backdrop-filter: blur(4px); transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .card-action-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
     .card-action-btn.delete:hover { background: #dc3545; color: #fff; }
-    .card-overlay-content {
-        position: absolute; bottom: 0; left: 0; right: 0;
-        padding: 1.25rem 1.25rem 2.5rem 1.25rem; z-index: 2;
-        background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0) 100%);
-        color: #fff; min-width: 0;
-    }
-    .text-truncate-1, .text-truncate-2 {
-        display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
-        text-overflow: ellipsis; max-width: 100%; overflow-wrap: anywhere;
-    }
+    .card-overlay-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 1.25rem 2.5rem 1.25rem; z-index: 2; background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0) 100%); color: #fff; min-width: 0; }
+    .text-truncate-1, .text-truncate-2 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-width: 100%; overflow-wrap: anywhere; }
     .text-truncate-1 { -webkit-line-clamp: 1; }
     .text-truncate-2 { -webkit-line-clamp: 2; }
-    .category-badge {
-        display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden;
-        text-overflow: ellipsis; font-size: 0.7rem; font-weight: 500;
-        padding: 0.35rem 0.6rem; border-radius: 6px; line-height: 1.2;
-        background: rgba(255,255,255,0.92); color: #212529;
-        margin-bottom: 0.5rem; vertical-align: middle;
-    }
-    .card-desc-text {
-        font-size: 0.9rem !important; font-weight: 500 !important; color: #ffffff !important;
-        text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.4; margin-bottom: 0; margin-top: 0.5rem;
-    }
-    .card-meta {
-        display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;
-        font-size: 0.72rem; color: rgba(255,255,255,0.85); flex-wrap: wrap;
-    }
-    .card-meta span {
-        display: inline-flex; align-items: center; gap: 4px; max-width: 100%;
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
+    .category-badge { display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.7rem; font-weight: 500; padding: 0.35rem 0.6rem; border-radius: 6px; line-height: 1.2; background: rgba(255,255,255,0.92); color: #212529; margin-bottom: 0.5rem; vertical-align: middle; }
+    .card-desc-text { font-size: 0.9rem !important; font-weight: 500 !important; color: #ffffff !important; text-shadow: 0 2px 8px rgba(0,0,0,0.8); line-height: 1.4; margin-bottom: 0; margin-top: 0.5rem; }
+    .card-meta { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.72rem; color: rgba(255,255,255,0.85); flex-wrap: wrap; }
+    .card-meta span { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .article-content-preview {
-        max-height: 500px; overflow-y: auto; padding: 1.25rem 1.5rem;
-        background: #fff; border-radius: 12px; border: 1px solid #f1f1f1;
-        font-size: 0.95rem; line-height: 1.7; color: #2c2c2c;
-    }
+    .article-content-preview { max-height: 500px; overflow-y: auto; padding: 1.25rem 1.5rem; background: #fff; border-radius: 12px; border: 1px solid #f1f1f1; font-size: 0.95rem; line-height: 1.7; color: #2c2c2c; }
     .article-content-preview::-webkit-scrollbar { width: 8px; }
     .article-content-preview::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .article-content-preview::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+
     .article-content-preview h1 { font-size: 1.75rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: #111; }
-    .article-content-preview h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.75rem; color: #111; }
-    .article-content-preview h3 { font-size: 1.3rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #222; }
-    .article-content-preview h4 { font-size: 1.15rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #222; }
-    .article-content-preview h5 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #333; }
-    .article-content-preview h6 { font-size: 0.9rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #333; }
-    .article-content-preview p { margin: 0 0 1rem; }
-    .article-content-preview img {
-        max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .article-content-preview figure { margin: 1.5rem 0; text-align: center; }
-    .article-content-preview figcaption {
-        font-size: 0.85rem; color: #6c757d; margin-top: 0.5rem; font-style: italic;
-    }
-    .article-content-preview a { color: #0d6efd; text-decoration: underline; }
-    .article-content-preview a:hover { color: #0a58ca; }
-    .article-content-preview blockquote {
-        border-left: 4px solid #dee2e6; padding: 0.5rem 0 0.5rem 1.25rem;
-        color: #6c757d; font-style: italic; margin: 1.25rem 0; background: #f8f9fa; border-radius: 4px;
-    }
-    .article-content-preview ul, .article-content-preview ol {
-        padding-left: 1.5rem; margin: 0 0 1rem;
-    }
-    .article-content-preview li { margin-bottom: 0.35rem; }
-    .article-content-preview ul li { list-style: disc; }
-    .article-content-preview ol li { list-style: decimal; }
-    .article-content-preview pre {
-        background: #1e1e1e; color: #f8f8f2; padding: 1rem; border-radius: 8px;
-        overflow-x: auto; font-size: 0.85rem; margin: 1rem 0;
-    }
-    .article-content-preview code {
-        background: #f1f1f1; padding: 0.15rem 0.4rem; border-radius: 4px;
-        font-size: 0.85em; font-family: 'SF Mono', Menlo, Consolas, monospace;
-    }
-    .article-content-preview pre code { background: transparent; padding: 0; color: inherit; }
-    .article-content-preview table {
-        width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.9rem;
-    }
-    .article-content-preview th, .article-content-preview td {
-        border: 1px solid #dee2e6; padding: 0.6rem 0.85rem; text-align: left;
-    }
-    .article-content-preview th { background: #f8f9fa; font-weight: 600; }
-    .article-content-preview hr { border: 0; border-top: 1px solid #dee2e6; margin: 1.5rem 0; }
+    .article-content-preview h2 { font-size: 1.5rem;  font-weight: 700; margin: 1.25rem 0 0.75rem; color: #111; }
+    .article-content-preview h3 { font-size: 1.3rem;  font-weight: 600; margin: 1rem 0 0.5rem;   color: #222; }
+    .article-content-preview h4 { font-size: 1.15rem; font-weight: 600; margin: 1rem 0 0.5rem;   color: #222; }
+    .article-content-preview p  { margin: 0 0 1rem; }
     .article-content-preview strong { font-weight: 700; color: #111; }
     .article-content-preview em { font-style: italic; }
+    .article-content-preview u { text-decoration: underline; }
+    .article-content-preview s { text-decoration: line-through; }
+    .article-content-preview a { color: #0d6efd; text-decoration: underline; }
+    .article-content-preview a:hover { color: #0a58ca; }
 
-    .fact-drawer {
-        width: 560px !important; max-width: 92vw;
-        border-left: none !important;
-        box-shadow: -8px 0 30px rgba(0,0,0,0.12);
+    .article-content-preview img {
+        max-width: 100%; height: auto; display: block;
+        margin: 1rem auto; border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
+    .article-content-preview blockquote {
+        border-left: 4px solid #dee2e6; padding: 0.5rem 0 0.5rem 1.25rem;
+        color: #6c757d; font-style: italic; margin: 1.25rem 0;
+        background: #f8f9fa; border-radius: 4px;
+    }
+    .article-content-preview ul, .article-content-preview ol { padding-left: 1.5rem; margin: 0 0 1rem; }
+    .article-content-preview li { margin-bottom: 0.35rem; }
+    .article-content-preview ol, .article-content-preview ul { list-style: none; padding-left: 1.5rem; }
+    .article-content-preview li[data-list] { position: relative; padding-left: 1.4rem; list-style: none; }
+    .article-content-preview li[data-list]::before { position: absolute; left: 0; top: 0; font-weight: 500; color: #333; }
+    .article-content-preview li[data-list="bullet"]::before { content: "•"; }
+    .article-content-preview li[data-list="ordered"]::before { content: attr(data-list-value, "1.") " "; }
+    .article-content-preview .ql-ui { display: none !important; }
+    .article-content-preview .ql-indent-1 { margin-left: 2rem; }
+    .article-content-preview .ql-indent-2 { margin-left: 4rem; }
+    .article-content-preview .ql-indent-3 { margin-left: 6rem; }
+    .article-content-preview .ql-align-center  { text-align: center; }
+    .article-content-preview .ql-align-right   { text-align: right; }
+    .article-content-preview .ql-align-justify { text-align: justify; }
+    .article-content-preview pre, .article-content-preview pre.ql-syntax {
+        background: #1e1e1e; color: #f8f8f2; padding: 1rem 1.25rem;
+        border-radius: 8px; overflow-x: auto; font-size: 0.85rem;
+        font-family: 'SF Mono', Menlo, Consolas, monospace;
+        margin: 1rem 0; white-space: pre;
+    }
+    .article-content-preview code { background: #f1f1f1; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .article-content-preview pre code { background: transparent; padding: 0; color: inherit; }
+    .article-content-preview iframe, .article-content-preview video {
+        max-width: 100%; width: 100%; aspect-ratio: 16 / 9; height: auto;
+        border: 0; border-radius: 8px; margin: 1rem 0;
+    }
+    .article-content-preview hr { border: 0; border-top: 1px solid #dee2e6; margin: 1.5rem 0; }
+
+    .fact-drawer { width: 560px !important; max-width: 92vw; border-left: none !important; box-shadow: -8px 0 30px rgba(0,0,0,0.12); }
     .fact-drawer .offcanvas-header { padding: 1.5rem 1.5rem 0.5rem 1.5rem; }
     .fact-drawer .offcanvas-body { padding: 0.5rem 1.5rem 1.5rem 1.5rem; flex-grow: 1; overflow-y: auto; }
     .fact-drawer .offcanvas-footer { background-color: #fff; border-top: 1px solid #f1f1f1; padding-top: 1rem !important; }
 
-    .tox-tinymce { border-radius: 10px !important; border-color: #e9ecef !important; }
-    .tox .tox-toolbar__primary { border-top-left-radius: 10px !important; border-top-right-radius: 10px !important; }
+    #quillToolbar.ql-toolbar.ql-snow, #quillEditor.ql-container.ql-snow { border-color: #e9ecef; }
+    #quillToolbar.ql-toolbar.ql-snow { border-radius: 10px 10px 0 0; background: #fff; padding: 6px 8px; border-bottom: none; }
+    #quillEditor.ql-container.ql-snow { border-radius: 0 0 10px 10px; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.95rem; }
+    #quillToolbar.ql-toolbar.ql-snow .ql-formats { margin-right: 8px; }
+    .ql-editor.ql-blank::before { color: #adb5bd; font-style: italic; }
+    .ql-editor h1 { font-size: 1.75rem; font-weight: 700; margin: 1rem 0 0.75rem; }
+    .ql-editor h2 { font-size: 1.5rem;  font-weight: 700; margin: 1rem 0 0.75rem; }
+    .ql-editor h3 { font-size: 1.3rem;  font-weight: 600; margin: 1rem 0 0.5rem; }
+    .ql-editor h4 { font-size: 1.15rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+    .ql-editor blockquote { border-left: 4px solid #dee2e6; padding-left: 1rem; color: #6c757d; font-style: italic; margin: 1rem 0; }
+    .ql-editor img { max-width: 100%; height: auto; border-radius: 8px; margin: 1rem auto; display: block; }
+    .ql-editor pre.ql-syntax { background: #1e1e1e; color: #f8f8f2; border-radius: 8px; padding: 1rem; }
+    .ql-editor .ql-video { width: 100%; aspect-ratio: 16/9; height: auto; border-radius: 8px; margin: 1rem 0; }
+
+    /* ---------- Image removal affordances in editor ---------- */
+    .ql-editor img {
+        cursor: pointer;
+        transition: outline 0.15s ease, box-shadow 0.15s ease;
+        border-radius: 8px;
+    }
+    .ql-editor img:hover {
+        outline: 2px dashed #dc3545;
+        outline-offset: 3px;
+        box-shadow: 0 4px 16px rgba(220, 53, 69, 0.15);
+    }
+    .ql-editor img.ql-image-selected,
+    .ql-editor .ql-editor-image-selected {
+        outline: 2px solid #0d6efd;
+        outline-offset: 3px;
+    }
+
 </style>
 @endsection
 
 @push('scripts')
-<!-- TinyMCE -->
-<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.min.js"></script>
 
 <script>
-// ---------------------------------------------------------------------------
-// Guard against duplicate execution.
-// Even if @stack('scripts') is rendered more than once by an ancestor layout,
-// this script tag will only execute its body the first time. All state and
-// functions are declared inside the IIFE so they never leak to `window`
-// except for the four inline-onclick handlers we explicitly export.
-// ---------------------------------------------------------------------------
 if (window.__articlesAdminScriptLoaded) {
     console.warn('[articles] duplicate script execution detected — skipping');
 } else {
     (function () {
         'use strict';
-
         window.__articlesAdminScriptLoaded = true;
 
-        // ---------------------------------------------------------------
-        // State
-        // ---------------------------------------------------------------
-        let editingArticleId = null;
+        let editingArticleId   = null;
         let viewDrawerInstance = null;
-        let allArticles = [];
-        let filteredArticles = [];
-        let articleEditor = null;
-        let tinyMceReady = false;
+        let allArticles        = [];
+        let filteredArticles   = [];
+        let quill              = null;
+        let quillReady         = false;
 
         const IMAGE_UPLOAD_URL = '/admin/api/images/upload';
 
-        // DOM refs
         const imageInputEl        = document.getElementById('image');
         const imageFileInput      = document.getElementById('imageFile');
         const imagePreviewEl      = document.getElementById('imagePreview');
@@ -372,7 +399,6 @@ if (window.__articlesAdminScriptLoaded) {
             imagePreviewWrapper.style.display = 'inline-block';
             imageEmptyState.style.display = 'none';
         }
-
         function clearImagePreview() {
             imagePreviewEl.removeAttribute('src');
             imagePreviewWrapper.style.display = 'none';
@@ -392,210 +418,298 @@ if (window.__articlesAdminScriptLoaded) {
             imageUploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Uploading…';
             uploadImageBtn.disabled = true;
 
-            const fd = new FormData();
-            fd.append('image', file);
-            fd.append('folder', 'articles');
-
             try {
-                const response = await fetch(IMAGE_UPLOAD_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                    },
-                    body: fd,
-                });
-                const data = await response.json();
-                console.log('[Image upload] response:', data);
-
-                if (data.success && data.data && data.data.url) {
-                    imageInputEl.value = data.data.url;
-                    showImagePreview(data.data.url);
-                    imageUploadStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i> Uploaded';
-                    showToast('Image uploaded', 'success');
-                } else {
-                    clearImagePreview();
-                    imageUploadStatus.textContent = '';
-                    showToast(data.message || 'Upload failed', 'danger');
-                }
+                const url = await uploadImageToServer(file);
+                imageInputEl.value = url;
+                showImagePreview(url);
+                imageUploadStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i> Uploaded';
+                showToast('Image uploaded', 'success');
             } catch (err) {
-                console.error('[Image upload] error:', err);
+                console.error('[Cover image upload] error:', err);
                 clearImagePreview();
                 imageUploadStatus.textContent = '';
-                showToast('Error uploading image', 'danger');
+                showToast(err.message || 'Upload failed', 'danger');
             } finally {
                 uploadImageBtn.disabled = false;
                 setTimeout(() => { imageUploadStatus.textContent = ''; }, 5000);
             }
         });
 
-        // ---------------------------------------------------------------
-        // TinyMCE
-        // ---------------------------------------------------------------
-        function destroyTinyMCE() {
-            try {
-                if (articleEditor) articleEditor.remove();
-            } catch (e) { console.warn('TinyMCE remove error:', e); }
-            articleEditor = null;
-            tinyMceReady = false;
+        async function uploadImageToServer(file) {
+            const fd = new FormData();
+            fd.append('image', file);
+            fd.append('folder', 'articles');
+
+            const response = await fetch(IMAGE_UPLOAD_URL, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: fd,
+            });
+
+            const data = await response.json();
+            console.log('[Image upload] server response:', data);
+
+            if (data.success && data.data && data.data.url) {
+                return data.data.url;
+            }
+            throw new Error(data.message || 'Upload failed');
         }
 
-        function initTinyMCE() {
-            destroyTinyMCE();
+        // ---------------------------------------------------------------
+        // Quill init
+        // ---------------------------------------------------------------
+        function initQuill() {
+            if (quillReady) return;
+            const container = document.getElementById('quillEditor');
+            if (!container) return;
 
-            const textarea = document.getElementById('content');
-            if (!textarea) return;
-
-            tinymce.init({
-                selector: '#content',
-                height: 480,
-                menubar: 'file edit view insert format tools table',
-                plugins: [
-                    'advlist','autolink','lists','link','image','charmap','preview',
-                    'anchor','searchreplace','visualblocks','code','fullscreen',
-                    'insertdatetime','media','table','wordcount','help','pagebreak','emoticons'
-                ],
-                toolbar:
-                    'undo redo | blocks | bold italic underline strikethrough | ' +
-                    'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
-                    'bullist numlist outdent indent | link image media table | ' +
-                    'pagebreak emoticons | removeformat | code fullscreen',
-                block_formats:
-                    'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; ' +
-                    'Heading 4=h4; Heading 5=h5; Heading 6=h6; Preformatted=pre; Blockquote=blockquote',
-                branding: false,
-                promotion: false,
-                entity_encoding: 'raw',
-                convert_urls: false,
-                paste_data_images: true,
-                image_advtab: true,
-                image_title: true,
-                automatic_uploads: true,
-                file_picker_types: 'image',
-                link_default_target: '_blank',
-                link_title: true,
-                images_upload_handler: function (blobInfo, progress) {
-                    return new Promise(function (resolve, reject) {
-                        const fd = new FormData();
-                        fd.append('image', blobInfo.blob(), blobInfo.filename());
-                        fd.append('folder', 'articles');
-
-                        fetch('/admin/api/images/upload', {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                            },
-                            body: fd
-                        })
-                        .then(r => r.json())
-                        .then(data => {
-                            console.log('[TinyMCE image upload] response:', data);
-                            if (data.success && data.data && data.data.url) {
-                                resolve(data.data.url);
-                            } else {
-                                reject({ message: data.message || 'Upload failed' });
-                            }
-                        })
-                        .catch(err => {
-                            console.error('[TinyMCE image upload] error:', err);
-                            reject({ message: 'Network error' });
-                        });
-                    });
-                },
-                file_picker_callback: function (cb, value, meta) {
-                    if (meta.filetype !== 'image') return;
-
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
-                    input.style.display = 'none';
-
-                    input.onchange = function () {
-                        const file = this.files[0];
-                        if (!file) return;
-
-                        const reader = new FileReader();
-                        reader.onload = function () {
-                            const id = 'blobid' + (new Date()).getTime();
-                            const blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                            const base64 = reader.result.split(',')[1];
-                            const blobInfo = blobCache.create(id, file, base64, file.name);
-                            blobCache.add(blobInfo);
-                            cb(blobInfo.blobUri(), { title: file.name });
-                        };
-                        reader.readAsDataURL(file);
+            const BlockEmbed = Quill.import('blots/block/embed');
+            class CustomImageBlot extends BlockEmbed {
+                static create(value) {
+                    const node = super.create();
+                    if (typeof value === 'object' && value !== null) {
+                        node.setAttribute('src', value.src || '');
+                        if (value.alt)    node.setAttribute('alt', value.alt);
+                        if (value.width)  node.setAttribute('width', value.width);
+                        if (value.height) node.setAttribute('height', value.height);
+                    } else {
+                        node.setAttribute('src', value);
+                        node.setAttribute('alt', '');
+                    }
+                    node.setAttribute('loading', 'lazy');
+                    return node;
+                }
+                static value(node) {
+                    return {
+                        src:    node.getAttribute('src') || '',
+                        alt:    node.getAttribute('alt') || '',
+                        width:  node.getAttribute('width') || null,
+                        height: node.getAttribute('height') || null,
                     };
+                }
+                static formats(node) {
+                    const formats = {};
+                    const w = node.getAttribute('width');
+                    const h = node.getAttribute('height');
+                    if (w) formats.width  = w;
+                    if (h) formats.height = h;
+                    return formats;
+                }
+                format(name, value) {
+                    if (name === 'width' || name === 'height') {
+                        if (value) this.domNode.setAttribute(name, value);
+                        else this.domNode.removeAttribute(name);
+                    } else {
+                        super.format(name, value);
+                    }
+                }
+            }
+            CustomImageBlot.blotName = 'image';
+            CustomImageBlot.tagName  = 'img';
+            Quill.register(CustomImageBlot, true);
 
-                    input.click();
+            quill = new Quill('#quillEditor', {
+                theme: 'snow',
+                placeholder: 'Write your article...',
+                modules: {
+                    toolbar: {
+                        container: '#quillToolbar',
+                        handlers: { image: quillImageHandler },
+                    },
                 },
-                setup: function (editor) {
-                    articleEditor = editor;
+            });
 
-                    editor.on('init', function () {
-                        tinyMceReady = true;
-                        console.log('[TinyMCE] ✅ initialized');
-                    });
+            quill.root.addEventListener('paste', handleQuillPaste, true);
 
-                    editor.on('change', function () {
-                        editor.save();
-                    });
+            quillReady = true;
+            console.log('[Quill] ✅ initialized');
+
+            // Wire up image removal
+            setupImageRemoval();
+        }
+
+        function quillImageHandler() {
+            const choice = window.prompt(
+                'Insert image:\n\n' +
+                '• Paste an image URL below and click OK\n' +
+                '• Or leave blank and click OK to pick a file from your device'
+            );
+            if (choice === null) return;
+
+            const trimmed = choice.trim();
+            if (trimmed && /^https?:\/\//i.test(trimmed)) {
+                insertQuillImage(trimmed);
+                return;
+            }
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (!file) return;
+                try {
+                    showToast('Uploading image…', 'info');
+                    const url = await uploadImageToServer(file);
+                    insertQuillImage(url);
+                    showToast('Image inserted', 'success');
+                } catch (err) {
+                    console.error('[Quill image upload] error:', err);
+                    showToast(err.message || 'Upload failed', 'danger');
+                }
+            };
+            input.click();
+        }
+
+        function insertQuillImage(url) {
+            if (!quill) return;
+            const range = quill.getSelection(true) || { index: quill.getLength() };
+            quill.insertEmbed(range.index, 'image', { src: url, alt: '' }, 'user');
+            quill.insertText(range.index + 1, '\n', 'user');
+            quill.setSelection(range.index + 2, 0);
+        }
+
+        function handleQuillPaste(e) {
+            const clipboard = e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData);
+            if (!clipboard || !clipboard.items) return;
+
+            for (let i = 0; i < clipboard.items.length; i++) {
+                const item = clipboard.items[i];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = item.getAsFile();
+                    if (!file) continue;
+                    (async () => {
+                        try {
+                            showToast('Uploading pasted image…', 'info');
+                            const url = await uploadImageToServer(file);
+                            insertQuillImage(url);
+                            showToast('Image inserted', 'success');
+                        } catch (err) {
+                            console.error('[Quill paste upload] error:', err);
+                            showToast(err.message || 'Upload failed', 'danger');
+                        }
+                    })();
+                    return;
+                }
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Image removal — inline in the Quill editor
+        // ---------------------------------------------------------------
+        function setupImageRemoval() {
+            if (!quill) return;
+
+            // Double-click an image → remove it (with confirm)
+            quill.root.addEventListener('dblclick', function (e) {
+                if (e.target && e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.confirm('Remove this image?')) {
+                        removeImageFromQuill(e.target);
+                    }
+                }
+            });
+
+            // Right-click an image → remove via confirm
+            quill.root.addEventListener('contextmenu', function (e) {
+                if (e.target && e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.confirm('Remove this image from the content?')) {
+                        removeImageFromQuill(e.target);
+                    }
                 }
             });
         }
 
-        function setEditorContent(html) {
-            if (!html) html = '';
-            const trySet = (attempts = 0) => {
-                const editor = tinymce.get('content');
-                if (editor && editor.initialized) {
-                    editor.setContent(html);
-                    editor.save();
-                    console.log('[TinyMCE] content set, length:', html.length);
-                } else if (attempts < 20) {
-                    setTimeout(() => trySet(attempts + 1), 100);
-                } else {
-                    console.warn('[TinyMCE] ⚠️ could not set content — falling back to textarea');
-                    document.getElementById('content').value = html;
-                }
-            };
-            trySet();
+        function removeImageFromQuill(imgEl) {
+            if (!quill) return;
+
+            // Use Quill's native blot removal so the internal Delta is updated
+            const blot = Quill.find(imgEl);
+            if (blot) {
+                blot.remove();
+            } else {
+                // Fallback — remove the DOM node directly
+                imgEl.remove();
+            }
+
+            syncQuillToTextarea();
+            console.log('[Quill] image removed');
+            showToast('Image removed', 'info');
         }
 
-        function getEditorContent() {
-            if (typeof tinymce === 'undefined') {
-                console.error('[TinyMCE] ❌ library not loaded — tinymce is undefined');
+        function clearEditorContent() {
+            if (!quill) {
+                showToast('Editor not ready', 'danger');
+                return;
+            }
+            if (!window.confirm('Clear all content from the editor?')) return;
+
+            quill.setContents([{ insert: '\n' }], 'silent');
+            quill.history.clear();
+            syncQuillToTextarea();
+            showToast('Content cleared', 'info');
+        }
+
+        // ---------------------------------------------------------------
+        // Content get/set
+        // ---------------------------------------------------------------
+        function setQuillContent(html) {
+            if (!quill) {
+                console.warn('[Quill] setContent called before init');
+                return;
+            }
+
+            if (!html || html === '<p><br></p>' || html === '<p></p>') {
+                quill.setContents([{ insert: '\n' }], 'silent');
+                quill.history.clear();
+                syncQuillToTextarea();
+                return;
+            }
+
+            const tempContainer = document.createElement('div');
+            const tempQuill = new Quill(tempContainer, { modules: { toolbar: false } });
+            tempQuill.clipboard.dangerouslyPasteHTML(html);
+            const delta = tempQuill.getContents();
+
+            quill.setContents(delta, 'silent');
+            quill.history.clear();
+            syncQuillToTextarea();
+
+            console.log('[Quill] content loaded, ops:', delta.ops.length,
+                        '| img count:', (html.match(/<img\b/gi) || []).length);
+        }
+
+        function getQuillContent() {
+            if (!quill) {
+                console.error('[Quill] getContent called before init');
                 return null;
             }
 
-            const editor = tinymce.get('content');
-            if (editor && editor.initialized) {
-                editor.save();
-                const html = editor.getContent();
+            let html = quill.root.innerHTML;
 
-                console.groupCollapsed('[Save] 📝 TinyMCE getContent()');
-                console.log('Length:', html.length);
-                console.log('Has <img>:', /<img\b/i.test(html));
-                console.log('Has src="":', /src="/i.test(html));
-                console.log('Has <strong>/<b>:', /<(strong|b)\b/i.test(html));
-                console.log('Has <h1>-<h6>:', /<h[1-6]\b/i.test(html));
-                console.log('Has style="":', /style="/i.test(html));
-                console.log('Has href="":', /href="/i.test(html));
-                console.log('First 500 chars:', html.substring(0, 500));
-                console.groupEnd();
+            if (html === '<p><br></p>' || html === '<p></p>' || html === '') html = '';
 
-                return html;
-            }
+            console.groupCollapsed('[Save] 📝 Quill getContent()');
+            console.log('Length:', html.length);
+            console.log('Has <img>:', /<img\b/i.test(html));
+            console.log('Has src="":', /src="/i.test(html));
+            console.log('Has <strong>/<b>:', /<(strong|b)\b/i.test(html));
+            console.log('Has <h1>-<h4>:', /<h[1-4]\b/i.test(html));
+            console.log('First 500 chars:', html.substring(0, 500));
+            console.groupEnd();
 
-            if (editor && !editor.initialized) {
-                console.warn('[TinyMCE] ⚠️ editor exists but is not yet initialized');
-                return null;
-            }
+            return html;
+        }
 
-            const tv = document.getElementById('content')?.value || '';
-            console.warn('[TinyMCE] ⚠️ no editor instance — using textarea fallback, length:', tv.length);
-            return tv;
+        function syncQuillToTextarea() {
+            const ta = document.getElementById('content');
+            if (ta && quill) ta.value = quill.root.innerHTML;
         }
 
         // ---------------------------------------------------------------
@@ -605,12 +719,11 @@ if (window.__articlesAdminScriptLoaded) {
             loadArticles();
             setupFilters();
 
+            document.getElementById('clearContentBtn')?.addEventListener('click', clearEditorContent);
+
             const articleDrawer = document.getElementById('articleModal');
             articleDrawer.addEventListener('shown.bs.offcanvas', function () {
-                if (!tinyMceReady) initTinyMCE();
-            });
-            articleDrawer.addEventListener('hidden.bs.offcanvas', function () {
-                destroyTinyMCE();
+                if (!quillReady) setTimeout(initQuill, 50);
             });
         });
 
@@ -620,14 +733,14 @@ if (window.__articlesAdminScriptLoaded) {
         }
 
         function applyFilters() {
-            const q = document.getElementById('searchArticles').value.toLowerCase().trim();
+            const q   = document.getElementById('searchArticles').value.toLowerCase().trim();
             const cat = document.getElementById('categoryFilter').value;
 
             filteredArticles = allArticles.filter(a => {
-                const title = (a.title || '').toLowerCase();
+                const title    = (a.title || '').toLowerCase();
                 const category = (a.category || '').toLowerCase();
-                const author = (a.author || '').toLowerCase();
-                const matchesQ = !q || title.includes(q) || category.includes(q) || author.includes(q);
+                const author   = (a.author || '').toLowerCase();
+                const matchesQ   = !q || title.includes(q) || category.includes(q) || author.includes(q);
                 const matchesCat = !cat || a.category === cat;
                 return matchesQ && matchesCat;
             });
@@ -643,7 +756,7 @@ if (window.__articlesAdminScriptLoaded) {
 
         async function loadArticles() {
             const skeleton = document.getElementById('articles-skeleton');
-            const content = document.getElementById('articles-content');
+            const content  = document.getElementById('articles-content');
 
             try {
                 const response = await fetch('/admin/api/articles');
@@ -651,7 +764,7 @@ if (window.__articlesAdminScriptLoaded) {
                 console.log('[loadArticles] response count:', (data.data || []).length);
 
                 if (data.success) {
-                    allArticles = data.data || [];
+                    allArticles      = data.data || [];
                     filteredArticles = allArticles;
 
                     const cats = [...new Set(allArticles.map(a => a.category).filter(Boolean))];
@@ -698,7 +811,6 @@ if (window.__articlesAdminScriptLoaded) {
                 const catBadge = a.category
                     ? `<span class="category-badge" title="${escapeHtml(a.category)}"><i class="fas fa-tag me-1"></i>${escapeHtml(a.category)}</span>`
                     : '';
-
                 const rawText = a.excerpt ? a.excerpt : (a.title || '');
                 const plainExcerpt = rawText.replace(/<[^>]+>/g, '').substring(0, 140);
 
@@ -706,13 +818,11 @@ if (window.__articlesAdminScriptLoaded) {
                     <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                         <div class="fact-card">
                             <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(a.title)}" class="card-img">
-
                             <div class="card-actions-overlay">
                                 <button class="card-action-btn" onclick="viewArticle('${escapeHtml(a.id)}')" title="View"><i class="fas fa-eye"></i></button>
                                 <button class="card-action-btn" onclick="editArticle('${escapeHtml(a.id)}')" title="Edit"><i class="fas fa-edit"></i></button>
                                 <button class="card-action-btn delete" onclick="confirmDelete('${escapeHtml(a.id)}')" title="Delete"><i class="fas fa-trash"></i></button>
                             </div>
-
                             <div class="card-overlay-content">
                                 ${catBadge}
                                 <h5 class="fw-bold mb-0 text-white text-truncate-1">${escapeHtml(a.title)}</h5>
@@ -743,6 +853,17 @@ if (window.__articlesAdminScriptLoaded) {
 
             const drawer = new bootstrap.Offcanvas(document.getElementById('articleModal'));
             drawer.show();
+
+            const clearQuill = (attempts = 0) => {
+                if (quill && quillReady) {
+                    quill.setContents([{ insert: '\n' }], 'silent');
+                    quill.history.clear();
+                    console.log('[Quill] cleared for new article');
+                } else if (attempts < 30) {
+                    setTimeout(() => clearQuill(attempts + 1), 100);
+                }
+            };
+            setTimeout(clearQuill, 300);
         }
 
         async function editArticle(id) {
@@ -750,62 +871,50 @@ if (window.__articlesAdminScriptLoaded) {
                 const response = await fetch(`/admin/api/articles/${id}`);
                 const data = await response.json();
 
-                if (data.success) {
-                    const a = data.data;
-                    editingArticleId = id;
-
-                    console.groupCollapsed('[Edit] 📥 Article fetched');
-                    console.log('id:', id);
-                    console.log('content.length:', (a.content || '').length);
-                    console.log('has <img>:', /<img\b/i.test(a.content || ''));
-                    console.log('has src="":', /src="/i.test(a.content || ''));
-                    console.log('has style="":', /style="/i.test(a.content || ''));
-                    console.log('preview:', (a.content || '').substring(0, 500));
-                    console.groupEnd();
-
-                    document.getElementById('articleModalTitle').textContent = 'Edit Article';
-                    document.getElementById('articleId').value = id;
-                    document.getElementById('title').value = a.title || '';
-                    document.getElementById('slug').value = a.slug || '';
-                    document.getElementById('category').value = a.category || '';
-                    document.getElementById('author').value = a.author || '';
-                    document.getElementById('excerpt').value = a.excerpt || '';
-                    document.getElementById('content').value = a.content || '';
-                    document.getElementById('image').value = a.image || '';
-                    showImagePreview(a.image || '');
-                    imageUploadStatus.textContent = '';
-                    document.getElementById('saveArticleBtn').textContent = 'Update Article';
-
-                    if (viewDrawerInstance) viewDrawerInstance.hide();
-                    const drawer = new bootstrap.Offcanvas(document.getElementById('articleModal'));
-                    drawer.show();
-
-                    const setupContent = () => {
-                        const editor = tinymce.get('content');
-                        if (editor && editor.initialized) {
-                            editor.setContent(a.content || '');
-                            editor.save();
-                            console.log('[Edit] ✅ content loaded into editor, length:', (a.content || '').length);
-
-                            setTimeout(() => {
-                                const ed = tinymce.get('content');
-                                if (ed) {
-                                    const now = ed.getContent();
-                                    console.groupCollapsed('[Edit] 📝 editor content AFTER setContent');
-                                    console.log('length:', now.length);
-                                    console.log('has <img>:', /<img\b/i.test(now));
-                                    console.log('preview:', now.substring(0, 500));
-                                    console.groupEnd();
-                                }
-                            }, 100);
-                        } else {
-                            setTimeout(setupContent, 100);
-                        }
-                    };
-                    setTimeout(setupContent, 300);
-                } else {
+                if (!data.success) {
                     showToast('Failed to load article', 'danger');
+                    return;
                 }
+
+                const a = data.data;
+                editingArticleId = id;
+
+                console.groupCollapsed('[Edit] 📥 Article fetched');
+                console.log('id:', id);
+                console.log('content.length:', (a.content || '').length);
+                console.log('has <img>:', /<img\b/i.test(a.content || ''));
+                console.log('has src="":', /src="/i.test(a.content || ''));
+                console.log('preview:', (a.content || '').substring(0, 500));
+                console.groupEnd();
+
+                document.getElementById('articleModalTitle').textContent = 'Edit Article';
+                document.getElementById('articleId').value = id;
+                document.getElementById('title').value = a.title || '';
+                document.getElementById('slug').value = a.slug || '';
+                document.getElementById('category').value = a.category || '';
+                document.getElementById('author').value = a.author || '';
+                document.getElementById('excerpt').value = a.excerpt || '';
+                document.getElementById('content').value = a.content || '';
+                document.getElementById('image').value = a.image || '';
+                showImagePreview(a.image || '');
+                imageUploadStatus.textContent = '';
+                document.getElementById('saveArticleBtn').textContent = 'Update Article';
+
+                if (viewDrawerInstance) viewDrawerInstance.hide();
+                const drawer = new bootstrap.Offcanvas(document.getElementById('articleModal'));
+                drawer.show();
+
+                const applyContent = (attempts = 0) => {
+                    if (quill && quillReady) {
+                        setQuillContent(a.content || '');
+                    } else if (attempts < 30) {
+                        setTimeout(() => applyContent(attempts + 1), 100);
+                    } else {
+                        console.warn('[Edit] Quill never became ready — falling back to textarea');
+                        document.getElementById('content').value = a.content || '';
+                    }
+                };
+                setTimeout(applyContent, 400);
             } catch (err) {
                 console.error('[editArticle] error:', err);
                 showToast('Error loading article', 'danger');
@@ -857,7 +966,7 @@ if (window.__articlesAdminScriptLoaded) {
                         ` : ''}
 
                         <small class="text-muted d-block text-uppercase mb-2 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Content</small>
-                        <div class="article-content-preview">${contentHtml}</div>
+                        <div class="article-content-preview ql-editor" style="padding: 1.25rem 1.5rem;">${contentHtml}</div>
                     `;
                     document.getElementById('editFromViewBtn').onclick = () => editArticle(id);
                 } else {
@@ -883,19 +992,12 @@ if (window.__articlesAdminScriptLoaded) {
             const formData = new FormData(form);
             const id = document.getElementById('articleId').value;
 
-            let contentValue;
-            try {
-                contentValue = getEditorContent();
-            } catch (err) {
-                console.error('[Save] unexpected error reading editor content:', err);
-                showToast('The editor hit an unexpected error. Please refresh the page and try again.', 'danger');
-                return;
-            }
-
+            const contentValue = getQuillContent();
             if (contentValue === null) {
                 showToast('The editor is still loading — wait a moment and click Save again.', 'danger');
                 return;
             }
+            document.getElementById('content').value = contentValue;
 
             const payload = {
                 title:    formData.get('title'),
@@ -909,12 +1011,10 @@ if (window.__articlesAdminScriptLoaded) {
 
             console.groupCollapsed('[Save] 📤 Payload being sent');
             console.log('URL:', id ? `/admin/api/articles/${id}` : '/admin/api/articles', '| method:', id ? 'PUT' : 'POST');
-            console.log('Title:', payload.title);
             console.log('content.length:', (payload.content || '').length);
+            console.log('JSON.stringify(payload).length:', JSON.stringify(payload).length);
             console.log('content has <img>:', /<img\b/i.test(payload.content || ''));
             console.log('content has src="":', /src="/i.test(payload.content || ''));
-            console.log('content has <strong>:', /<strong\b/i.test(payload.content || ''));
-            console.log('content has style="":', /style="/i.test(payload.content || ''));
             console.log('content preview:', (payload.content || '').substring(0, 500));
             console.groupEnd();
 
@@ -922,12 +1022,10 @@ if (window.__articlesAdminScriptLoaded) {
                 showToast('Title is required', 'danger');
                 return;
             }
-
-            if (payload.content.replace(/<[^>]+>/g, '').trim() === '') {
+            if (payload.content.replace(/<[^>]+>/g, '').trim() === '' && !/<img\b/i.test(payload.content)) {
                 showToast('Content cannot be empty', 'danger');
                 return;
             }
-
             if (this.disabled) return;
 
             try {
@@ -940,10 +1038,7 @@ if (window.__articlesAdminScriptLoaded) {
 
                 const response = await fetch(url, {
                     method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
@@ -975,17 +1070,13 @@ if (window.__articlesAdminScriptLoaded) {
         // ---------------------------------------------------------------
         document.getElementById('confirmDeleteBtn').addEventListener('click', async function () {
             const id = document.getElementById('deleteArticleId').value;
-
             if (this.disabled) return;
 
             try {
                 this.disabled = true;
                 this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
 
-                const response = await fetch(`/admin/api/articles/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' }
-                });
+                const response = await fetch(`/admin/api/articles/${id}`, { method: 'DELETE' });
                 const data = await response.json();
 
                 if (data.success) {
@@ -1032,9 +1123,6 @@ if (window.__articlesAdminScriptLoaded) {
             }, 5000);
         }
 
-        // ---------------------------------------------------------------
-        // Utils
-        // ---------------------------------------------------------------
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -1042,11 +1130,10 @@ if (window.__articlesAdminScriptLoaded) {
             return div.innerHTML;
         }
 
-
-        window.openAddModal    = openAddModal;
-        window.editArticle     = editArticle;
-        window.viewArticle     = viewArticle;
-        window.confirmDelete   = confirmDelete;
+        window.openAddModal  = openAddModal;
+        window.editArticle   = editArticle;
+        window.viewArticle   = viewArticle;
+        window.confirmDelete = confirmDelete;
 
         console.log('[articles] script loaded ✅');
     })();
