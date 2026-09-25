@@ -5,27 +5,26 @@
     /* Import Urbanist font */
     @import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap');
 
-
     /* Network-specific error styling */
-.alert-network {
-    background-color: #fff3cd;
-    border-color: #ffecb5;
-    color: #856404;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    line-height: 1.5;
-}
+    .alert-network {
+        background-color: #fff3cd;
+        border-color: #ffecb5;
+        color: #856404;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        line-height: 1.5;
+    }
 
-.alert-network i {
-    font-size: 1.2rem;
-    margin-top: 2px;
-    flex-shrink: 0;
-}
+    .alert-network i {
+        font-size: 1.2rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
 
     #particle-canvas {
         position: fixed;
@@ -241,16 +240,24 @@
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* --- Right Side Image & Dark Overlay --- */
+    /* --- Right Side Video & Lighter Overlay --- */
     .image-panel {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('../assets/img/4.jpeg');
-        background-size: cover;
-        background-position: center;
+        overflow: hidden;
+    }
+
+    .image-panel video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
     }
 
     .image-overlay {
@@ -259,7 +266,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7));
+        /* Lighter overlay — reduced opacity for more video visibility */
+        background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.45));
         z-index: 1;
     }
 
@@ -271,7 +279,8 @@
         width: 100%;
         padding: 4rem 3.5rem;
         z-index: 3;
-        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+        /* Lighter gradient so the video stays visible behind the text */
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 60%, transparent 100%);
     }
 
     .brand-heading {
@@ -281,16 +290,17 @@
         color: #ffffff;
         line-height: 1.1;
         margin-bottom: 1.5rem;
-        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
     }
 
     .brand-subtext {
         font-family: 'Urbanist', sans-serif !important;
         font-size: 1rem;
-        color: rgba(255, 255, 255, 0.85);
+        color: rgba(255, 255, 255, 0.9);
         line-height: 1.6;
         max-width: 450px;
         font-weight: 400;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
     }
 
     /* --- Animated Astronaut --- */
@@ -299,7 +309,7 @@
         height: 130px;
         flex-shrink: 0;
         animation: astronaut-float 4s ease-in-out infinite;
-        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); /* Lighter shadow for white card background */
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
     }
 
     .astronaut-svg {
@@ -310,7 +320,7 @@
 
     .waving-arm {
         transform-box: fill-box;
-        transform-origin: 50% 100%; /* Rotates from the shoulder */
+        transform-origin: 50% 100%;
         animation: astronaut-wave 1.5s ease-in-out infinite;
     }
 
@@ -398,7 +408,6 @@
                     <p class="mb-0 text-center mt-2" style="font-size: 14px;">Sign in with these credentials:</p>
                 </div>
 
-                <!-- Changed to pt-1 to keep the form close to the logo -->
                 <div class="card-body pt-1">
 
                     @if (session('success'))
@@ -481,6 +490,12 @@
 
         <div class="right-panel">
             <div class="image-panel">
+                <!-- Video replaces the background image -->
+                <video autoplay loop muted playsinline>
+                    <source src="{{ asset('assets/video/orbit.MP4') }}" type="video/mp4">
+                    <!-- Fallback image if video doesn't load -->
+                    <img src="{{ asset('assets/img/4.jpeg') }}" alt="Background" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
+                </video>
                 <div class="image-overlay"></div>
 
                 <div class="panel-content">
