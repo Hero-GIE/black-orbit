@@ -480,11 +480,7 @@
                     </form>
                 </div>
 
-                <!--<div class="card-footer text-center pt-0 px-lg-2 px-1">-->
-                <!--    <small class="text-muted">Forgot your password? Reset it-->
-                <!--        <a href="{{ route('password.request') }}" class="login-link">here</a>-->
-                <!--    </small>-->
-                <!--</div>-->
+                <!--   <a href="{{ route('password.request') }}" class="login-link">here</a>-->
             </div>
         </div>
 
@@ -493,7 +489,6 @@
                 <!-- Video replaces the background image -->
                 <video autoplay loop muted playsinline>
                     <source src="{{ asset('assets/video/orbit.MP4') }}" type="video/mp4">
-                    <!-- Fallback image if video doesn't load -->
                     <img src="{{ asset('assets/img/4.jpeg') }}" alt="Background" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
                 </video>
                 <div class="image-overlay"></div>
