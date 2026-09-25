@@ -486,7 +486,7 @@
 
         <div class="right-panel">
             <div class="image-panel">
-                <!-- Video replaces the background image -->
+
                 <video autoplay loop muted playsinline>
                     <source src="{{ asset('assets/video/orbit.MP4') }}" type="video/mp4">
                     <img src="{{ asset('assets/img/4.jpeg') }}" alt="Background" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;">
