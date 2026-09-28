@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Admin\FactController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ArticleController;
+use App\Http\Controllers\Admin\VideoController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -138,6 +139,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Video Routes
     Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
+    Route::get('/api/videos/courses', [VideoController::class, 'fetchCourses'])->name('api.videos.courses');
+    Route::get('/api/videos', [VideoController::class, 'fetchVideos'])->name('api.videos');
     Route::post('/api/videos/upload', [VideoController::class, 'upload'])->name('api.videos.upload');
+    Route::get('/api/videos/{id}', [VideoController::class, 'getVideo'])->name('api.videos.get');
     Route::post('/api/videos/{id}/replace', [VideoController::class, 'replaceVideo'])->name('api.videos.replace');
+    Route::delete('/api/videos/{id}', [VideoController::class, 'destroy'])->name('api.videos.delete');
 });
