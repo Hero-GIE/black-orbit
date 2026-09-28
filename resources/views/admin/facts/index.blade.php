@@ -55,6 +55,17 @@
     <div id="facts-content" class="row g-4" style="display: none; animation: fadeIn 0.5s ease-in-out;">
         <!-- Cards will be injected here via JS -->
     </div>
+
+    <!-- LOAD MORE -->
+    <div class="text-center mt-4">
+        <button id="loadMoreBtn" class="btn btn-outline-dark d-none align-items-center gap-2" onclick="loadFacts(false)">
+            <i class="fas fa-plus"></i>
+            <span>Load more</span>
+        </button>
+        <div id="loadingMoreSpinner" class="text-muted small mt-2 d-none">
+            <span class="spinner-border spinner-border-sm me-1"></span> Loading…
+        </div>
+    </div>
 </div>
 
 {{-- Add/Edit Fact Drawer (Right) --}}
@@ -138,7 +149,7 @@
     </div>
 </div>
 
-{{-- Delete Confirmation Modal (stays as modal) --}}
+{{-- Delete Confirmation Modal --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
@@ -168,7 +179,6 @@
     .form-control-custom { border: 1px solid #e9ecef; background-color: #f8f9fa; border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem; transition: all 0.2s ease; }
     .form-control-custom:focus { background-color: #fff; border-color: #000; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); outline: none; }
 
-    /* Card Styles - Image covers full card */
     .fact-card {
         position: relative;
         border-radius: 10px;
@@ -232,7 +242,7 @@
         z-index: 2;
         background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0) 100%);
         color: #fff;
-        min-width: 0; /* allows ellipsis on children */
+        min-width: 0;
     }
 
     .text-truncate-1 {
@@ -245,7 +255,6 @@
         overflow-wrap: anywhere;
     }
 
-    /* === Category badge — single line, ellipsis, never overflows the card === */
     .category-badge {
         display: inline-block;
         max-width: 100%;
@@ -289,7 +298,6 @@
     .modal-desc-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
     .modal-desc-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
 
-    /* === Right Drawer Styles === */
     .fact-drawer {
         width: 480px !important;
         max-width: 90vw;
@@ -317,9 +325,14 @@
 let editingFactId = null;
 let viewDrawerInstance = null;
 let allFacts = [];
-let filteredFacts = [];
+let currentPageToken = null;
+let isLoadingMore = false;
+let hasMore = false;
+let debounceTimer = null;
 
-// Image Upload Logic
+const PAGE_SIZE = 50;
+
+// ── Image upload logic ──
 const imageInputEl = document.getElementById('image');
 const imageFileInput = document.getElementById('imageFile');
 const imagePreviewEl = document.getElementById('imagePreview');
@@ -386,73 +399,113 @@ imageFileInput.addEventListener('change', async function () {
     }
 });
 
+// ── Page init ──
 document.addEventListener('DOMContentLoaded', function() {
-    loadFacts();
+    loadCategories();
+    loadFacts(true);
     setupFilters();
 });
 
 function setupFilters() {
     const searchInput = document.getElementById('searchFacts');
     const categoryFilter = document.getElementById('categoryFilter');
-    if (searchInput) searchInput.addEventListener('input', applyFilters);
-    if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
+
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => loadFacts(true), 350);
+        });
+    }
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', () => loadFacts(true));
+    }
 }
 
-function applyFilters() {
-    const query = document.getElementById('searchFacts').value.toLowerCase().trim();
-    const selectedCategory = document.getElementById('categoryFilter').value;
-
-    filteredFacts = allFacts.filter(f => {
-        const title = (f.title || '').toLowerCase();
-        const category = (f.category || '').toLowerCase();
-        const author = (f.author || '').toLowerCase();
-
-        const matchesQuery = !query || title.includes(query) || category.includes(query) || author.includes(query);
-        const matchesCategory = !selectedCategory || (f.category || '') === selectedCategory;
-
-        return matchesQuery && matchesCategory;
-    });
-
-    renderFacts(filteredFacts);
-    updateFilteredCount(filteredFacts.length);
+// ── Load categories once (full list) ──
+async function loadCategories() {
+    try {
+        const response = await fetch('/admin/api/facts/categories');
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+            const select = document.getElementById('categoryFilter');
+            const current = select.value;
+            select.innerHTML = '<option value="">All Categories</option>' +
+                data.data.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            select.value = current;
+        }
+    } catch (err) {
+        console.error('Failed to load categories', err);
+    }
 }
 
-function updateFilteredCount(count) {
-    const countElement = document.getElementById('recordCount');
-    if (countElement) countElement.textContent = count === 1 ? '1 record found' : count + ' records found';
-}
+// ── Load facts (paginated) ──
+async function loadFacts(reset = true) {
+    if (isLoadingMore) return;
+    if (!reset && !hasMore) return;
 
-async function loadFacts() {
+    isLoadingMore = true;
+
     const skeleton = document.getElementById('facts-skeleton');
     const content = document.getElementById('facts-content');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadingMoreSpinner = document.getElementById('loadingMoreSpinner');
+
+    if (reset) {
+        currentPageToken = null;
+        allFacts = [];
+        hasMore = true;
+        if (skeleton) skeleton.style.display = 'flex';
+        if (content) { content.style.display = 'none'; content.innerHTML = ''; }
+        if (loadMoreBtn) loadMoreBtn.classList.add('d-none');
+    } else {
+        if (loadMoreBtn) loadMoreBtn.classList.add('d-none');
+        if (loadingMoreSpinner) loadingMoreSpinner.classList.remove('d-none');
+    }
 
     try {
-        const response = await fetch('/admin/api/facts');
+        const params = new URLSearchParams();
+        params.set('limit', String(PAGE_SIZE));
+        if (currentPageToken) params.set('page_token', currentPageToken);
+
+        const q = document.getElementById('searchFacts')?.value?.trim() || '';
+        const cat = document.getElementById('categoryFilter')?.value || '';
+        if (q) params.set('q', q);
+        if (cat) params.set('category', cat);
+
+        const response = await fetch('/admin/api/facts?' + params.toString());
         const data = await response.json();
 
         if (data.success) {
-            allFacts = data.data || [];
-            filteredFacts = allFacts;
+            allFacts = reset ? data.data : [...allFacts, ...data.data];
+            currentPageToken = data.nextPageToken || null;
+            hasMore = !!currentPageToken;
 
-            const categories = [...new Set(allFacts.map(f => f.category).filter(Boolean))];
-            const categoryFilter = document.getElementById('categoryFilter');
-            categoryFilter.innerHTML = '<option value="">All Categories</option>' +
-                categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-
-            renderFacts(filteredFacts);
-            updateFilteredCount(filteredFacts.length);
+            renderFacts(allFacts);
+            updateFilteredCount(allFacts.length);
         } else {
-            showToast('Failed to load facts', 'danger');
-            renderFacts([]); updateFilteredCount(0);
+            showToast(data.message || 'Failed to load facts', 'danger');
+            if (reset) renderFacts([]);
         }
     } catch (error) {
         console.error('Error loading facts:', error);
         showToast('Error loading facts', 'danger');
-        renderFacts([]); updateFilteredCount(0);
+        if (reset) renderFacts([]);
     } finally {
+        isLoadingMore = false;
         if (skeleton) skeleton.style.display = 'none';
         if (content) content.style.display = 'flex';
+        if (loadingMoreSpinner) loadingMoreSpinner.classList.add('d-none');
+        if (loadMoreBtn) {
+            if (hasMore) loadMoreBtn.classList.remove('d-none');
+            else loadMoreBtn.classList.add('d-none');
+        }
     }
+}
+
+function updateFilteredCount(count) {
+    const countElement = document.getElementById('recordCount');
+    if (!countElement) return;
+    countElement.textContent = count === 1 ? '1 record found' : count + ' records found';
 }
 
 function renderFacts(facts) {
@@ -463,8 +516,8 @@ function renderFacts(facts) {
             <div class="col-12 text-center py-5">
                 <div class="text-muted">
                     <i class="fas fa-lightbulb fa-2x mb-3 d-block opacity-50"></i>
-                    <p class="mb-0 fw-bold">${allFacts.length > 0 ? 'No matching facts found' : 'No facts found'}</p>
-                    <small>${allFacts.length > 0 ? 'Try adjusting your search or filter' : 'Click "Add Fact" to create one'}</small>
+                    <p class="mb-0 fw-bold">No facts found</p>
+                    <small>Try adjusting your search or filter</small>
                 </div>
             </div>
         `;
@@ -481,7 +534,7 @@ function renderFacts(facts) {
         html += `
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
                 <div class="fact-card">
-                    <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(f.title)}" class="card-img">
+                    <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(f.title)}" class="card-img" loading="lazy">
 
                     <div class="card-actions-overlay">
                         <button class="card-action-btn" onclick="viewFact('${f.id}')" title="View"><i class="fas fa-eye"></i></button>
@@ -605,7 +658,8 @@ document.getElementById('saveFactBtn').addEventListener('click', async function(
             showToast(data.message, 'success');
             const drawer = bootstrap.Offcanvas.getInstance(document.getElementById('factModal'));
             drawer.hide();
-            loadFacts();
+            loadCategories();
+            loadFacts(true);
         } else { showToast(data.message || 'Failed to save', 'danger'); }
     } catch (error) { showToast('Error saving fact', 'danger'); }
     finally {
@@ -634,7 +688,8 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
             showToast('Fact deleted', 'success');
             const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
             modal.hide();
-            loadFacts();
+            loadCategories();
+            loadFacts(true);
         } else { showToast('Failed to delete', 'danger'); }
     } catch (error) { showToast('Error deleting', 'danger'); }
     finally {

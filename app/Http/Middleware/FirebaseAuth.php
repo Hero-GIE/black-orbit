@@ -29,7 +29,6 @@ class FirebaseAuth
             'method' => $request->method()
         ]);
 
-        // LOCAL: Allow requests without token for testing
         if ($environment === 'local' && !$token) {
             Log::info('Local environment - using test user (no token)');
             $request->merge([
@@ -44,7 +43,6 @@ class FirebaseAuth
             return $next($request);
         }
 
-        // PRODUCTION OR TOKEN REQUIRED: Require token
         if (!$token) {
             Log::warning('No token provided', ['environment' => $environment]);
             return response()->json([

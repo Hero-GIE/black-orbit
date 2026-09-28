@@ -102,12 +102,14 @@
                     </a>
                 </li>
 
+
                 <li>
-                    <a class="sb-link {{ request()->routeIs('admin.chats.*') ? 'active' : '' }}"
-                       href="{{ route('admin.chats.index') }}" data-label="Chats">
-                        <i class="fas fa-comment-dots"></i><span>Chats</span>
+                    <a class="sb-link {{ request()->routeIs('admin.videos.*') ? 'active' : '' }}"
+                       href="{{ route('admin.videos.index') }}" data-label="Videos">
+                        <i class="fas fa-comment-dots"></i><span>Videos</span>
                     </a>
                 </li>
+
 
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.articles.*') ? 'active' : '' }}"
@@ -123,6 +125,14 @@
                     <a class="sb-link {{ request()->routeIs('admin.facts.*') ? 'active' : '' }}"
                        href="{{ route('admin.facts.index') }}" data-label="Facts">
                         <i class="fas fa-lightbulb"></i><span>Facts</span>
+                    </a>
+                </li>
+
+
+                <li>
+                    <a class="sb-link {{ request()->routeIs('admin.chats.*') ? 'active' : '' }}"
+                       href="{{ route('admin.chats.index') }}" data-label="Chats">
+                        <i class="fas fa-comment-dots"></i><span>Chats</span>
                     </a>
                 </li>
 

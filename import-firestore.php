@@ -3,20 +3,12 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-echo "=========================================\n";
-echo "🚀 Firestore Import Tool (Random IDs)\n";
-echo "⚠️  WARNING: This will DELETE existing personalities!\n";
-echo "=========================================\n\n";
-
 // Load .env
 $envFile = __DIR__ . '/.env';
 if (!file_exists($envFile)) {
     die("❌ .env file not found at: $envFile\n");
 }
 
-echo "✅ .env file found\n";
-
-// Parse .env
 $env = [];
 $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 foreach ($lines as $line) {
@@ -106,7 +98,6 @@ if ($httpCode !== 200) {
 }
 echo "✅ Token works!\n\n";
 
-// Function to generate random ID (like Firebase push ID)
 function generateRandomId($length = 28) {
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     $id = '';
@@ -122,11 +113,11 @@ echo "🗑️  Step 1: Deleting existing personalities...\n";
 function deleteAllDocuments($projectId, $token) {
     $deleted = 0;
     $collection = 'personalities';
-    
+
     while (true) {
         // Get a batch of documents
         $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/$collection?pageSize=300";
-        
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -134,25 +125,25 @@ function deleteAllDocuments($projectId, $token) {
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($httpCode !== 200) {
             echo "  ⚠️  No documents found or error fetching\n";
             break;
         }
-        
+
         $data = json_decode($response, true);
         if (!isset($data['documents']) || empty($data['documents'])) {
             echo "  ✅ No more documents to delete\n";
             break;
         }
-        
+
         // Prepare delete writes
         $writes = [];
         foreach ($data['documents'] as $doc) {
             $docName = $doc['name'];
             $writes[] = ['delete' => $docName];
         }
-        
+
         // Execute batch delete
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents:batchWrite");
@@ -163,11 +154,11 @@ function deleteAllDocuments($projectId, $token) {
             'Authorization: Bearer ' . $token,
             'Content-Type: application/json',
         ]);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($httpCode === 200) {
             $deleted += count($writes);
             echo "  🗑️  Deleted " . count($writes) . " documents (Total: $deleted)\n";
@@ -176,7 +167,7 @@ function deleteAllDocuments($projectId, $token) {
             break;
         }
     }
-    
+
     return $deleted;
 }
 
@@ -195,20 +186,20 @@ $batchSize = 0;
 while (($row = fgetcsv($file)) !== false) {
     $data = array_combine($header, $row);
     $name = trim($data['name'] ?? '');
-    
+
     // Generate a random document ID
     $docId = generateRandomId(28);
-    
+
     // Handle achievements as array
     $achievements = trim($data['achievements'] ?? '');
     $achievementsArray = [];
     if (!empty($achievements)) {
         $achievementsArray = array_map('trim', explode(',', $achievements));
     }
-    
+
     // Create slug from name (for reference)
     $slug = strtolower(str_replace(' ', '-', $name));
-    
+
     $docData = [
         'fields' => [
             'name' => ['stringValue' => $name],
@@ -223,36 +214,36 @@ while (($row = fgetcsv($file)) !== false) {
             'updatedAt' => ['timestampValue' => date('c')],
         ]
     ];
-    
+
     $batch[$docId] = $docData;
     $batchSize++;
     $total++;
-    
+
     echo "  📝 Added: $name -> ID: $docId\n";
-    
+
     if ($batchSize >= 500) {
         $writes = [];
         foreach ($batch as $id => $data) {
             $writes[] = ['update' => ['name' => "projects/$PROJECT_ID/databases/(default)/documents/personalities/$id", 'fields' => $data['fields']]];
         }
-        
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://firestore.googleapis.com/v1/projects/$PROJECT_ID/databases/(default)/documents:batchWrite");
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['writes' => $writes]));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token, 'Content-Type: application/json']);
-        
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($httpCode === 200) {
             echo "  ✅ Batch of " . count($writes) . " committed ($total total)\n";
         } else {
             echo "  ❌ Batch failed (HTTP $httpCode): " . substr($response, 0, 200) . "\n";
         }
-        
+
         $batch = [];
         $batchSize = 0;
     }
@@ -264,18 +255,18 @@ if ($batchSize > 0) {
     foreach ($batch as $id => $data) {
         $writes[] = ['update' => ['name' => "projects/$PROJECT_ID/databases/(default)/documents/personalities/$id", 'fields' => $data['fields']]];
     }
-    
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "https://firestore.googleapis.com/v1/projects/$PROJECT_ID/databases/(default)/documents:batchWrite");
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['writes' => $writes]));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token, 'Content-Type: application/json']);
-    
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
+
     if ($httpCode === 200) {
         echo "  ✅ Final batch of " . count($writes) . " committed\n";
     } else {

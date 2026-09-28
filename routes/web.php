@@ -109,11 +109,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Fact Routes
     Route::get('/facts', [FactController::class, 'index'])->name('facts.index');
+    Route::get('/api/facts/categories', [FactController::class, 'fetchCategories'])->name('api.facts.categories');
     Route::get('/api/facts', [FactController::class, 'fetchFacts'])->name('api.facts');
-    Route::get('/api/facts/{id}', [FactController::class, 'getFact'])->name('api.fact.get');
     Route::post('/api/facts', [FactController::class, 'store'])->name('api.facts.store');
+    Route::get('/api/facts/{id}', [FactController::class, 'getFact'])->name('api.fact.get');
     Route::put('/api/facts/{id}', [FactController::class, 'update'])->name('api.facts.update');
     Route::delete('/api/facts/{id}', [FactController::class, 'destroy'])->name('api.facts.delete');
+
 
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -132,4 +134,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/api/articles/{id}', [ArticleController::class, 'update'])->name('api.articles.update');
     Route::delete('/api/articles/{id}', [ArticleController::class, 'destroy'])->name('api.articles.delete');
     Route::post('/api/articles/{id}/rename', [ArticleController::class, 'rename'])->name('api.articles.rename');
+
+
+    // Video Routes
+    Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
+    Route::post('/api/videos/upload', [VideoController::class, 'upload'])->name('api.videos.upload');
+    Route::post('/api/videos/{id}/replace', [VideoController::class, 'replaceVideo'])->name('api.videos.replace');
 });

@@ -19,7 +19,13 @@ class FactController extends Controller
         return session('firebase_token');
     }
 
-    public function fetchFacts()
+    /**
+     * Paginated + filtered fetch from Firestore.
+     * - Loops Firestore pages (300 per page) until we've collected `limit` matching facts.
+     * - Applies `q` (title/category/author) and `category` filters per-document.
+     * - Returns a `nextPageToken` so the frontend can "Load more".
+     */
+    public function fetchFacts(Request $request)
     {
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
@@ -29,17 +35,37 @@ class FactController extends Controller
                 return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
             }
 
-            $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/facts";
-            $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->timeout(30)->get($url);
+            $limit = min((int) $request->query('limit', 50), 200);
+            $startToken = $request->query('page_token');
+            $search = trim((string) $request->query('q', ''));
+            $category = trim((string) $request->query('category', ''));
 
-            if ($response->successful()) {
+            $baseUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/facts";
+
+            $facts = [];
+            $pageToken = $startToken;
+            $nextToken = null;
+            $firestorePageSize = 300;
+            $maxPages = 30;
+
+            for ($page = 0; $page < $maxPages; $page++) {
+                $query = ['pageSize' => $firestorePageSize];
+                if ($pageToken) $query['pageToken'] = $pageToken;
+
+                $url = $baseUrl . '?' . http_build_query($query);
+                $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+                    ->timeout(30)
+                    ->get($url);
+
+                if (!$response->successful()) {
+                    return response()->json(['success' => false, 'message' => 'Failed to fetch'], 500);
+                }
+
                 $data = $response->json();
-                $facts = [];
 
                 foreach ($data['documents'] ?? [] as $doc) {
                     $fields = $doc['fields'] ?? [];
-
-                    $facts[] = [
+                    $fact = [
                         'id' => basename($doc['name']),
                         'author' => $fields['author']['stringValue'] ?? '',
                         'category' => $fields['category']['stringValue'] ?? '',
@@ -48,12 +74,95 @@ class FactController extends Controller
                         'title' => $fields['title']['stringValue'] ?? '',
                         'createdAt' => $fields['createdAt']['timestampValue'] ?? '',
                     ];
+
+                    if ($category !== '' && $fact['category'] !== $category) continue;
+
+                    if ($search !== '') {
+                        $q = mb_strtolower($search);
+                        $hit = str_contains(mb_strtolower($fact['title']), $q)
+                            || str_contains(mb_strtolower($fact['category']), $q)
+                            || str_contains(mb_strtolower($fact['author']), $q);
+                        if (!$hit) continue;
+                    }
+
+                    $facts[] = $fact;
+
+                    if (count($facts) >= $limit) {
+                        // We have enough for this page. Remember where to resume next time.
+                        $nextToken = $pageToken ?? ($data['nextPageToken'] ?? null);
+                        break 2;
+                    }
                 }
 
-                return response()->json(['success' => true, 'data' => $facts]);
+                $pageToken = $data['nextPageToken'] ?? null;
+                if (!$pageToken) {
+                    $nextToken = null;
+                    break;
+                }
             }
 
-            return response()->json(['success' => false, 'message' => 'Failed to fetch facts'], 500);
+            return response()->json([
+                'success' => true,
+                'data' => $facts,
+                'nextPageToken' => $nextToken,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Returns every distinct `category` value across the entire facts collection.
+     */
+    public function fetchCategories()
+    {
+        try {
+            $projectId = env('FIREBASE_PROJECT_ID');
+            $token = $this->getFirebaseToken();
+
+            if (!$token) {
+                return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+            }
+
+            $baseUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/facts";
+
+            $categories = [];
+            $pageToken = null;
+            $pageSize = 300;
+            $maxPages = 50;
+
+            for ($page = 0; $page < $maxPages; $page++) {
+                $query = ['pageSize' => $pageSize];
+                if ($pageToken) $query['pageToken'] = $pageToken;
+
+                $url = $baseUrl . '?' . http_build_query($query);
+                $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+                    ->timeout(30)
+                    ->get($url);
+
+                if (!$response->successful()) break;
+
+                $data = $response->json();
+
+                foreach ($data['documents'] ?? [] as $doc) {
+                    $cat = $doc['fields']['category']['stringValue'] ?? '';
+                    if ($cat !== '' && !in_array($cat, $categories, true)) {
+                        $categories[] = $cat;
+                    }
+                }
+
+                $pageToken = $data['nextPageToken'] ?? null;
+                if (!$pageToken) break;
+            }
+
+            sort($categories, SORT_NATURAL | SORT_FLAG_CASE);
+
+            return response()->json([
+                'success' => true,
+                'data' => $categories,
+                'count' => count($categories),
+            ]);
 
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
