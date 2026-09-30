@@ -26,6 +26,8 @@ class VideoUploadRequest extends FormRequest
             'prerequisites.*' => 'string',
             'resources'       => 'nullable|array',
             'resources.*'     => 'url',
+            'videoId'         => 'nullable|string|max:100',
+            'lessonDocId'     => 'nullable|string|max:100',
         ];
     }
 

@@ -245,4 +245,153 @@ class FirestoreServiceForVideos
         }
         return $out;
     }
+
+
+        /**
+     * Write (create or overwrite) a lesson doc at
+     * courses/{courseId}/lessons/{lessonId}
+     */
+    public function upsertLesson(string $courseId, string $lessonId, array $data): bool
+    {
+        $token = $this->token();
+        if (!$token) throw new \Exception('Not authenticated');
+
+        $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}"
+             . "/databases/(default)/documents/courses/{$courseId}/lessons/{$lessonId}";
+
+        $fields = $this->toFirestoreFields($data);
+
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->timeout(60)
+            ->patch($url, ['fields' => $fields]);
+
+        if (!$response->successful()) {
+            Log::error('[firestore:upsertLesson] FAILED', [
+                'status'   => $response->status(),
+                'body'     => substr($response->body(), 0, 500),
+                'courseid' => $courseId,
+                'lessonid' => $lessonId,
+            ]);
+            throw new \Exception('Firestore lesson write failed: ' . $response->body());
+        }
+
+        Log::info('[firestore:upsertLesson] OK', [
+            'courseid' => $courseId,
+            'lessonid' => $lessonId,
+            'name'     => $response->json('name'),
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Fetch a single lesson doc from
+     * courses/{courseId}/lessons/{lessonId}
+     */
+    public function getLesson(string $courseId, string $lessonId): ?array
+    {
+        $token = $this->token();
+        if (!$token) return null;
+
+        $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}"
+             . "/databases/(default)/documents/courses/{$courseId}/lessons/{$lessonId}";
+
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->timeout(30)
+            ->get($url);
+
+        if (!$response->successful()) return null;
+
+        $fields = $response->json()['fields'] ?? [];
+
+        return [
+            'courseid'      => $fields['courseid']['stringValue'] ?? '',
+            'lessonid'      => $fields['lessonid']['stringValue'] ?? '',
+            'title'         => $fields['title']['stringValue'] ?? '',
+            'description'   => $fields['description']['stringValue'] ?? '',
+            'videourl'      => $fields['videourl']['stringValue'] ?? '',
+            'prerequisites' => $this->pluckStringArray($fields['prerequisites'] ?? null),
+            'resources'     => $this->pluckStringArray($fields['resources'] ?? null),
+            'createdAt'     => $fields['createdAt']['timestampValue'] ?? '',
+            'updatedAt'     => $fields['updatedAt']['timestampValue'] ?? '',
+        ];
+    }
+
+    /**
+     * Delete a lesson doc from
+     * courses/{courseId}/lessons/{lessonId}
+     */
+    public function deleteLesson(string $courseId, string $lessonId): bool
+    {
+        $token = $this->token();
+        if (!$token) throw new \Exception('Not authenticated');
+
+        $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}"
+             . "/databases/(default)/documents/courses/{$courseId}/lessons/{$lessonId}";
+
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->timeout(30)
+            ->delete($url);
+
+        if ($response->status() === 404) return false;
+
+        if (!$response->successful()) {
+            throw new \Exception('Firestore lesson delete failed: ' . $response->body());
+        }
+
+        return true;
+    }
+
+    /**
+     * Update only `videourl` and `updatedAt` on a lesson doc.
+     */
+    public function updateLessonVideoUrl(string $courseId, string $lessonId, string $videourl): bool
+    {
+        $token = $this->token();
+        if (!$token) throw new \Exception('Not authenticated');
+
+        $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}"
+             . "/databases/(default)/documents/courses/{$courseId}/lessons/{$lessonId}"
+             . "?updateMask.fieldPaths=videourl&updateMask.fieldPaths=updatedAt";
+
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->timeout(30)
+            ->patch($url, [
+                'fields' => [
+                    'videourl'  => ['stringValue' => $videourl],
+                    'updatedAt' => ['timestampValue' => now()->toISOString()],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Firestore lesson update failed: ' . $response->body());
+        }
+
+        return true;
+    }
+
+
+    public function findLessonDocIdByField(string $courseId, string $lessonId): ?string
+    {
+        $token = $this->token();
+        if (!$token) return null;
+
+        $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}"
+             . "/databases/(default)/documents/courses/{$courseId}/lessons?pageSize=300";
+
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->timeout(30)->get($url);
+
+        if (!$response->successful()) return null;
+
+        foreach ($response->json()['documents'] ?? [] as $doc) {
+            $f = $doc['fields'] ?? [];
+            if (($f['lessonid']['stringValue'] ?? null) === $lessonId) {
+                return basename($doc['name']);
+            }
+        }
+
+        return null;
+    }
+
 }
