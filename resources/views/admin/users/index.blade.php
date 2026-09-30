@@ -23,7 +23,7 @@
     <div class="row mb-4">
         <div class="col-md-6 col-lg-4">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;">
                     <i class="fas fa-search text-muted"></i>
                 </span>
                 <input type="text"
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Main Card -->
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm" style="border-radius: 10px;">
         <div class="card-body p-4">
             <div id="users-skeleton">
                 <div class="table-responsive">
@@ -58,31 +58,31 @@
                             @for($i = 0; $i < 8; $i++)
                                 <tr>
                                     <td class="text-center">
-                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 10px;"></div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="skeleton-box me-3" style="width: 40px; height: 40px; border-radius: 50%;"></div>
                                             <div>
-                                                <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 4px;"></div>
-                                                <div class="skeleton-box" style="width: 150px; height: 12px; border-radius: 4px;"></div>
+                                                <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 10px;"></div>
+                                                <div class="skeleton-box" style="width: 150px; height: 12px; border-radius: 10px;"></div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="text-center">
-                                        <div class="skeleton-box mx-auto" style="width: 60px; height: 24px; border-radius: 20px;"></div>
+                                        <div class="skeleton-box mx-auto" style="width: 60px; height: 24px; border-radius: 10px;"></div>
                                     </td>
                                     <td class="text-center">
-                                        <div class="skeleton-box mx-auto" style="width: 50px; height: 20px; border-radius: 4px;"></div>
+                                        <div class="skeleton-box mx-auto" style="width: 50px; height: 20px; border-radius: 10px;"></div>
                                     </td>
                                     <td class="text-center">
-                                        <div class="skeleton-box mx-auto" style="width: 80px; height: 14px; border-radius: 4px;"></div>
+                                        <div class="skeleton-box mx-auto" style="width: 80px; height: 14px; border-radius: 10px;"></div>
                                     </td>
                                     <td class="text-end">
                                         <div class="d-inline-flex gap-1">
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 10px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 10px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 10px;"></div>
                                         </div>
                                     </td>
                                 </tr>
@@ -117,7 +117,7 @@
 {{-- Add/Edit User Modal --}}
 <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 10px;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" id="userModalTitle">Add User</h5>
                 <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -162,8 +162,8 @@
                 </form>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark px-4" id="saveUserBtn">Save User</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                <button type="button" class="btn btn-dark px-4" id="saveUserBtn" style="border-radius: 10px;">Save User</button>
             </div>
         </div>
     </div>
@@ -172,7 +172,7 @@
 {{-- View User Modal --}}
 <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 10px;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold"><i class="fas fa-user-circle me-2 text-dark"></i>User Profile</h5>
                 <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -185,8 +185,8 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px;">Close</button>
+                <button type="button" class="btn btn-outline-dark px-4" id="editFromViewBtn" style="border-radius: 10px;">
                     <i class="fas fa-edit me-1"></i> Edit User
                 </button>
             </div>
@@ -197,17 +197,17 @@
 {{-- Delete Confirmation Modal --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 10px;">
             <div class="modal-body text-center p-5">
-                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-4 mb-3">
+                <div class="bg-danger bg-opacity-10 text-danger d-inline-flex p-4 mb-3" style="border-radius: 50%;">
                     <i class="fas fa-trash-alt fa-2x"></i>
                 </div>
                 <h4 class="fw-bold mb-2">Delete User?</h4>
                 <p class="text-muted mb-4">Are you sure you want to delete this user? This action cannot be undone.</p>
                 <input type="hidden" id="deleteUserId">
                 <div class="d-flex justify-content-center gap-3">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                    <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn" style="border-radius: 10px;">
                         <i class="fas fa-trash me-1"></i> Delete
                     </button>
                 </div>
@@ -227,7 +227,7 @@
     .skeleton-box {
         display: block;
         background-color: #e9ecef;
-        border-radius: 4px;
+        border-radius: 10px;
         animation: skeleton-pulse 1.5s infinite ease-in-out;
     }
 
@@ -256,7 +256,7 @@
 
     .table-scroll-wrapper::-webkit-scrollbar-thumb {
         background-color: #d1d5db;
-        border-radius: 8px;
+        border-radius: 10px;
     }
 
     .table-scroll-wrapper::-webkit-scrollbar-track {
@@ -316,7 +316,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px;
+        border-radius: 10px;
         border: none;
         background: transparent;
         color: #6c757d;
@@ -335,7 +335,7 @@
 
     .role-badge {
         padding: 5px 12px;
-        border-radius: 20px;
+        border-radius: 10px;
         font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -369,6 +369,14 @@
 
     .input-group .form-control:focus + .input-group-text {
         border-color: #dee2e6;
+    }
+
+    .input-group .input-group-text {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .input-group .form-control {
+        border-radius: 0 10px 10px 0;
     }
 </style>
 @endsection
@@ -508,7 +516,7 @@ function renderUsers(users) {
                     </div>
                 </td>
                 <td class="text-center"><span class="role-badge ${roleClass}">${escapeHtml(user.role || 'student')}</span></td>
-                <td class="text-center"><span class="badge bg-light text-dark border">${escapeHtml(user.accesslevel || 'user')}</span></td>
+                <td class="text-center"><span class="badge bg-light text-dark border" style="border-radius: 10px;">${escapeHtml(user.accesslevel || 'user')}</span></td>
                 <td class="text-center text-muted">${joinedDate}</td>
                 <td class="text-end">
                     <div class="d-inline-flex gap-1">
@@ -679,11 +687,11 @@ async function viewUser(userId) {
                     <p class="text-muted mb-2">${escapeHtml(user.email)}</p>
                     <span class="role-badge ${user.role || 'student'}">${escapeHtml(user.role || 'student')}</span>
                 </div>
-                <div class="bg-light p-3 rounded-3" style="border-radius: 12px !important;">
+                <div class="bg-light p-3" style="border-radius: 10px !important;">
                     <div class="row text-center">
                         <div class="col-6 mb-3">
                             <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">Access Level</small>
-                            <span class="badge bg-dark mt-1">${escapeHtml(user.accesslevel || 'user')}</span>
+                            <span class="badge bg-dark mt-1" style="border-radius: 10px;">${escapeHtml(user.accesslevel || 'user')}</span>
                         </div>
                         <div class="col-6 mb-3">
                             <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">Joined Date</small>
@@ -845,7 +853,7 @@ function showToast(message, type = 'info') {
 
     const toastId = 'toast-' + Date.now();
     const toastHtml = `
-        <div id="${toastId}" class="toast show align-items-center text-white bg-${type === 'danger' ? 'danger' : 'dark'} border-0" role="alert">
+        <div id="${toastId}" class="toast show align-items-center text-white bg-${type === 'danger' ? 'danger' : 'dark'} border-0" role="alert" style="border-radius: 10px;">
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>

@@ -29,7 +29,7 @@ class LoginController extends Controller
 
             // Get API Key
             $apiKey = env('FIREBASE_API_KEY');
-            
+
             if (empty($apiKey)) {
                 Log::error('FIREBASE_API_KEY not set');
                 return $this->handleErrorResponse($request, 'Authentication service not configured. Please contact administrator.');
@@ -147,31 +147,23 @@ class LoginController extends Controller
         return back()->withErrors(['email' => $message])->withInput();
     }
 
-    public function logout(Request $request)
-    {
-        ActivityLogger::log('admin_action', 'User logged out', session('firebase_email') . ' signed out');
+   public function logout(Request $request)
+{
+    ActivityLogger::log('admin_action', 'User logged out', session('firebase_email') . ' signed out');
 
-        Session::forget([
-            'firebase_token',
-            'firebase_refresh_token',
-            'firebase_user_id',
-            'firebase_email',
-            'firebase_role',
-            'firebase_accesslevel',
-            'firebase_username'
-        ]);
+    Session::forget([
+        'firebase_token',
+        'firebase_refresh_token',
+        'firebase_user_id',
+        'firebase_email',
+        'firebase_role',
+        'firebase_accesslevel',
+        'firebase_username',
+    ]);
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
 
-        // Handle API logout
-        if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Logged out successfully'
-            ], 200);
-        }
-
-        return redirect('/login')->with('success', 'Logged out successfully');
-    }
+    return redirect('/login')->with('success', 'Logged out successfully');
+}
 }

@@ -7,12 +7,12 @@
 @if (session('success'))
     <div id="loginToast" style="
         position: fixed; top: 20px; right: 20px; z-index: 99999;
-        padding: 10px 18px;
+        padding: 12px 20px;
         border-radius: 10px;
-        background: #1a1a1a;
+        background: #14141a;
         color: white;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         max-width: 400px;
         font-family: 'Segoe UI', system-ui, sans-serif;
@@ -21,10 +21,10 @@
         gap: 10px;
     ">
         <div style="
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(74, 222, 128, 0.15);
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -33,12 +33,10 @@
             <i class="fas fa-check-circle" style="font-size: 14px; color: #4ade80;"></i>
         </div>
 
-        <!-- Message -->
         <div style="flex: 1; font-size: 13px; font-weight: 400; color: white; letter-spacing: 0.2px; line-height: 1.4;">
             {{ session('success') }}
         </div>
 
-        <!-- Close Button -->
         <button type="button" onclick="dismissToast()" style="
             background: transparent;
             border: none;
@@ -58,7 +56,6 @@
 @endif
 
 <style>
-    /* Toast Animations */
     @keyframes slideInRight {
         from { transform: translateX(120%) scale(0.9); opacity: 0; }
         to { transform: translateX(0) scale(1); opacity: 1; }
@@ -68,78 +65,204 @@
         to { transform: translateX(120%) scale(0.9); opacity: 0; }
     }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(12px); }
         to { opacity: 1; transform: translateY(0); }
     }
     @keyframes skeleton-pulse {
-        0% { opacity: 0.6; }
+        0% { opacity: 0.55; }
         50% { opacity: 1; }
-        100% { opacity: 0.6; }
+        100% { opacity: 0.55; }
     }
 
-    /* Skeleton Loading */
     .skeleton-box {
         display: block;
-        background-color: #e9ecef;
-        border-radius: 4px;
+        background: linear-gradient(90deg, #eceff1 25%, #f5f6f8 37%, #eceff1 63%);
+        background-size: 400% 100%;
+        border-radius: 10px;
         animation: skeleton-pulse 1.5s infinite ease-in-out;
     }
 
-    /* Hover Cards */
+    #dashboard-content, #dashboard-skeleton {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .dash-heading {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #111827;
+    }
+    .dash-subtext {
+        color: #8a8f98;
+        font-size: 0.9rem;
+    }
+    .date-badge {
+        background: #111827;
+        color: #fff;
+        font-weight: 500;
+        font-size: 0.8rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(17,24,39,0.15);
+    }
+
+    /* Stat cards */
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(17,24,39,0.05);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 30px rgba(17,24,39,0.09);
+    }
+    .stat-card .card-body { padding: 1.15rem 1.25rem; }
+    .stat-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: #9aa1ac;
+        text-transform: uppercase;
+        margin-bottom: 0.35rem;
+    }
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #111827;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .stat-delta {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #10b981;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 0.3rem;
+    }
+    .stat-icon-wrap {
+        width: 44px; height: 44px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .stat-icon-wrap.red    { background: linear-gradient(135deg,#fee2e2,#fecaca); }
+    .stat-icon-wrap.amber  { background: linear-gradient(135deg,#fef3c7,#fde68a); }
+    .stat-icon-wrap.green  { background: linear-gradient(135deg,#d1fae5,#a7f3d0); }
+    .stat-icon-wrap.blue   { background: linear-gradient(135deg,#dbeafe,#bfdbfe); }
+    .stat-icon-wrap i { font-size: 1.05rem; }
+
+    /* Nav / quick-link cards */
     .hover-card {
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(17,24,39,0.05);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
     .hover-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+        transform: translateY(-5px);
+        box-shadow: 0 16px 34px rgba(17,24,39,0.10) !important;
+    }
+    .nav-icon-circle {
+        width: 62px; height: 62px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 14px;
+    }
+    .nav-icon-circle.red    { background: linear-gradient(135deg,#fee2e2,#fecaca); }
+    .nav-icon-circle.amber  { background: linear-gradient(135deg,#fef3c7,#fde68a); }
+    .nav-icon-circle.green  { background: linear-gradient(135deg,#d1fae5,#a7f3d0); }
+    .nav-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1f2937;
+        margin-bottom: 0.6rem;
+    }
+    .nav-badge {
+        background: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+        font-size: 0.72rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
     }
 
-    /* Gradient Background */
-    .bg-gradient-dark {
-        background: linear-gradient(135deg, #000000 0%, #333333 100%);
-    }
-    .bg-gradient-dark .btn-light {
-        background: rgba(255,255,255,0.9);
-        border: none;
+    /* Quick actions card */
+    .quick-actions-card .card-body { padding: 1.75rem 1.5rem; }
+    .quick-action-btn {
+        border-radius: 10px;
         font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.65rem 1rem;
+        border: 1px solid transparent;
         transition: all 0.2s ease;
     }
-    .bg-gradient-dark .btn-light:hover {
-        background: white;
-        transform: scale(1.02);
-    }
+    .quick-action-btn.red { background: #fef2f2; color: #dc2626; border-color: #fecdd3; }
+    .quick-action-btn.red:hover { background: #fee2e2; transform: translateY(-1px); }
+    .quick-action-btn.green { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+    .quick-action-btn.green:hover { background: #d1fae5; transform: translateY(-1px); }
 
-    .card-body.d-flex {
-        min-height: 180px;
+    /* Chart cards */
+    .chart-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(17,24,39,0.05);
     }
-
-    .table-hover tbody tr:hover {
-        background-color: rgba(0,0,0,0.02);
+    .chart-card .card-header {
+        border-bottom: 1px solid #f1f2f4;
+        padding: 1.1rem 1.35rem;
     }
-
-    .activity-scroll {
-        max-height: 600px;
-        overflow-y: auto;
+    .chart-card .card-header h6 {
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 0.95rem;
     }
+    .chart-card .form-select-sm {
+        border-radius: 10px;
+        font-size: 0.78rem;
+        border-color: #e5e7eb;
+    }
+    .chart-card .card-body { padding: 1.35rem; }
 
+    /* Activity table */
+    .activity-scroll { max-height: 600px; overflow-y: auto; }
     .activity-scroll thead th {
-        position: sticky;
-        top: 0;
-        background-color: #ffffff;
+        position: sticky; top: 0;
+        background-color: #fafbfc;
         z-index: 10;
-        box-shadow: inset 0 -1px 0 #dee2e6;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #9aa1ac;
+        padding: 0.9rem 1.35rem;
+        box-shadow: inset 0 -1px 0 #f1f2f4;
     }
+    .activity-scroll tbody td {
+        padding: 0.85rem 1.35rem;
+        border-color: #f5f6f8;
+    }
+    .table-hover tbody tr:hover { background-color: #fafbfc; }
+    .activity-scroll::-webkit-scrollbar { width: 6px; }
+    .activity-scroll::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 10px; }
+    .activity-scroll::-webkit-scrollbar-track { background: transparent; }
 
-    .activity-scroll::-webkit-scrollbar {
-        width: 6px;
+    .refresh-btn {
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-color: #e5e7eb;
+        color: #374151;
     }
-    .activity-scroll::-webkit-scrollbar-thumb {
-        background-color: #d1d5db;
-        border-radius: 6px;
-    }
-    .activity-scroll::-webkit-scrollbar-track {
-        background: transparent;
+    .refresh-btn:hover { background: #111827; border-color: #111827; color: #fff; }
+
+    .progress, .progress-bar {
+        border-radius: 10px !important;
     }
 </style>
 
@@ -149,21 +272,21 @@
             <div class="skeleton-box" style="width: 200px; height: 24px; margin-bottom: 8px;"></div>
             <div class="skeleton-box" style="width: 150px; height: 16px;"></div>
         </div>
-        <div class="skeleton-box" style="width: 180px; height: 35px; border-radius: 8px;"></div>
+        <div class="skeleton-box" style="width: 180px; height: 35px; border-radius: 10px;"></div>
     </div>
 
     <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
         @for($i = 0; $i < 5; $i++)
             <div class="col">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body p-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="w-75">
                                 <div class="skeleton-box" style="width: 80px; height: 12px; margin-bottom: 8px;"></div>
                                 <div class="skeleton-box" style="width: 50px; height: 24px; margin-bottom: 8px;"></div>
                                 <div class="skeleton-box" style="width: 60px; height: 12px;"></div>
                             </div>
-                            <div class="skeleton-box" style="width: 40px; height: 40px; border-radius: 12px;"></div>
+                            <div class="skeleton-box" style="width: 44px; height: 44px; border-radius: 10px;"></div>
                         </div>
                     </div>
                 </div>
@@ -174,11 +297,11 @@
     <div class="row g-3 mb-4">
         @for($i = 0; $i < 6; $i++)
             <div class="col-md-6 col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card hover-card h-100">
                     <div class="card-body text-center p-4 d-flex flex-column justify-content-center align-items-center" style="min-height: 180px;">
-                        <div class="skeleton-box" style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 16px;"></div>
+                        <div class="skeleton-box" style="width: 62px; height: 62px; border-radius: 50%; margin-bottom: 16px;"></div>
                         <div class="skeleton-box" style="width: 120px; height: 20px; margin-bottom: 12px;"></div>
-                        <div class="skeleton-box" style="width: 80px; height: 16px; border-radius: 20px;"></div>
+                        <div class="skeleton-box" style="width: 80px; height: 16px; border-radius: 10px;"></div>
                     </div>
                 </div>
             </div>
@@ -187,16 +310,16 @@
 
     <div class="row g-3 mb-4">
         <div class="col-xl-8">
-            <div class="card border-0 shadow-sm">
+            <div class="card chart-card">
                 <div class="card-body p-3">
-                    <div class="skeleton-box" style="width: 100%; height: 350px; border-radius: 8px;"></div>
+                    <div class="skeleton-box" style="width: 100%; height: 350px; border-radius: 10px;"></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-4">
-            <div class="card border-0 shadow-sm">
+            <div class="card chart-card">
                 <div class="card-body p-3">
-                    <div class="skeleton-box" style="width: 100%; height: 350px; border-radius: 8px;"></div>
+                    <div class="skeleton-box" style="width: 100%; height: 350px; border-radius: 10px;"></div>
                 </div>
             </div>
         </div>
@@ -204,9 +327,9 @@
 
     <div class="row g-3">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
+            <div class="card chart-card">
                 <div class="card-body p-3">
-                    <div class="skeleton-box" style="width: 100%; height: 300px; border-radius: 8px;"></div>
+                    <div class="skeleton-box" style="width: 100%; height: 300px; border-radius: 10px;"></div>
                 </div>
             </div>
         </div>
@@ -218,11 +341,11 @@
     {{-- Page Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-0">Admin Dashboard</h4>
-            <p class="text-muted mb-0">Welcome back, Administrator!</p>
+            <h4 class="dash-heading mb-1">Admin Dashboard</h4>
+            <p class="dash-subtext mb-0">Welcome back, Administrator!</p>
         </div>
         <div>
-            <span class="badge bg-dark p-2">
+            <span class="date-badge">
                 <i class="fas fa-calendar me-2"></i>{{ now()->format('l, F j, Y') }}
             </span>
         </div>
@@ -231,16 +354,16 @@
     {{-- Stats Cards --}}
     <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">Chats</p>
-                            <h4 class="mb-0 fw-bold" id="totalChats">0</h4>
-                            <small class="text-dark" id="newChatsToday">+0 today</small>
+                            <p class="stat-label mb-0">Chats</p>
+                            <h4 class="stat-value mb-0" id="totalChats">0</h4>
+                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newChatsToday">+0 today</span></span>
                         </div>
-                        <div class="bg-danger bg-opacity-10 p-2 rounded-3">
-                            <i class="fas fa-comment-dots fa-lg text-danger"></i>
+                        <div class="stat-icon-wrap red">
+                            <i class="fas fa-comment-dots text-danger"></i>
                         </div>
                     </div>
                 </div>
@@ -248,16 +371,16 @@
         </div>
 
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">Word Search</p>
-                            <h4 class="mb-0 fw-bold" id="wordSearchProgress">0%</h4>
-                            <small class="text-muted" id="wordsFound">0 found</small>
+                            <p class="stat-label mb-0">Word Search</p>
+                            <h4 class="stat-value mb-0" id="wordSearchProgress">0%</h4>
+                            <span class="stat-delta" style="color:#d97706;"><i class="fas fa-search"></i> <span id="wordsFound">0 found</span></span>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-3">
-                            <i class="fas fa-search fa-lg text-warning"></i>
+                        <div class="stat-icon-wrap amber">
+                            <i class="fas fa-search text-warning"></i>
                         </div>
                     </div>
                 </div>
@@ -265,16 +388,16 @@
         </div>
 
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">Courses</p>
-                            <h4 class="mb-0 fw-bold" id="totalCourses">0</h4>
-                            <small class="text-dark" id="newCoursesToday">+0 today</small>
+                            <p class="stat-label mb-0">Courses</p>
+                            <h4 class="stat-value mb-0" id="totalCourses">0</h4>
+                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newCoursesToday">+0 today</span></span>
                         </div>
-                        <div class="bg-success bg-opacity-10 p-2 rounded-3">
-                            <i class="fas fa-book fa-lg text-success"></i>
+                        <div class="stat-icon-wrap green">
+                            <i class="fas fa-book text-success"></i>
                         </div>
                     </div>
                 </div>
@@ -282,16 +405,16 @@
         </div>
 
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">Enrollments</p>
-                            <h4 class="mb-0 fw-bold" id="totalEnrollments">0</h4>
-                            <small class="text-dark" id="newEnrollmentsToday">+0 today</small>
+                            <p class="stat-label mb-0">Enrollments</p>
+                            <h4 class="stat-value mb-0" id="totalEnrollments">0</h4>
+                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newEnrollmentsToday">+0 today</span></span>
                         </div>
-                        <div class="bg-danger bg-opacity-10 p-2 rounded-3">
-                            <i class="fas fa-user-graduate fa-lg text-danger"></i>
+                        <div class="stat-icon-wrap red">
+                            <i class="fas fa-user-graduate text-danger"></i>
                         </div>
                     </div>
                 </div>
@@ -299,16 +422,16 @@
         </div>
 
         <div class="col">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-3">
+            <div class="card stat-card h-100">
+                <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted text-uppercase mb-1" style="font-size: 0.7rem; font-weight: 600;">Users</p>
-                            <h4 class="mb-0 fw-bold" id="totalUsers">0</h4>
-                            <small class="text-dark" id="newUsersToday">+0 today</small>
+                            <p class="stat-label mb-0">Users</p>
+                            <h4 class="stat-value mb-0" id="totalUsers">0</h4>
+                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newUsersToday">+0 today</span></span>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-3">
-                            <i class="fas fa-users fa-lg text-warning"></i>
+                        <div class="stat-icon-wrap amber">
+                            <i class="fas fa-users text-warning"></i>
                         </div>
                     </div>
                 </div>
@@ -319,24 +442,24 @@
     {{-- Navigation Cards --}}
     <div class="row g-3 mb-4">
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 hover-card" onclick="navigateTo('chats')">
+            <div class="card hover-card h-100" onclick="navigateTo('chats')">
                 <div class="card-body text-center p-4 d-flex flex-column justify-content-center align-items-center">
-                    <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                    <div class="nav-icon-circle red">
                         <i class="fas fa-comment-dots fa-lg text-danger"></i>
                     </div>
-                    <h6 class="fw-bold mb-2">Chats</h6>
-                    <span class="badge bg-dark" id="chatBadge">0 conversations</span>
+                    <h6 class="nav-title">Chats</h6>
+                    <span class="nav-badge" id="chatBadge">0 conversations</span>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 hover-card" onclick="navigateTo('cosmic')">
+            <div class="card hover-card h-100" onclick="navigateTo('cosmic')">
                 <div class="card-body text-center p-4 d-flex flex-column justify-content-center align-items-center">
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                    <div class="nav-icon-circle amber">
                         <i class="fas fa-search fa-lg text-warning"></i>
                     </div>
-                    <h6 class="fw-bold mb-3">Word Search Progress</h6>
+                    <h6 class="nav-title mb-3">Word Search Progress</h6>
                     <div class="progress w-100" style="height: 8px;">
                         <div class="progress-bar bg-warning" role="progressbar" style="width: 0%;" id="wordSearchBar"></div>
                     </div>
@@ -346,56 +469,54 @@
         </div>
 
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 hover-card" onclick="navigateTo('courses')">
+            <div class="card hover-card h-100" onclick="navigateTo('courses')">
                 <div class="card-body text-center p-4 d-flex flex-column justify-content-center align-items-center">
-                    <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                    <div class="nav-icon-circle green">
                         <i class="fas fa-book fa-lg text-success"></i>
                     </div>
-                    <h6 class="fw-bold mb-2">Courses</h6>
-                    <span class="badge bg-dark" id="courseBadge">0 courses</span>
+                    <h6 class="nav-title">Courses</h6>
+                    <span class="nav-badge" id="courseBadge">0 courses</span>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 hover-card" onclick="navigateTo('enrollments')">
+            <div class="card hover-card h-100" onclick="navigateTo('enrollments')">
                 <div class="card-body text-center p-4 d-flex flex-column justify-content-center align-items-center">
-                    <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                    <div class="nav-icon-circle red">
                         <i class="fas fa-user-graduate fa-lg text-danger"></i>
                     </div>
-                    <h6 class="fw-bold mb-2">Enrollments</h6>
-                    <span class="badge bg-dark" id="enrollmentBadge">0 enrollments</span>
+                    <h6 class="nav-title">Enrollments</h6>
+                    <span class="nav-badge" id="enrollmentBadge">0 enrollments</span>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 hover-card" onclick="navigateTo('users')">
+            <div class="card hover-card h-100" onclick="navigateTo('users')">
                 <div class="card-body text-center p-4 d-flex flex-column justify-content-center align-items-center">
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
+                    <div class="nav-icon-circle amber">
                         <i class="fas fa-users fa-lg text-warning"></i>
                     </div>
-                    <h6 class="fw-bold mb-2">Users</h6>
-                    <span class="badge bg-dark" id="userBadge">0 users</span>
+                    <h6 class="nav-title">Users</h6>
+                    <span class="nav-badge" id="userBadge">0 users</span>
                 </div>
             </div>
         </div>
 
-        {{-- Quick Actions Card  --}}
+        {{-- Quick Actions Card --}}
         <div class="col-md-6 col-lg-4">
-            <div class="card border-0 shadow-sm h-100 bg-white">
-                <div class="card-body text-center text-dark p-4 d-flex flex-column justify-content-center align-items-center">
-                    <div class="p-3 rounded-circle d-inline-block mb-3 bg-warning bg-opacity-10">
+            <div class="card hover-card quick-actions-card h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                    <div class="nav-icon-circle amber">
                         <i class="fas fa-bolt fa-lg text-warning"></i>
                     </div>
-                    <h6 class="fw-bold mb-3 text-dark">Quick Actions</h6>
+                    <h6 class="nav-title mb-3">Quick Actions</h6>
                     <div class="d-grid gap-2 w-100">
-                        <!-- Light Red Button -->
-                        <button class="btn btn-sm" style="background-color: #fdecec; color: #dc3545; border: 1px solid #f8c8c8; font-weight: 600;" onclick="navigateTo('courses')">
+                        <button class="btn quick-action-btn red" onclick="navigateTo('courses')">
                             <i class="fas fa-plus me-2"></i>Add Course
                         </button>
-                        <!-- Light Green Button -->
-                        <button class="btn btn-sm" style="background-color: #e6f7ed; color: #198754; border: 1px solid #b7e4c7; font-weight: 600;" onclick="navigateTo('users')">
+                        <button class="btn quick-action-btn green" onclick="navigateTo('users')">
                             <i class="fas fa-user-plus me-2"></i>Add User
                         </button>
                     </div>
@@ -407,9 +528,9 @@
     {{-- Charts Row --}}
     <div class="row g-3 mb-4">
         <div class="col-xl-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-chart-line me-2"></i>Platform Analytics</h6>
+            <div class="card chart-card">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-chart-line me-2 text-muted"></i>Platform Analytics</h6>
                     <div class="d-flex gap-2">
                         <select class="form-select form-select-sm w-auto" id="analyticsType">
                             <option value="all" selected>All</option>
@@ -430,9 +551,9 @@
             </div>
         </div>
         <div class="col-xl-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0 py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-pie-chart me-2"></i>Distribution</h6>
+            <div class="card chart-card">
+                <div class="card-header bg-transparent">
+                    <h6 class="mb-0"><i class="fas fa-chart-pie me-2 text-muted"></i>Distribution</h6>
                 </div>
                 <div class="card-body">
                     <canvas id="distributionChart" height="200"></canvas>
@@ -455,17 +576,16 @@
         </div>
     </div>
 
- <div class="row g-3">
+    <div class="row g-3">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center py-3">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-clock me-2"></i>Recent Activity</h6>
-                    <button class="btn btn-sm btn-outline-dark" onclick="refreshActivity()">
+            <div class="card chart-card">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-clock me-2 text-muted"></i>Recent Activity</h6>
+                    <button class="btn btn-sm refresh-btn" onclick="refreshActivity()">
                         <i class="fas fa-sync-alt me-1"></i>Refresh
                     </button>
                 </div>
                 <div class="card-body p-0">
-                    <!-- Added activity-scroll class here -->
                     <div class="table-responsive activity-scroll">
                         <table class="table table-hover mb-0 align-middle">
                             <thead>
@@ -495,6 +615,7 @@
 </div>
 
 <script>
+// ── All JavaScript below is unchanged from your original file ──
 
 function dismissToast() {
     const toast = document.getElementById('loginToast');
@@ -774,7 +895,6 @@ function initDistributionChart() {
             labels: ['Chats', 'Courses', 'Users'],
             datasets: [{
                 data: [0, 0, 0],
-
                 backgroundColor: ['#f69595', '#ffcc66', '#75c594'],
                 hoverBackgroundColor: ['#dc3545', '#ffc107', '#198754'],
                 borderWidth: 2,
@@ -916,7 +1036,6 @@ function getActivityIcon(type) {
 }
 
 function getActivityColor(type) {
-
     const colors = {
         'chat': 'danger',
         'course': 'success',
