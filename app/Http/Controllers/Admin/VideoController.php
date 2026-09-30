@@ -7,9 +7,9 @@ use App\Http\Requests\VideoUploadRequest;
 use App\Services\ActivityLogger;
 use App\Services\CloudinaryService;
 use App\Services\FirestoreServiceForVideos;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class VideoController extends Controller
@@ -28,7 +28,10 @@ class VideoController extends Controller
         return view('admin.videos.index');
     }
 
-     public function upload(VideoUploadRequest $request)
+    /**
+     * Upload / Update — writes to BOTH videos/{id} AND courses/{c}/lessons/{l}
+     */
+    public function upload(VideoUploadRequest $request)
     {
         Log::info('[video:upload] START', [
             'courseid' => $request->input('courseid'),
@@ -41,22 +44,22 @@ class VideoController extends Controller
         try {
             $docId = $request->input('videoId');
             $isUpdating = !empty($docId);
-
             if (!$isUpdating) {
                 $docId = Str::uuid()->toString();
             }
 
             $file = $request->file('video');
             $urlFromInput = $request->input('videourl');
-
-            // If creating, a file or URL is required
             if (!$isUpdating && !$file && !$urlFromInput) {
                 return response()->json(['success' => false, 'message' => 'Video file or URL is required'], 422);
             }
 
+            $courseId = $request->input('courseid');
+            $lessonId = $request->input('lessonid');
+
             $payload = [
-                'courseid'      => $request->input('courseid'),
-                'lessonid'      => $request->input('lessonid'),
+                'courseid'      => $courseId,
+                'lessonid'      => $lessonId,
                 'title'         => $request->input('title'),
                 'description'   => $request->input('description', ''),
                 'prerequisites' => $request->input('prerequisites', []),
@@ -65,18 +68,17 @@ class VideoController extends Controller
             ];
 
             if ($file) {
-                // Upload to Cloudinary
-                $publicId = "{$request->input('lessonid')}_" . time();
+                $publicId = "{$lessonId}_" . time();
                 Log::info('[video:upload] uploading to Cloudinary', ['public_id' => $publicId]);
 
                 $cloud = $this->cloudinary->uploadVideo($file, [
-                    'folder'    => "videos/{$request->input('courseid')}",
+                    'folder'    => "videos/{$courseId}",
                     'public_id' => $publicId,
-                    'tags'      => ["course:{$request->input('courseid')}", "lesson:{$request->input('lessonid')}"],
+                    'tags'      => ["course:{$courseId}", "lesson:{$lessonId}"],
                     'context'   => [
                         'title'    => $request->input('title'),
-                        'lessonid' => $request->input('lessonid'),
-                        'courseid' => $request->input('courseid'),
+                        'lessonid' => $lessonId,
+                        'courseid' => $courseId,
                     ],
                 ]);
 
@@ -85,7 +87,6 @@ class VideoController extends Controller
                 $payload['duration']           = $cloud['duration'];
                 $payload['bytes']              = $cloud['bytes'];
             } elseif ($urlFromInput) {
-                // Use the pasted URL
                 $payload['videourl']           = $urlFromInput;
                 $payload['cloudinaryPublicId'] = null;
                 $payload['duration']           = null;
@@ -96,23 +97,64 @@ class VideoController extends Controller
                 $payload['createdAt'] = now()->toISOString();
             }
 
-            Log::info('[video:upload] writing to Firestore', ['docId' => $docId]);
+            // -------- WRITE 1: videos/{docId} --------
+            Log::info('[video:upload] writing to videos', ['docId' => $docId]);
             $this->firestore->createVideo($docId, $payload);
-            Log::info('[video:upload] Firestore write OK', ['docId' => $docId]);
+
+            // -------- WRITE 2: courses/{courseId}/lessons/{lessonDocId} --------
+            $lessonDocId = $request->input('lessonDocId');
+            if (!$lessonDocId) {
+                $lessonDocId = $this->firestore->findLessonDocIdByField($courseId, $lessonId);
+            }
+            if (!$lessonDocId) {
+                $lessonDocId = $this->generateFirestoreId();
+            }
+
+            $lessonPayload = $payload;
+            $lessonPayload['lessonid'] = $lessonDocId;
+            $lessonPayload['courseid'] = $courseId;
+
+            $existing = $this->firestore->getLesson($courseId, $lessonDocId);
+            if ($existing && !empty($existing['createdAt'])) {
+                $lessonPayload['createdAt'] = $existing['createdAt'];
+            }
+
+            $subWritten = true;
+            $subError = null;
+            try {
+                $this->firestore->upsertLesson($courseId, $lessonDocId, $lessonPayload);
+                Log::info('[video:upload] lesson write OK', [
+                    'courseid' => $courseId, 'lessonDocId' => $lessonDocId,
+                ]);
+            } catch (\Throwable $e) {
+                $subWritten = false;
+                $subError = $e->getMessage();
+                Log::warning('[video:upload] lesson write FAILED', [
+                    'courseid' => $courseId, 'lessonDocId' => $lessonDocId, 'error' => $e->getMessage(),
+                ]);
+            }
 
             ActivityLogger::log(
                 'admin_action',
                 ($isUpdating ? 'Video updated: ' : 'Video uploaded: ') . $request->input('title'),
                 'Action by ' . session('firebase_username', 'Admin'),
-                ['docId' => $docId]
+                ['docId' => $docId, 'lessonDocId' => $lessonDocId]
             );
 
             return response()->json([
                 'success' => true,
                 'message' => $isUpdating ? 'Video updated successfully' : 'Video uploaded successfully',
                 'data' => [
-                    'id'       => $docId,
-                    'videourl' => $payload['videourl'] ?? null,
+                    'id'          => $docId,
+                    'courseid'    => $courseId,
+                    'lessonid'    => $lessonId,
+                    'lessonDocId' => $lessonDocId,
+                    'videourl'    => $payload['videourl'] ?? null,
+                    'writes' => [
+                        'videos'        => true,
+                        'lessons'       => $subWritten,
+                        'lessons_error' => $subError,
+                    ],
                 ],
             ]);
         } catch (\Throwable $e) {
@@ -121,76 +163,97 @@ class VideoController extends Controller
                 'file'    => $e->getFile(),
                 'line'    => $e->getLine(),
             ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
+    /**
+     * Replace Video File — updates videourl on both docs
+     */
     public function replaceVideo(Request $request, string $id)
     {
         Log::info('[video:replace] START', ['id' => $id, 'has_file' => $request->hasFile('video')]);
 
         $request->validate([
-            'video' => 'required|file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm|max:' . config('services.videos.max_size_kb', 512000),
+            'video'       => 'required|file|mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm|max:' . config('services.videos.max_size_kb', 512000),
+            'courseid'    => 'required|string|max:100',
+            'lessonid'    => 'required|string|max:100',
+            'lessonDocId' => 'nullable|string|max:100',
         ]);
 
         try {
-            Log::info('[video:replace] uploading to Cloudinary');
+            $courseId    = $request->input('courseid');
+            $lessonId    = $request->input('lessonid');
+            $lessonDocId = $request->input('lessonDocId');
+
+            if (!$lessonDocId) {
+                $lessonDocId = $this->firestore->findLessonDocIdByField($courseId, $lessonId);
+            }
+            if (!$lessonDocId) {
+                return response()->json(['success' => false, 'message' => 'Lesson doc not found'], 404);
+            }
 
             $cloud = $this->cloudinary->uploadVideo($request->file('video'), [
-                'folder' => 'videos/replacements',
+                'folder' => "videos/{$courseId}",
+                'tags'   => ["course:{$courseId}", "lesson:{$lessonDocId}"],
             ]);
-
-            Log::info('[video:replace] Cloudinary OK', ['url' => $cloud['url'] ?? null]);
 
             $this->firestore->updateVideoUrl($id, $cloud['url']);
 
-            Log::info('[video:replace] Firestore updated', ['id' => $id]);
+            $subWritten = true;
+            $subError = null;
+            try {
+                $this->firestore->updateLessonVideoUrl($courseId, $lessonDocId, $cloud['url']);
+            } catch (\Throwable $e) {
+                $subWritten = false;
+                $subError = $e->getMessage();
+                Log::warning('[video:replace] lesson update FAILED', [
+                    'courseid' => $courseId, 'lessonDocId' => $lessonDocId, 'error' => $e->getMessage(),
+                ]);
+            }
 
-            ActivityLogger::log('admin_action', 'Video replaced', 'Video ' . $id . ' replaced by ' . session('firebase_username', 'Admin'));
+            ActivityLogger::log(
+                'admin_action',
+                'Video replaced',
+                'Video ' . $id . ' replaced by ' . session('firebase_username', 'Admin'),
+                ['courseid' => $courseId, 'lessonDocId' => $lessonDocId]
+            );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Video replaced successfully',
-                'data' => ['videourl' => $cloud['url']],
+                'data' => [
+                    'id'          => $id,
+                    'courseid'    => $courseId,
+                    'lessonid'    => $lessonId,
+                    'lessonDocId' => $lessonDocId,
+                    'videourl'    => $cloud['url'],
+                    'writes' => [
+                        'videos'        => true,
+                        'lessons'       => $subWritten,
+                        'lessons_error' => $subError,
+                    ],
+                ],
             ]);
         } catch (\Throwable $e) {
             Log::error('[video:replace] FAILED', [
-                'id'      => $id,
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'id' => $id, 'message' => $e->getMessage(),
+                'file' => $e->getFile(), 'line' => $e->getLine(),
             ]);
-
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-       public function fetchVideos(Request $request)
+    public function fetchVideos(Request $request)
     {
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
-            $token = session('firebase_token');
 
-            Log::info('[video:fetchVideos] START', [
-                'has_session_token' => (bool) $token,
-                'filters' => [
-                    'courseid' => $request->query('courseid'),
-                    'lessonid' => $request->query('lessonid'),
-                    'q'        => $request->query('q'),
-                    'limit'    => $request->query('limit'),
-                ],
-            ]);
-
-            $limit = min((int) $request->query('limit', 24), 100);
-            $search = trim((string) $request->query('q', ''));
+            $limit    = min((int) $request->query('limit', 24), 100);
+            $search   = trim((string) $request->query('q', ''));
             $courseid = trim((string) $request->query('courseid', ''));
             $lessonid = trim((string) $request->query('lessonid', ''));
 
-            // Use the service for auth — service account preferred, session fallback
             $authToken = app(FirestoreServiceForVideos::class);
             $reflection = new \ReflectionClass($authToken);
             $method = $reflection->getMethod('token');
@@ -198,15 +261,14 @@ class VideoController extends Controller
             $bearer = $method->invoke($authToken);
 
             if (!$bearer) {
-                Log::warning('[video:fetchVideos] no auth token available');
-                return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+                return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
             }
 
             $baseUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos";
             $videos = [];
+            $totalFetched = 0;
             $pageToken = null;
 
-            // Fetch all matching documents to sort them properly in PHP
             for ($page = 0; $page < 30; $page++) {
                 $query = ['pageSize' => 300];
                 if ($pageToken) $query['pageToken'] = $pageToken;
@@ -216,35 +278,30 @@ class VideoController extends Controller
                     ->get($baseUrl . '?' . http_build_query($query));
 
                 if (!$response->successful()) {
-                    Log::error('[video:fetchVideos] Firestore HTTP error', [
-                        'status' => $response->status(),
-                        'body'   => substr($response->body(), 0, 500),
-                        'page'   => $page,
-                    ]);
                     return response()->json([
                         'success' => false,
                         'message' => 'Firestore auth failed (HTTP ' . $response->status() . ')',
+                        'count'   => count($videos),
                     ], 500);
                 }
 
                 $data = $response->json();
-
                 foreach ($data['documents'] ?? [] as $doc) {
+                    $totalFetched++;
                     $f = $doc['fields'] ?? [];
                     $video = [
-                        'id' => basename($doc['name']),
-                        'courseid' => $f['courseid']['stringValue'] ?? '',
-                        'lessonid' => $f['lessonid']['stringValue'] ?? '',
-                        'title' => $f['title']['stringValue'] ?? '',
-                        'description' => $f['description']['stringValue'] ?? '',
-                        'videourl' => $f['videourl']['stringValue'] ?? '',
+                        'id'            => basename($doc['name']),
+                        'courseid'      => $f['courseid']['stringValue'] ?? '',
+                        'lessonid'      => $f['lessonid']['stringValue'] ?? '',
+                        'title'         => $f['title']['stringValue'] ?? '',
+                        'description'   => $f['description']['stringValue'] ?? '',
+                        'videourl'      => $f['videourl']['stringValue'] ?? '',
                         'prerequisites' => $this->pluckStringArray($f['prerequisites'] ?? null),
-                        'resources' => $this->pluckStringArray($f['resources'] ?? null),
-                        'createdAt' => $f['createdAt']['timestampValue'] ?? '',
-                        'updatedAt' => $f['updatedAt']['timestampValue'] ?? '',
+                        'resources'     => $this->pluckStringArray($f['resources'] ?? null),
+                        'createdAt'     => $f['createdAt']['timestampValue'] ?? '',
+                        'updatedAt'     => $f['updatedAt']['timestampValue'] ?? '',
                     ];
 
-                    // Apply filters
                     if ($courseid && $video['courseid'] !== $courseid) continue;
                     if ($lessonid && $video['lessonid'] !== $lessonid) continue;
                     if ($search) {
@@ -263,25 +320,29 @@ class VideoController extends Controller
 
             usort($videos, function ($a, $b) {
                 $courseCmp = strnatcmp($a['courseid'] ?? '', $b['courseid'] ?? '');
-                if ($courseCmp !== 0) {
-                    return $courseCmp;
-                }
+                if ($courseCmp !== 0) return $courseCmp;
                 return strnatcmp($a['lessonid'] ?? '', $b['lessonid'] ?? '');
             });
 
-            Log::info('[video:fetchVideos] OK', [
-                'returned' => count($videos),
-                'has_more' => false,
+            return response()->json([
+                'success' => true,
+                'message' => 'Videos retrieved successfully',
+                'count'   => count($videos),
+                'total'   => $totalFetched,
+                'filters' => [
+                    'q'        => $search,
+                    'courseid' => $courseid,
+                    'lessonid' => $lessonid,
+                    'limit'    => $limit,
+                ],
+                'data' => $videos,
+                'nextPageToken' => null,
             ]);
-
-            return response()->json(['success' => true, 'data' => $videos, 'nextPageToken' => null]);
         } catch (\Throwable $e) {
             Log::error('[video:fetchVideos] FAILED', [
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine(),
             ]);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
         }
     }
 
@@ -290,8 +351,6 @@ class VideoController extends Controller
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
 
-            Log::info('[video:fetchCourses] START');
-
             $authToken = app(FirestoreServiceForVideos::class);
             $reflection = new \ReflectionClass($authToken);
             $method = $reflection->getMethod('token');
@@ -299,8 +358,7 @@ class VideoController extends Controller
             $bearer = $method->invoke($authToken);
 
             if (!$bearer) {
-                Log::warning('[video:fetchCourses] no auth token available');
-                return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+                return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
             }
 
             $baseUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos";
@@ -316,15 +374,7 @@ class VideoController extends Controller
                     ->get($baseUrl . '?' . http_build_query($query));
 
                 if (!$response->successful()) {
-                    Log::error('[video:fetchCourses] Firestore HTTP error', [
-                        'status' => $response->status(),
-                        'body'   => substr($response->body(), 0, 500),
-                        'page'   => $page,
-                    ]);
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Firestore auth failed (HTTP ' . $response->status() . ')',
-                    ], 500);
+                    return response()->json(['success' => false, 'message' => 'Firestore auth failed (HTTP ' . $response->status() . ')', 'count' => count($courses)], 500);
                 }
 
                 $data = $response->json();
@@ -338,25 +388,24 @@ class VideoController extends Controller
 
             sort($courses, SORT_NATURAL | SORT_FLAG_CASE);
 
-            Log::info('[video:fetchCourses] OK', ['count' => count($courses), 'courses' => $courses]);
-
-            return response()->json(['success' => true, 'data' => $courses]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Courses retrieved successfully',
+                'count'   => count($courses),
+                'data'    => $courses,
+            ]);
         } catch (\Throwable $e) {
             Log::error('[video:fetchCourses] FAILED', [
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine(),
             ]);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
         }
     }
 
-        public function fetchLessons()
+    public function fetchLessons()
     {
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
-
-            Log::info('[video:fetchLessons] START');
 
             $authToken = app(FirestoreServiceForVideos::class);
             $reflection = new \ReflectionClass($authToken);
@@ -365,8 +414,7 @@ class VideoController extends Controller
             $bearer = $method->invoke($authToken);
 
             if (!$bearer) {
-                Log::warning('[video:fetchLessons] no auth token available');
-                return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+                return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
             }
 
             $baseUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos";
@@ -382,15 +430,7 @@ class VideoController extends Controller
                     ->get($baseUrl . '?' . http_build_query($query));
 
                 if (!$response->successful()) {
-                    Log::error('[video:fetchLessons] Firestore HTTP error', [
-                        'status' => $response->status(),
-                        'body'   => substr($response->body(), 0, 500),
-                        'page'   => $page,
-                    ]);
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Firestore auth failed (HTTP ' . $response->status() . ')',
-                    ], 500);
+                    return response()->json(['success' => false, 'message' => 'Firestore auth failed (HTTP ' . $response->status() . ')', 'count' => count($lessons)], 500);
                 }
 
                 $data = $response->json();
@@ -404,16 +444,17 @@ class VideoController extends Controller
 
             sort($lessons, SORT_NATURAL | SORT_FLAG_CASE);
 
-            Log::info('[video:fetchLessons] OK', ['count' => count($lessons), 'lessons' => $lessons]);
-
-            return response()->json(['success' => true, 'data' => $lessons]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Lessons retrieved successfully',
+                'count'   => count($lessons),
+                'data'    => $lessons,
+            ]);
         } catch (\Throwable $e) {
             Log::error('[video:fetchLessons] FAILED', [
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'message' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine(),
             ]);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
         }
     }
 
@@ -422,8 +463,6 @@ class VideoController extends Controller
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
 
-            Log::info('[video:getVideo] START', ['id' => $id]);
-
             $authToken = app(FirestoreServiceForVideos::class);
             $reflection = new \ReflectionClass($authToken);
             $method = $reflection->getMethod('token');
@@ -431,53 +470,55 @@ class VideoController extends Controller
             $bearer = $method->invoke($authToken);
 
             if (!$bearer) {
-                return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+                return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
             }
 
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos/{$id}";
             $response = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])->timeout(30)->get($url);
 
             if (!$response->successful()) {
-                Log::warning('[video:getVideo] not found', [
-                    'id'     => $id,
-                    'status' => $response->status(),
-                ]);
-                return response()->json(['success' => false, 'message' => 'Not found'], 404);
+                return response()->json(['success' => false, 'message' => 'Not found', 'count' => 0], 404);
             }
 
             $f = $response->json()['fields'] ?? [];
 
-            Log::info('[video:getVideo] OK', ['id' => $id]);
-
-            return response()->json(['success' => true, 'data' => [
-                'id' => $id,
-                'courseid' => $f['courseid']['stringValue'] ?? '',
-                'lessonid' => $f['lessonid']['stringValue'] ?? '',
-                'title' => $f['title']['stringValue'] ?? '',
-                'description' => $f['description']['stringValue'] ?? '',
-                'videourl' => $f['videourl']['stringValue'] ?? '',
-                'prerequisites' => $this->pluckStringArray($f['prerequisites'] ?? null),
-                'resources' => $this->pluckStringArray($f['resources'] ?? null),
-                'createdAt' => $f['createdAt']['timestampValue'] ?? '',
-                'updatedAt' => $f['updatedAt']['timestampValue'] ?? '',
-            ]]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Video retrieved successfully',
+                'count'   => 1,
+                'data' => [
+                    'id'            => $id,
+                    'courseid'      => $f['courseid']['stringValue'] ?? '',
+                    'lessonid'      => $f['lessonid']['stringValue'] ?? '',
+                    'title'         => $f['title']['stringValue'] ?? '',
+                    'description'   => $f['description']['stringValue'] ?? '',
+                    'videourl'      => $f['videourl']['stringValue'] ?? '',
+                    'prerequisites' => $this->pluckStringArray($f['prerequisites'] ?? null),
+                    'resources'     => $this->pluckStringArray($f['resources'] ?? null),
+                    'createdAt'     => $f['createdAt']['timestampValue'] ?? '',
+                    'updatedAt'     => $f['updatedAt']['timestampValue'] ?? '',
+                ],
+            ]);
         } catch (\Throwable $e) {
             Log::error('[video:getVideo] FAILED', [
-                'id'      => $id,
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'id' => $id, 'message' => $e->getMessage(),
+                'file' => $e->getFile(), 'line' => $e->getLine(),
             ]);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
         }
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         try {
-            $projectId = env('FIREBASE_PROJECT_ID');
+            $projectId   = env('FIREBASE_PROJECT_ID');
+            $courseId    = $request->query('courseid',    $request->input('courseid', ''));
+            $lessonId    = $request->query('lessonid',    $request->input('lessonid', ''));
+            $lessonDocId = $request->query('lessonDocId', $request->input('lessonDocId', ''));
 
-            Log::info('[video:destroy] START', ['id' => $id]);
+            if (!$courseId) {
+                return response()->json(['success' => false, 'message' => 'courseid is required', 'count' => 0], 422);
+            }
 
             $authToken = app(FirestoreServiceForVideos::class);
             $reflection = new \ReflectionClass($authToken);
@@ -486,31 +527,65 @@ class VideoController extends Controller
             $bearer = $method->invoke($authToken);
 
             if (!$bearer) {
-                return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+                return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
             }
 
+            if (!$lessonDocId && $lessonId) {
+                $lessonDocId = $this->firestore->findLessonDocIdByField($courseId, $lessonId);
+            }
+
+            // DELETE 1
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos/{$id}";
             $response = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])->timeout(30)->delete($url);
+            $videoDeleted = $response->successful() || $response->status() === 404;
 
-            if ($response->successful()) {
-                Log::info('[video:destroy] OK', ['id' => $id]);
-                return response()->json(['success' => true, 'message' => 'Video deleted']);
+            // DELETE 2
+            $lessonDeleted = false;
+            $lessonError = null;
+            if ($lessonDocId) {
+                try {
+                    $lessonDeleted = $this->firestore->deleteLesson($courseId, $lessonDocId);
+                } catch (\Throwable $e) {
+                    $lessonError = $e->getMessage();
+                    Log::warning('[video:destroy] lesson delete FAILED', [
+                        'courseid' => $courseId, 'lessonDocId' => $lessonDocId, 'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
-            Log::error('[video:destroy] Firestore error', [
-                'id'     => $id,
-                'status' => $response->status(),
-                'body'   => substr($response->body(), 0, 300),
+            if (!$videoDeleted && !$lessonDeleted) {
+                return response()->json(['success' => false, 'message' => 'Failed to delete from both locations', 'count' => 0], 500);
+            }
+
+            ActivityLogger::log(
+                'admin_action',
+                'Video deleted',
+                'Video ' . $id . ' deleted by ' . session('firebase_username', 'Admin'),
+                ['courseid' => $courseId, 'lessonDocId' => $lessonDocId]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Video deleted',
+                'count'   => 1,
+                'data' => [
+                    'id'          => $id,
+                    'courseid'    => $courseId,
+                    'lessonid'    => $lessonId,
+                    'lessonDocId' => $lessonDocId,
+                    'writes' => [
+                        'videos'        => $videoDeleted,
+                        'lessons'       => $lessonDeleted,
+                        'lessons_error' => $lessonError,
+                    ],
+                ],
             ]);
-            return response()->json(['success' => false, 'message' => 'Failed to delete'], 500);
         } catch (\Throwable $e) {
             Log::error('[video:destroy] FAILED', [
-                'id'      => $id,
-                'message' => $e->getMessage(),
-                'file'    => $e->getFile(),
-                'line'    => $e->getLine(),
+                'id' => $id, 'message' => $e->getMessage(),
+                'file' => $e->getFile(), 'line' => $e->getLine(),
             ]);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
         }
     }
 
@@ -520,6 +595,17 @@ class VideoController extends Controller
         $out = [];
         foreach ($arrayValue['arrayValue']['values'] as $v) {
             if (isset($v['stringValue'])) $out[] = $v['stringValue'];
+        }
+        return $out;
+    }
+
+    private function generateFirestoreId(int $length = 20): string
+    {
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $max = strlen($alphabet) - 1;
+        $out = '';
+        for ($i = 0; $i < $length; $i++) {
+            $out .= $alphabet[random_int(0, $max)];
         }
         return $out;
     }
