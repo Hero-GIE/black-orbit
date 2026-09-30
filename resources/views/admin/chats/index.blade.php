@@ -7,7 +7,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-comment-dots me-2"></i>Chats Management</h4>
-            {{-- <small class="text-muted" id="recordCount">Loading...</small> --}}
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-dark btn-sm d-flex align-items-center" onclick="window.location.href='{{ route('admin.dashboard') }}'">
@@ -20,7 +19,7 @@
     <div class="row mb-4">
         <div class="col-md-6 col-lg-4">
             <div class="input-group">
-                <span class="input-group-text bg-white border-end-0">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;">
                     <i class="fas fa-search text-muted"></i>
                 </span>
                 <input type="text"
@@ -35,7 +34,7 @@
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm" style="border-radius: 10px;">
         <div class="card-body p-4">
 
             <!-- SKELETON LOADING -->
@@ -57,12 +56,12 @@
                             @for($i = 0; $i < 6; $i++)
                                 <tr>
                                     <td class="text-center">
-                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 4px;"></div>
+                                        <div class="skeleton-box mx-auto" style="width: 20px; height: 16px; border-radius: 10px;"></div>
                                     </td>
                                     <td>
                                         <div>
-                                            <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 4px;"></div>
-                                            <div class="skeleton-box" style="width: 80px; height: 12px; border-radius: 4px;"></div>
+                                            <div class="skeleton-box mb-1" style="width: 120px; height: 16px; border-radius: 10px;"></div>
+                                            <div class="skeleton-box" style="width: 80px; height: 12px; border-radius: 10px;"></div>
                                         </div>
                                     </td>
                                     <td>
@@ -70,21 +69,21 @@
                                             <div class="skeleton-box me-1" style="width: 32px; height: 32px; border-radius: 50%;"></div>
                                             <div class="skeleton-box me-1" style="width: 32px; height: 32px; border-radius: 50%;"></div>
                                             <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 50%;"></div>
-                                            <div class="skeleton-box ms-2" style="width: 40px; height: 12px; border-radius: 4px;"></div>
+                                            <div class="skeleton-box ms-2" style="width: 40px; height: 12px; border-radius: 10px;"></div>
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="skeleton-box mx-auto" style="width: 60px; height: 24px; border-radius: 20px;"></div>
+                                        <div class="skeleton-box mx-auto" style="width: 60px; height: 24px; border-radius: 10px;"></div>
                                     </td>
                                     <td>
-                                        <div class="skeleton-box" style="width: 120px; height: 14px; border-radius: 4px;"></div>
+                                        <div class="skeleton-box" style="width: 120px; height: 14px; border-radius: 10px;"></div>
                                     </td>
                                     <td>
-                                        <div class="skeleton-box" style="width: 80px; height: 12px; border-radius: 4px;"></div>
+                                        <div class="skeleton-box" style="width: 80px; height: 12px; border-radius: 10px;"></div>
                                     </td>
                                     <td class="text-end">
                                         <div class="d-inline-flex gap-1">
-                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+                                            <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 10px;"></div>
                                         </div>
                                     </td>
                                 </tr>
@@ -127,7 +126,7 @@
 {{-- View Chat Modal --}}
 <div class="modal fade" id="viewChatModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 10px;">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold" id="viewChatTitle">
                     <i class="fas fa-comment-dots me-2"></i>Chat Details
@@ -142,7 +141,7 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px;">Close</button>
             </div>
         </div>
     </div>
@@ -159,7 +158,7 @@
     .skeleton-box {
         display: block;
         background-color: #e9ecef;
-        border-radius: 4px;
+        border-radius: 10px;
         animation: skeleton-pulse 1.5s infinite ease-in-out;
     }
 
@@ -174,7 +173,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px;
+        border-radius: 10px;
         border: none;
         background: transparent;
         color: #6c757d;
@@ -190,7 +189,7 @@
     }
     .chat-type-badge {
         padding: 4px 12px;
-        border-radius: 20px;
+        border-radius: 10px;
         font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -231,7 +230,7 @@
     }
     .message-bubble {
         padding: 8px 14px;
-        border-radius: 12px;
+        border-radius: 10px;
         max-width: 75%;
         word-wrap: break-word;
     }
@@ -239,13 +238,13 @@
         background: #1a1a1a;
         color: white;
         align-self: flex-end;
-        border-bottom-right-radius: 4px;
+        border-bottom-right-radius: 10px;
     }
     .message-bubble.received {
         background: #f1f1f1;
         color: #1a1a1a;
         align-self: flex-start;
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 10px;
     }
     .message-time {
         font-size: 0.6rem;
@@ -265,7 +264,7 @@
     }
     .messages-container::-webkit-scrollbar-thumb {
         background: #d1d5db;
-        border-radius: 4px;
+        border-radius: 10px;
     }
 
     #chatsTableWrapper::-webkit-scrollbar {
@@ -298,6 +297,14 @@
 
     .input-group .form-control:focus + .input-group-text {
         border-color: #dee2e6;
+    }
+
+    .input-group .input-group-text {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .input-group .form-control {
+        border-radius: 0 10px 10px 0;
     }
 </style>
 @endsection
@@ -673,7 +680,7 @@ function showToast(message, type = 'info') {
 
     const toastId = 'toast-' + Date.now();
     const toastHtml = `
-        <div id="${toastId}" class="toast show align-items-center text-white bg-${type === 'danger' ? 'danger' : 'dark'} border-0" role="alert">
+        <div id="${toastId}" class="toast show align-items-center text-white bg-${type === 'danger' ? 'danger' : 'dark'} border-0" role="alert" style="border-radius: 10px;">
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>

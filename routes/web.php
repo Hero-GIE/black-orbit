@@ -36,6 +36,10 @@ Route::get('/dashboard', function () {
 })->middleware('auth')->name('dashboard.redirect');
 
 
+Route::get('/dashboard', function () {
+    return redirect('/admin/dashboard');
+})->middleware(['auth', 'firebase.auth'])->name('dashboard.redirect');
+
 Route::prefix('admin')->group(function () {
     Route::get('/api/personalities', [PersonalityController::class, 'fetchPersonalities'])
         ->name('public.api.personalities');
@@ -46,7 +50,7 @@ Route::prefix('admin')->group(function () {
 
 // Admin Routes (Protected)
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::post('/api/images/upload', [ImageController::class, 'upload']);
 
