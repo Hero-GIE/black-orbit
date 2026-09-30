@@ -29,7 +29,7 @@ class CloudinaryService
 
     public function uploadVideo($source, array $options = []): array
     {
-        $uploadApi = new UploadApi();
+        $uploadApi = $this->cloudinary->uploadApi();
 
         // Build the Cloudinary options
         $cloudOptions = [
@@ -54,7 +54,6 @@ class CloudinaryService
         if ($source instanceof UploadedFile) {
             $cloudOptions['file'] = $source->getRealPath();
         } elseif (is_string($source)) {
-            // Local absolute path or URL — Cloudinary handles both
             $cloudOptions['file'] = $source;
         } else {
             throw new \InvalidArgumentException('Unsupported source for Cloudinary upload');
@@ -80,16 +79,16 @@ class CloudinaryService
     /**
      * Delete a video from Cloudinary by public_id.
      */
-    public function deleteVideo(string $publicId): bool
-    {
-        try {
-            $uploadApi = new UploadApi();
-            $uploadApi->destroy($publicId, ['resource_type' => 'video', 'invalidate' => true]);
-            Log::info('Cloudinary video deleted', ['public_id' => $publicId]);
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Cloudinary delete failed', ['public_id' => $publicId, 'error' => $e->getMessage()]);
-            return false;
-        }
+  public function deleteVideo(string $publicId): bool
+{
+    try {
+        $uploadApi = $this->cloudinary->uploadApi();
+        $uploadApi->destroy($publicId, ['resource_type' => 'video', 'invalidate' => true]);
+        Log::info('Cloudinary video deleted', ['public_id' => $publicId]);
+        return true;
+    } catch (\Exception $e) {
+        Log::error('Cloudinary delete failed', ['public_id' => $publicId, 'error' => $e->getMessage()]);
+        return false;
     }
+}
 }

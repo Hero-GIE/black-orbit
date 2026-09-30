@@ -3,42 +3,142 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
-class FireStoreServiceForVideos
+class FirestoreServiceForVideos
 {
     protected string $projectId;
+    protected ?string $credentialsFile;
 
     public function __construct()
     {
-        $this->projectId = env('FIREBASE_PROJECT_ID');
+        $this->projectId       = env('FIREBASE_PROJECT_ID');
+        $this->credentialsFile = env('FIREBASE_CREDENTIALS');
     }
 
-    protected function token(): ?string
+    /**
+     * Get an auth token — service account preferred, session fallback.
+     */
+  protected function token(): ?string
+{
+    if ($this->credentialsFile && file_exists($this->credentialsFile)) {
+        $cached = Cache::get('firestore_service_token');
+        if ($cached) {
+            return $cached;
+        }
+
+        try {
+            $token = $this->getServiceAccountToken();
+            Cache::put('firestore_service_token', $token, now()->addMinutes(50));
+            Log::info('[firestore:token] service account token acquired');
+            return $token;
+        } catch (\Throwable $e) {
+            Log::error('[firestore:token] service account token failed', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    $sessionToken = session('firebase_token');
+    if ($sessionToken) {
+        Log::warning('[firestore:token] using session token fallback');
+        return $sessionToken;
+    }
+
+    Log::error('[firestore:token] no token available', [
+        'credentials_file' => $this->credentialsFile,
+        'file_exists'      => $this->credentialsFile ? file_exists($this->credentialsFile) : false,
+    ]);
+
+    return null;
+}
+
+    /**
+     * Exchange the service account JSON for an OAuth access token.
+     */
+    protected function getServiceAccountToken(): string
     {
-        return session('firebase_token');
+        $creds = json_decode(file_get_contents($this->credentialsFile), true);
+        if (!$creds) {
+            throw new \Exception("Invalid credentials JSON");
+        }
+
+        $b64 = fn($data) => rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+
+        $header  = $b64(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
+        $now     = time();
+        $payload = $b64(json_encode([
+            'iss'   => $creds['client_email'],
+            'sub'   => $creds['client_email'],
+            'scope' => 'https://www.googleapis.com/auth/datastore',
+            'aud'   => 'https://oauth2.googleapis.com/token',
+            'iat'   => $now,
+            'exp'   => $now + 3600,
+        ]));
+
+        $signature = '';
+        if (!openssl_sign($header . '.' . $payload, $signature, $creds['private_key'], OPENSSL_ALGO_SHA256)) {
+            throw new \Exception("Failed to sign JWT");
+        }
+
+        $jwt = $header . '.' . $payload . '.' . $b64($signature);
+
+        $response = Http::asForm()->timeout(30)->post('https://oauth2.googleapis.com/token', [
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion'  => $jwt,
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception("Token exchange failed: " . $response->body());
+        }
+
+        $accessToken = $response->json('access_token');
+        if (!$accessToken) {
+            throw new \Exception("No access token in response");
+        }
+
+        return $accessToken;
     }
 
     /**
      * Create a video document with an explicit ID.
      */
-    public function createVideo(string $id, array $data): bool
-    {
-        $token = $this->token();
-        if (!$token) throw new \Exception('Not authenticated');
+ public function createVideo(string $id, array $data): bool
+{
+    $token = $this->token();
+    if (!$token) throw new \Exception('Not authenticated');
 
-        $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents/videos/{$id}";
-        $fields = $this->toFirestoreFields($data);
+    $url = "https://firestore.googleapis.com/v1/projects/{$this->projectId}/databases/(default)/documents/videos/{$id}";
+    $fields = $this->toFirestoreFields($data);
 
-        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
-            ->timeout(30)
-            ->patch($url, ['fields' => $fields]);
+    Log::info('[firestore:createVideo] writing', [
+        'project' => $this->projectId,
+        'docId'   => $id,
+        'url'     => $url,
+        'field_count' => count($fields),
+    ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('Firestore create failed: ' . $response->body());
-        }
+    $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+        ->timeout(30)
+        ->patch($url, ['fields' => $fields]);
 
-        return true;
+    if (!$response->successful()) {
+        Log::error('[firestore:createVideo] FAILED', [
+            'status' => $response->status(),
+            'body'   => substr($response->body(), 0, 500),
+            'docId'  => $id,
+        ]);
+        throw new \Exception('Firestore create failed: ' . $response->body());
     }
+
+    Log::info('[firestore:createVideo] OK', [
+        'docId' => $id,
+        'name'  => $response->json('name'),
+    ]);
+
+    return true;
+}
 
     /**
      * Update only the `videourl` and `updatedAt` fields of an existing doc.
@@ -110,7 +210,7 @@ class FireStoreServiceForVideos
             } elseif (is_float($value)) {
                 $fields[$key] = ['doubleValue' => $value];
             } elseif (is_array($value)) {
-                $isList = array_keys($value) === range(0, count($value) - 1);
+                $isList = empty($value) || array_keys($value) === range(0, count($value) - 1);
                 if ($isList) {
                     $fields[$key] = [
                         'arrayValue' => [
@@ -136,9 +236,6 @@ class FireStoreServiceForVideos
         return ['nullValue' => null];
     }
 
-    /**
-     * Firestore string array -> PHP array of strings.
-     */
     protected function pluckStringArray(?array $arrayValue): array
     {
         if (!$arrayValue || !isset($arrayValue['arrayValue']['values'])) return [];

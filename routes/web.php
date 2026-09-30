@@ -140,6 +140,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Video Routes
     Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
     Route::get('/api/videos/courses', [VideoController::class, 'fetchCourses'])->name('api.videos.courses');
+    Route::get('/api/videos/lessons', [VideoController::class, 'fetchLessons']);
     Route::get('/api/videos', [VideoController::class, 'fetchVideos'])->name('api.videos');
     Route::post('/api/videos/upload', [VideoController::class, 'upload'])->name('api.videos.upload');
     Route::get('/api/videos/{id}', [VideoController::class, 'getVideo'])->name('api.videos.get');

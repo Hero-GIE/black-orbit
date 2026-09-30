@@ -49,9 +49,9 @@
 
     <!-- SKELETON LOADING -->
     <div id="videos-skeleton" class="row g-4">
-        @for($i = 0; $i < 6; $i++)
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="skeleton-box w-100" style="height: 320px; border-radius: 12px;"></div>
+        @for($i = 0; $i < 8; $i++)
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="skeleton-box w-100" style="height: 350px; border-radius: 10px;"></div>
             </div>
         @endfor
     </div>
@@ -105,12 +105,24 @@
             </div>
 
             <div class="mb-3">
-                <label for="video" class="form-label text-muted small fw-bold">Video File *</label>
+                <label class="form-label text-muted small fw-bold">Video File / URL *</label>
                 <div id="videoPreviewWrapper" class="mb-2" style="display: none;">
                     <video id="videoPreview" controls class="w-100 rounded border bg-light" style="max-height: 220px;"></video>
                 </div>
+
+                <input type="url" id="videoUrl" name="videourl" class="form-control form-control-custom mb-2" placeholder="https://res.cloudinary.com/...">
+                <small class="text-muted d-block mb-2">Paste a video URL above, OR upload a file below:</small>
+
                 <input type="file" id="videoFile" accept="video/mp4,video/quicktime,video/x-msvideo,video/webm" class="form-control form-control-custom">
                 <small class="text-muted d-block mt-1">MP4, MOV, AVI, WEBM — max 512 MB</small>
+
+                <div id="videoUploadProgressWrap" class="mt-2" style="display:none;">
+                    <div class="progress" style="height: 8px; border-radius: 6px;">
+                        <!-- Added transition: width 0.3s ease; for smooth sliding -->
+                        <div id="videoUploadProgressBar" class="progress-bar bg-dark" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
                 <div id="videoUploadStatus" class="small text-muted mt-1"></div>
             </div>
 
@@ -156,6 +168,21 @@
     </div>
 </div>
 
+{{-- Video Player Modal --}}
+<div class="modal fade" id="videoPlayerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border-0 rounded-3 overflow-hidden">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white fw-bold" id="videoPlayerTitle">Now Playing</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 bg-black">
+                <video id="modalVideoPlayer" controls autoplay class="w-100" style="max-height: 70vh; background: #000;"></video>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Delete Confirmation Modal --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -188,40 +215,116 @@
 
     .video-card {
         position: relative;
-        border-radius: 12px;
+        border-radius: 10px;
         overflow: hidden;
-        background: #f8f9fa;
+        height: 350px;
+        background: #000;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex;
-        flex-direction: column;
+        cursor: pointer;
     }
     .video-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
     }
 
-    .video-thumb {
-        position: relative;
+    .card-img {
         width: 100%;
-        padding-top: 56.25%; /* 16:9 */
-        background: #000;
-        overflow: hidden;
-    }
-    .video-thumb video, .video-thumb img {
+        height: 100%;
+        object-fit: cover;
         position: absolute;
         top: 0; left: 0;
-        width: 100%; height: 100%;
-        object-fit: cover;
+        z-index: 1;
+        transition: transform 0.4s ease;
+    }
+    .video-card:hover .card-img {
+        transform: scale(1.08);
     }
 
-    .video-body {
-        padding: 1rem 1.25rem 1.25rem 1.25rem;
-        background: #fff;
+    .play-icon-overlay {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        width: 60px; height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff;
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+    .video-card:hover .play-icon-overlay {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .card-actions-overlay {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 10;
+    }
+    .video-card:hover .card-actions-overlay {
+        opacity: 1;
+    }
+    .card-action-btn {
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .card-action-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
+    .card-action-btn.delete:hover { background: #dc3545; color: #fff; }
+
+    .card-overlay-content {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.25rem;
+        padding-top: 3rem;
+        z-index: 2;
+        background: linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.1) 100%);
+        color: #fff;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
-        flex: 1;
+        justify-content: flex-end;
+        min-width: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 1.4rem;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .text-truncate-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        overflow-wrap: anywhere;
     }
 
     .video-cat-chip {
@@ -237,55 +340,11 @@
         padding: 0.3rem 0.55rem;
         border-radius: 6px;
         line-height: 1.2;
-        background: #f1f3f5;
+        background: rgba(255, 255, 255, 0.92);
         color: #212529;
+        margin-bottom: 0.5rem;
+        width: fit-content;
     }
-
-    .video-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1f2937;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        overflow-wrap: anywhere;
-        margin: 0;
-    }
-
-    .video-desc {
-        font-size: 0.8rem;
-        color: #6b7280;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        overflow-wrap: anywhere;
-        margin: 0;
-    }
-
-    .video-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.35rem;
-        margin-top: auto;
-        padding-top: 0.5rem;
-        border-top: 1px solid #f1f3f5;
-    }
-
-    .video-action-btn {
-        width: 32px; height: 32px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 8px;
-        border: none;
-        background: #f8f9fa;
-        color: #495057;
-        transition: all 0.2s ease;
-    }
-    .video-action-btn:hover { background: #e9ecef; color: #000; }
-    .video-action-btn.delete:hover { background: #dc3545; color: #fff; }
 
     .video-drawer {
         width: 520px !important;
@@ -319,18 +378,29 @@ let debounceTimer = null;
 
 const PAGE_SIZE = 24;
 
-// ── Video preview on file select ──
+// ── Video preview elements ──
 const videoFileEl = document.getElementById('videoFile');
+const videoUrlEl = document.getElementById('videoUrl');
 const videoPreviewEl = document.getElementById('videoPreview');
 const videoPreviewWrapper = document.getElementById('videoPreviewWrapper');
 const videoUploadStatus = document.getElementById('videoUploadStatus');
+const videoUploadProgressWrap = document.getElementById('videoUploadProgressWrap');
+const videoUploadProgressBar = document.getElementById('videoUploadProgressBar');
+
+function showVideoPreview(src) {
+    if (!src) {
+        videoPreviewWrapper.style.display = 'none';
+        videoPreviewEl.removeAttribute('src');
+        return;
+    }
+    videoPreviewEl.src = src;
+    videoPreviewWrapper.style.display = 'block';
+}
 
 videoFileEl.addEventListener('change', function () {
     const file = this.files[0];
-    if (!file) {
-        videoPreviewWrapper.style.display = 'none';
-        return;
-    }
+    if (!file) return;
+
     if (!file.type.startsWith('video/')) {
         showToast('Please choose a video file', 'danger');
         this.value = '';
@@ -342,16 +412,48 @@ videoFileEl.addEventListener('change', function () {
         return;
     }
 
+    videoUrlEl.value = '';
     const url = URL.createObjectURL(file);
-    videoPreviewEl.src = url;
-    videoPreviewWrapper.style.display = 'block';
+    showVideoPreview(url);
+});
+
+videoUrlEl.addEventListener('input', function() {
+    if (this.value) {
+        videoFileEl.value = '';
+        showVideoPreview(this.value);
+    }
 });
 
 // ── Page init ──
 document.addEventListener('DOMContentLoaded', function () {
     loadCourses();
+    loadLessons(); // <--- ADD THIS LINE
     loadVideos(true);
     setupFilters();
+
+    // Stop video playback when the View drawer is closed
+    const viewVideoModalEl = document.getElementById('viewVideoModal');
+    if (viewVideoModalEl) {
+        viewVideoModalEl.addEventListener('hidden.bs.offcanvas', function () {
+            const viewContent = document.getElementById('viewVideoContent');
+            if (viewContent) {
+                viewContent.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+            }
+        });
+    }
+
+    // Stop video playback when the Player Modal is closed
+    const videoPlayerModalEl = document.getElementById('videoPlayerModal');
+    if (videoPlayerModalEl) {
+        videoPlayerModalEl.addEventListener('hidden.bs.modal', function () {
+            const playerEl = document.getElementById('modalVideoPlayer');
+            if (playerEl) {
+                playerEl.pause();
+                playerEl.removeAttribute('src');
+                playerEl.load();
+            }
+        });
+    }
 });
 
 function setupFilters() {
@@ -369,10 +471,11 @@ function setupFilters() {
     if (lessonFilter) lessonFilter.addEventListener('change', () => loadVideos(true));
 }
 
-// ── Load distinct courses (builds the dropdown) ──
 async function loadCourses() {
     try {
-        const response = await fetch('/admin/api/videos/courses');
+        const response = await fetch('/admin/api/videos/courses', {
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await response.json();
         if (data.success && Array.isArray(data.data)) {
             const select = document.getElementById('courseFilter');
@@ -386,7 +489,24 @@ async function loadCourses() {
     }
 }
 
-// ── Load videos (paginated) ──
+async function loadLessons() {
+    try {
+        const response = await fetch('/admin/api/videos/lessons', {
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+            const select = document.getElementById('lessonFilter');
+            const current = select.value;
+            select.innerHTML = '<option value="">All Lessons</option>' +
+                data.data.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
+            select.value = current;
+        }
+    } catch (err) {
+        console.error('Failed to load lessons', err);
+    }
+}
+
 async function loadVideos(reset = true) {
     if (isLoadingMore) return;
     if (!reset && !hasMore) return;
@@ -422,7 +542,9 @@ async function loadVideos(reset = true) {
         if (course) params.set('courseid', course);
         if (lesson) params.set('lessonid', lesson);
 
-        const response = await fetch('/admin/api/videos?' + params.toString());
+        const response = await fetch('/admin/api/videos?' + params.toString(), {
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -458,6 +580,16 @@ function updateCount(count) {
     el.textContent = count === 1 ? '1 video found' : count + ' videos found';
 }
 
+// Helper: Generate a thumbnail image URL from a Cloudinary video URL
+function getVideoThumb(url) {
+    if (!url) return null;
+    if (url.includes('res.cloudinary.com') && url.includes('/video/upload/')) {
+        let thumbUrl = url.replace('/video/upload/', '/video/upload/f_jpg,so_2,w_600,q_auto/');
+        return thumbUrl.replace(/\.(mp4|mov|avi|webm|m4v)$/i, '.jpg');
+    }
+    return null;
+}
+
 function renderVideos(videos) {
     const grid = document.getElementById('videos-content');
 
@@ -476,30 +608,43 @@ function renderVideos(videos) {
 
     let html = '';
     videos.forEach((v) => {
-        const chip = v.lessonid
-            ? `<span class="video-cat-chip" title="${escapeHtml(v.courseid)} / ${escapeHtml(v.lessonid)}">
-                 <i class="fas fa-book"></i>${escapeHtml(v.courseid)} <span class="text-muted">/</span> ${escapeHtml(v.lessonid)}
+        const chip = (v.courseid || v.lessonid)
+            ? `<span class="video-cat-chip" title="${escapeHtml(v.courseid || 'N/A')} / ${escapeHtml(v.lessonid || 'N/A')}">
+                 <i class="fas fa-book"></i>${escapeHtml(v.courseid || 'N/A')} <span class="text-muted">/</span> ${escapeHtml(v.lessonid || 'N/A')}
                </span>`
             : '';
 
-        // Show a real <video> tag with preload=metadata so the browser shows the first frame
-        const thumb = v.videourl
-            ? `<video src="${escapeHtml(v.videourl)}" preload="metadata" muted playsinline></video>`
-            : `<div class="d-flex align-items-center justify-content-center h-100"><i class="fas fa-video-slash fa-2x text-muted"></i></div>`;
+        const posterUrl = getVideoThumb(v.videourl);
+        let thumb = '';
+        if (v.videourl) {
+            const preloadVal = posterUrl ? 'none' : 'metadata';
+            thumb = `<video src="${escapeHtml(v.videourl)}" preload="${preloadVal}" poster="${escapeHtml(posterUrl || '')}" class="card-img" muted playsinline></video>`;
+        } else {
+            thumb = `<div class="card-img d-flex align-items-center justify-content-center"><i class="fas fa-video-slash fa-2x text-muted"></i></div>`;
+        }
+
+        const safeUrl = v.videourl ? escapeHtml(v.videourl) : '';
+        const safeTitle = escapeHtml(v.title || '(untitled)');
 
         html += `
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="video-card">
-                    <div class="video-thumb">${thumb}</div>
-                    <div class="video-body">
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="video-card" onclick="playVideoInModal('${safeUrl}', '${safeTitle}')">
+                    ${thumb}
+
+                    <div class="play-icon-overlay">
+                        <i class="fas fa-play" style="font-size: 1.25rem; margin-left: 4px;"></i>
+                    </div>
+
+                    <div class="card-actions-overlay">
+                        <button class="card-action-btn" onclick="event.stopPropagation(); viewVideo('${v.id}')" title="View Details"><i class="fas fa-eye"></i></button>
+                        <button class="card-action-btn" onclick="event.stopPropagation(); editVideo('${v.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="card-action-btn delete" onclick="event.stopPropagation(); confirmDelete('${v.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+
+                    <div class="card-overlay-content">
                         ${chip}
-                        <p class="video-title">${escapeHtml(v.title || '(untitled)')}</p>
-                        ${v.description ? `<p class="video-desc">${escapeHtml(v.description)}</p>` : ''}
-                        <div class="video-actions">
-                            <button class="video-action-btn" onclick="viewVideo('${v.id}')" title="View"><i class="fas fa-eye"></i></button>
-                            <button class="video-action-btn" onclick="editVideo('${v.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="video-action-btn delete" onclick="confirmDelete('${v.id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                        </div>
+                        <h5 class="fw-bold mb-1 text-white text-truncate-1">${safeTitle}</h5>
+                        ${v.description ? `<p class="card-text small text-white text-truncate-2 mb-0">${escapeHtml(v.description)}</p>` : ''}
                     </div>
                 </div>
             </div>
@@ -509,22 +654,48 @@ function renderVideos(videos) {
     grid.innerHTML = html;
 }
 
+function playVideoInModal(url, title) {
+    if (!url) {
+        showToast('No video source available.', 'danger');
+        return;
+    }
+
+    const modalEl = document.getElementById('videoPlayerModal');
+    const videoEl = document.getElementById('modalVideoPlayer');
+    const titleEl = document.getElementById('videoPlayerTitle');
+
+    titleEl.textContent = title || 'Now Playing';
+    videoEl.src = url;
+
+    const playerModal = new bootstrap.Modal(modalEl);
+    playerModal.show();
+
+    videoEl.play().catch(err => console.error("Error playing video:", err));
+}
+
 function openAddModal() {
     editingVideoId = null;
     document.getElementById('videoModalTitle').textContent = 'Upload Video';
     document.getElementById('videoForm').reset();
-    videoPreviewWrapper.style.display = 'none';
-    videoPreviewEl.removeAttribute('src');
-    videoUploadStatus.textContent = '';
     document.getElementById('videoId').value = '';
     document.getElementById('saveVideoBtn').textContent = 'Upload Video';
+
+    videoUrlEl.value = '';
+    videoFileEl.value = '';
+    showVideoPreview('');
+    videoUploadStatus.textContent = '';
+    videoUploadProgressWrap.style.display = 'none';
+    videoUploadProgressBar.style.width = '0%';
+
     const drawer = new bootstrap.Offcanvas(document.getElementById('videoModal'));
     drawer.show();
 }
 
 async function editVideo(id) {
     try {
-        const response = await fetch(`/admin/api/videos/${id}`);
+        const response = await fetch(`/admin/api/videos/${id}`, {
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -539,9 +710,14 @@ async function editVideo(id) {
             document.getElementById('description').value = v.description || '';
             document.getElementById('prerequisites').value = (v.prerequisites || []).join(', ');
             document.getElementById('resources').value = (v.resources || []).join(', ');
-            videoPreviewWrapper.style.display = 'none';
-            videoPreviewEl.removeAttribute('src');
+
+            videoUrlEl.value = v.videourl || '';
+            videoFileEl.value = '';
+            showVideoPreview(v.videourl || '');
+
             videoUploadStatus.textContent = '';
+            videoUploadProgressWrap.style.display = 'none';
+            videoUploadProgressBar.style.width = '0%';
             document.getElementById('saveVideoBtn').textContent = 'Save Changes';
 
             if (viewDrawerInstance) viewDrawerInstance.hide();
@@ -563,7 +739,9 @@ async function viewVideo(id) {
     viewDrawerInstance.show();
 
     try {
-        const response = await fetch(`/admin/api/videos/${id}`);
+        const response = await fetch(`/admin/api/videos/${id}`, {
+            headers: { 'Accept': 'application/json' }
+        });
         const data = await response.json();
 
         if (data.success) {
@@ -624,7 +802,10 @@ async function replaceVideo(id) {
         try {
             const res = await fetch(`/admin/api/videos/${id}/replace`, {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
                 body: fd,
             });
             const data = await res.json();
@@ -643,62 +824,172 @@ async function replaceVideo(id) {
     input.click();
 }
 
-document.getElementById('saveVideoBtn').addEventListener('click', async function () {
-    const form = document.getElementById('videoForm');
+// ── Upload / Save (XHR-based so we get real upload progress) ──
+document.getElementById('saveVideoBtn').addEventListener('click', function () {
     const id = document.getElementById('videoId').value;
     const file = videoFileEl.files?.[0];
+    const url = videoUrlEl.value.trim();
 
-    if (!id && !file) {
-        showToast('Please choose a video file', 'danger');
+    if (!id && !file && !url) {
+        showToast('Please provide a video file or URL', 'danger');
         return;
     }
 
     const fd = new FormData();
+    fd.append('videoId', id);
     fd.append('courseid', document.getElementById('courseid').value);
     fd.append('lessonid', document.getElementById('lessonid').value);
     fd.append('title', document.getElementById('title').value);
     fd.append('description', document.getElementById('description').value);
 
-    const pre = document.getElementById('prerequisites').value
-        .split(',').map(s => s.trim()).filter(Boolean);
-    pre.forEach(p => fd.append('prerequisites[]', p));
+    if (url) fd.append('videourl', url);
 
-    const res = document.getElementById('resources').value
-        .split(',').map(s => s.trim()).filter(Boolean);
-    res.forEach(r => fd.append('resources[]', r));
+    document.getElementById('prerequisites').value
+        .split(',').map(s => s.trim()).filter(Boolean)
+        .forEach(p => fd.append('prerequisites[]', p));
+
+    document.getElementById('resources').value
+        .split(',').map(s => s.trim()).filter(Boolean)
+        .forEach(r => fd.append('resources[]', r));
 
     if (file) fd.append('video', file);
 
-    try {
-        this.disabled = true;
-        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+    const btn = this;
+    const originalLabel = id ? 'Save Changes' : 'Upload Video';
 
-        let url = '/admin/api/videos/upload';
-        let method = 'POST';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Starting...';
 
-        const response = await fetch(url, {
-            method,
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-            body: fd,
-        });
-        const data = await response.json();
+    // --- SMOOTH PROGRESS BAR LOGIC ---
+    videoUploadProgressWrap.style.display = 'block';
+    videoUploadProgressBar.style.width = '0%';
+    videoUploadStatus.textContent = 'Preparing upload…';
+
+    let currentProgress = 0;
+
+    // Fallback interval to ensure smooth visual progress in 1% increments
+    // This handles cases where the browser doesn't emit progress events fast enough
+    const progressInterval = setInterval(() => {
+        if (currentProgress < 90) {
+            currentProgress += 1; // Move by 1% for smooth sliding
+            if (currentProgress > 90) currentProgress = 90;
+
+            videoUploadProgressBar.style.width = currentProgress + '%';
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${currentProgress}%`;
+            videoUploadStatus.textContent = `Uploading… ${currentProgress}%`;
+        } else if (currentProgress === 90) {
+            videoUploadStatus.textContent = 'Finalizing on server, please wait…';
+        }
+    }, 150); // Tick every 150ms
+    // --------------------------
+
+    const xhr = new XMLHttpRequest();
+    xhr.timeout = 20 * 60 * 1000; // 20 minutes
+
+    xhr.upload.addEventListener('progress', function (evt) {
+        if (evt.lengthComputable && file) {
+            // Cap real progress at 90% to reserve 10% for server-side processing
+            let rawPct = Math.round((evt.loaded / evt.total) * 90);
+
+            // Only update if the real progress is ahead of our fake interval
+            if (rawPct > currentProgress) {
+                currentProgress = rawPct;
+                videoUploadProgressBar.style.width = currentProgress + '%';
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>${currentProgress}%`;
+                videoUploadStatus.textContent = `Uploading… ${currentProgress}%`;
+            }
+        }
+    });
+
+    xhr.addEventListener('load', function () {
+        // Stop the interval from ticking up
+        clearInterval(progressInterval);
+
+        let data;
+        try {
+            data = JSON.parse(xhr.responseText);
+        } catch (e) {
+            console.error('Non-JSON response (status ' + xhr.status + '):', xhr.responseText.slice(0, 500));
+            showToast('Server error. Check server logs.', 'danger');
+            resetUploadUI();
+            return;
+        }
+
+        // Catch server-level rejection (like 413 Content Too Large)
+        if (xhr.status === 413) {
+            showToast('The video is too large for the server to accept. Please compress it or upload a smaller file.', 'danger');
+            resetUploadUI();
+            return;
+        }
+
+        // Handle 422 Validation Errors specifically
+        if (xhr.status === 422) {
+            if (data.errors) {
+                const firstError = Object.values(data.errors)[0][0];
+                showToast(firstError, 'danger');
+            } else {
+                showToast(data.message || 'Validation failed. Please check your inputs.', 'danger');
+            }
+            resetUploadUI();
+            return;
+        }
+
+        if (xhr.status >= 400) {
+            showToast('Upload failed. Server returned an error (Status: ' + xhr.status + ').', 'danger');
+            resetUploadUI();
+            return;
+        }
 
         if (data.success) {
+            // Complete the progress bar visually
+            videoUploadProgressBar.style.width = '100%';
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>100%`;
+            videoUploadStatus.textContent = 'Upload complete!';
+
             showToast(data.message, 'success');
-            const drawer = bootstrap.Offcanvas.getInstance(document.getElementById('videoModal'));
-            drawer.hide();
-            loadCourses();
-            loadVideos(true);
+
+            // Small delay so the user sees 100% before the drawer closes
+            setTimeout(() => {
+                const drawer = bootstrap.Offcanvas.getInstance(document.getElementById('videoModal'));
+                drawer.hide();
+                resetUploadUI();
+                loadCourses();
+                loadVideos(true);
+            }, 800);
+        } else if (data.errors) {
+            const firstError = Object.values(data.errors)[0][0];
+            showToast(firstError, 'danger');
+            resetUploadUI();
         } else {
             showToast(data.message || 'Failed to save', 'danger');
+            resetUploadUI();
         }
-    } catch (error) {
-        console.error(error);
-        showToast('Error saving video', 'danger');
-    } finally {
-        this.disabled = false;
-        this.innerHTML = id ? 'Save Changes' : 'Upload Video';
+    });
+
+    function resetUploadUI() {
+        btn.disabled = false;
+        btn.innerHTML = originalLabel;
+        videoUploadProgressWrap.style.display = 'none';
+        videoUploadStatus.textContent = '';
+        videoUploadProgressBar.style.width = '0%';
     }
+
+    xhr.addEventListener('error', function () {
+        clearInterval(progressInterval);
+        showToast('Network error during upload', 'danger');
+        resetUploadUI();
+    });
+
+    xhr.addEventListener('timeout', function () {
+        clearInterval(progressInterval);
+        showToast('Upload timed out — file may be too large or connection too slow', 'danger');
+        resetUploadUI();
+    });
+
+    xhr.open('POST', '/admin/api/videos/upload');
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]')?.content || '');
+    xhr.send(fd);
 });
 
 function confirmDelete(id) {
@@ -714,7 +1005,10 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
         const response = await fetch(`/admin/api/videos/${id}`, {
             method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' }
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
         });
         const data = await response.json();
         if (data.success) {

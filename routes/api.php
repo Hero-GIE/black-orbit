@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\ArticleController;
+use App\Http\Controllers\Api\VideoController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -31,4 +32,13 @@ Route::middleware(['firebase.auth'])->group(function () {
     Route::get('/image-url', [ImageController::class, 'getUrl']);
 
     Route::post('/articles/{id}/view', [ArticleController::class, 'recordView']);
+
+    // --- Video Routes ---
+    Route::get('/videos', [VideoController::class, 'fetchVideos']);
+    Route::get('/videos/courses', [VideoController::class, 'fetchCourses']);
+    Route::get('/videos/lessons', [VideoController::class, 'fetchLessons']);
+    Route::post('/videos/upload', [VideoController::class, 'upload']);
+    Route::post('/videos/{id}/replace', [VideoController::class, 'replaceVideo']);
+    Route::get('/videos/{id}', [VideoController::class, 'getVideo']);
+    Route::delete('/videos/{id}', [VideoController::class, 'destroy']);
 });
