@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\FactController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\VideoController;
+use App\Http\Controllers\Api\AppInstallController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -60,6 +61,8 @@ Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->g
     Route::get('/api/analytics', [DashboardController::class, 'getAnalytics'])->name('api.analytics');
     Route::get('/api/distribution', [DashboardController::class, 'getDistribution'])->name('api.distribution');
     Route::get('/api/dashboard/activity', [DashboardController::class, 'getActivity'])->name('api.activity');
+    // app install stats
+    Route::get('/api/apps/installs', [AppInstallController::class, 'stats'])->name('api.apps.installs');
 
     // user routes
     Route::get('/users', [UserController::class, 'index'])->name('users.index');

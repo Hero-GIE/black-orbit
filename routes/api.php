@@ -4,12 +4,16 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\Api\AppInstallController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/health', function () {
     return response()->json(['status' => 'OK', 'timestamp' => now()]);
 });
+
+Route::post('/apps/install', [AppInstallController::class, 'track']);
+Route::post('/apps/open',    [AppInstallController::class, 'trackOpen']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
@@ -33,7 +37,7 @@ Route::middleware(['firebase.auth'])->group(function () {
 
     Route::post('/articles/{id}/view', [ArticleController::class, 'recordView']);
 
-    // --- Video Routes ---
+    // Video Routes ---
     Route::get('/videos', [VideoController::class, 'fetchVideos']);
     Route::get('/videos/courses', [VideoController::class, 'fetchCourses']);
     Route::get('/videos/lessons', [VideoController::class, 'fetchLessons']);
