@@ -58,7 +58,6 @@
 
     <!-- ACTUAL CONTENT -->
     <div id="videos-content" class="row g-4" style="display: none; animation: fadeIn 0.5s ease-in-out;">
-        <!-- Cards will be injected here via JS -->
     </div>
 
     <!-- LOAD MORE -->
@@ -82,6 +81,7 @@
     <div class="offcanvas-body pt-2">
         <form id="videoForm">
             <input type="hidden" id="videoId" name="videoId">
+            <input type="hidden" id="lessonDocId" name="lessonDocId">
 
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -118,7 +118,6 @@
 
                 <div id="videoUploadProgressWrap" class="mt-2" style="display:none;">
                     <div class="progress" style="height: 8px; border-radius: 6px;">
-                        <!-- Added transition: width 0.3s ease; for smooth sliding -->
                         <div id="videoUploadProgressBar" class="progress-bar bg-dark" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
                     </div>
                 </div>
@@ -295,7 +294,6 @@
         left: 0;
         right: 0;
         padding: 1.25rem;
-        padding-top: 3rem;
         z-index: 2;
         background: linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.1) 100%);
         color: #fff;
@@ -325,25 +323,6 @@
         text-overflow: ellipsis;
         max-width: 100%;
         overflow-wrap: anywhere;
-    }
-
-    .video-cat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        max-width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 0.3rem 0.55rem;
-        border-radius: 6px;
-        line-height: 1.2;
-        background: rgba(255, 255, 255, 0.92);
-        color: #212529;
-        margin-bottom: 0.5rem;
-        width: fit-content;
     }
 
     .video-drawer {
@@ -427,11 +406,10 @@ videoUrlEl.addEventListener('input', function() {
 // ── Page init ──
 document.addEventListener('DOMContentLoaded', function () {
     loadCourses();
-    loadLessons(); // <--- ADD THIS LINE
+    loadLessons();
     loadVideos(true);
     setupFilters();
 
-    // Stop video playback when the View drawer is closed
     const viewVideoModalEl = document.getElementById('viewVideoModal');
     if (viewVideoModalEl) {
         viewVideoModalEl.addEventListener('hidden.bs.offcanvas', function () {
@@ -442,7 +420,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Stop video playback when the Player Modal is closed
     const videoPlayerModalEl = document.getElementById('videoPlayerModal');
     if (videoPlayerModalEl) {
         videoPlayerModalEl.addEventListener('hidden.bs.modal', function () {
@@ -473,9 +450,7 @@ function setupFilters() {
 
 async function loadCourses() {
     try {
-        const response = await fetch('/admin/api/videos/courses', {
-            headers: { 'Accept': 'application/json' }
-        });
+        const response = await fetch('/admin/api/videos/courses', { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
         if (data.success && Array.isArray(data.data)) {
             const select = document.getElementById('courseFilter');
@@ -484,16 +459,12 @@ async function loadCourses() {
                 data.data.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
             select.value = current;
         }
-    } catch (err) {
-        console.error('Failed to load courses', err);
-    }
+    } catch (err) { console.error('Failed to load courses', err); }
 }
 
 async function loadLessons() {
     try {
-        const response = await fetch('/admin/api/videos/lessons', {
-            headers: { 'Accept': 'application/json' }
-        });
+        const response = await fetch('/admin/api/videos/lessons', { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
         if (data.success && Array.isArray(data.data)) {
             const select = document.getElementById('lessonFilter');
@@ -502,9 +473,7 @@ async function loadLessons() {
                 data.data.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
             select.value = current;
         }
-    } catch (err) {
-        console.error('Failed to load lessons', err);
-    }
+    } catch (err) { console.error('Failed to load lessons', err); }
 }
 
 async function loadVideos(reset = true) {
@@ -542,9 +511,7 @@ async function loadVideos(reset = true) {
         if (course) params.set('courseid', course);
         if (lesson) params.set('lessonid', lesson);
 
-        const response = await fetch('/admin/api/videos?' + params.toString(), {
-            headers: { 'Accept': 'application/json' }
-        });
+        const response = await fetch('/admin/api/videos?' + params.toString(), { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
 
         if (data.success) {
@@ -608,12 +575,6 @@ function renderVideos(videos) {
 
     let html = '';
     videos.forEach((v) => {
-        const chip = (v.courseid || v.lessonid)
-            ? `<span class="video-cat-chip" title="${escapeHtml(v.courseid || 'N/A')} / ${escapeHtml(v.lessonid || 'N/A')}">
-                 <i class="fas fa-book"></i>${escapeHtml(v.courseid || 'N/A')} <span class="text-muted">/</span> ${escapeHtml(v.lessonid || 'N/A')}
-               </span>`
-            : '';
-
         const posterUrl = getVideoThumb(v.videourl);
         let thumb = '';
         if (v.videourl) {
@@ -642,7 +603,6 @@ function renderVideos(videos) {
                     </div>
 
                     <div class="card-overlay-content">
-                        ${chip}
                         <h5 class="fw-bold mb-1 text-white text-truncate-1">${safeTitle}</h5>
                         ${v.description ? `<p class="card-text small text-white text-truncate-2 mb-0">${escapeHtml(v.description)}</p>` : ''}
                     </div>
@@ -678,6 +638,7 @@ function openAddModal() {
     document.getElementById('videoModalTitle').textContent = 'Upload Video';
     document.getElementById('videoForm').reset();
     document.getElementById('videoId').value = '';
+    document.getElementById('lessonDocId').value = '';
     document.getElementById('saveVideoBtn').textContent = 'Upload Video';
 
     videoUrlEl.value = '';
@@ -693,9 +654,7 @@ function openAddModal() {
 
 async function editVideo(id) {
     try {
-        const response = await fetch(`/admin/api/videos/${id}`, {
-            headers: { 'Accept': 'application/json' }
-        });
+        const response = await fetch(`/admin/api/videos/${id}`, { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
 
         if (data.success) {
@@ -704,6 +663,7 @@ async function editVideo(id) {
 
             document.getElementById('videoModalTitle').textContent = 'Edit Video';
             document.getElementById('videoId').value = id;
+            document.getElementById('lessonDocId').value = v.lessonDocId || v.id || '';
             document.getElementById('courseid').value = v.courseid || '';
             document.getElementById('lessonid').value = v.lessonid || '';
             document.getElementById('title').value = v.title || '';
@@ -739,9 +699,7 @@ async function viewVideo(id) {
     viewDrawerInstance.show();
 
     try {
-        const response = await fetch(`/admin/api/videos/${id}`, {
-            headers: { 'Accept': 'application/json' }
-        });
+        const response = await fetch(`/admin/api/videos/${id}`, { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
 
         if (data.success) {
@@ -751,7 +709,6 @@ async function viewVideo(id) {
                     ${v.videourl ? `<video src="${escapeHtml(v.videourl)}" controls class="w-100 mb-3 shadow-sm" style="max-height: 280px; border-radius: 12px; background: #000;"></video>` : `<div class="d-flex align-items-center justify-content-center bg-light mb-3 rounded" style="height: 220px;"><i class="fas fa-video-slash fa-2x text-muted"></i></div>`}
                     <div class="text-center">
                         <h4 class="fw-bold mb-1">${escapeHtml(v.title || '(untitled)')}</h4>
-                        ${v.courseid || v.lessonid ? `<p class="text-muted mb-1"><i class="fas fa-book me-2"></i>${escapeHtml(v.courseid)} <span class="text-muted">/</span> ${escapeHtml(v.lessonid)}</p>` : ''}
                     </div>
                 </div>
 
@@ -827,6 +784,7 @@ async function replaceVideo(id) {
 // ── Upload / Save (XHR-based so we get real upload progress) ──
 document.getElementById('saveVideoBtn').addEventListener('click', function () {
     const id = document.getElementById('videoId').value;
+    const lessonDocId = document.getElementById('lessonDocId').value;
     const file = videoFileEl.files?.[0];
     const url = videoUrlEl.value.trim();
 
@@ -837,6 +795,7 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
 
     const fd = new FormData();
     fd.append('videoId', id);
+    fd.append('lessonDocId', lessonDocId);
     fd.append('courseid', document.getElementById('courseid').value);
     fd.append('lessonid', document.getElementById('lessonid').value);
     fd.append('title', document.getElementById('title').value);
@@ -867,11 +826,9 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
 
     let currentProgress = 0;
 
-    // Fallback interval to ensure smooth visual progress in 1% increments
-    // This handles cases where the browser doesn't emit progress events fast enough
     const progressInterval = setInterval(() => {
         if (currentProgress < 90) {
-            currentProgress += 1; // Move by 1% for smooth sliding
+            currentProgress += 1;
             if (currentProgress > 90) currentProgress = 90;
 
             videoUploadProgressBar.style.width = currentProgress + '%';
@@ -880,7 +837,7 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
         } else if (currentProgress === 90) {
             videoUploadStatus.textContent = 'Finalizing on server, please wait…';
         }
-    }, 150); // Tick every 150ms
+    }, 150);
     // --------------------------
 
     const xhr = new XMLHttpRequest();
@@ -888,10 +845,8 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
 
     xhr.upload.addEventListener('progress', function (evt) {
         if (evt.lengthComputable && file) {
-            // Cap real progress at 90% to reserve 10% for server-side processing
             let rawPct = Math.round((evt.loaded / evt.total) * 90);
 
-            // Only update if the real progress is ahead of our fake interval
             if (rawPct > currentProgress) {
                 currentProgress = rawPct;
                 videoUploadProgressBar.style.width = currentProgress + '%';
@@ -902,7 +857,6 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
     });
 
     xhr.addEventListener('load', function () {
-        // Stop the interval from ticking up
         clearInterval(progressInterval);
 
         let data;
@@ -915,14 +869,12 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
             return;
         }
 
-        // Catch server-level rejection (like 413 Content Too Large)
         if (xhr.status === 413) {
             showToast('The video is too large for the server to accept. Please compress it or upload a smaller file.', 'danger');
             resetUploadUI();
             return;
         }
 
-        // Handle 422 Validation Errors specifically
         if (xhr.status === 422) {
             if (data.errors) {
                 const firstError = Object.values(data.errors)[0][0];
@@ -941,19 +893,18 @@ document.getElementById('saveVideoBtn').addEventListener('click', function () {
         }
 
         if (data.success) {
-            // Complete the progress bar visually
             videoUploadProgressBar.style.width = '100%';
             btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>100%`;
             videoUploadStatus.textContent = 'Upload complete!';
 
             showToast(data.message, 'success');
 
-            // Small delay so the user sees 100% before the drawer closes
             setTimeout(() => {
                 const drawer = bootstrap.Offcanvas.getInstance(document.getElementById('videoModal'));
                 drawer.hide();
                 resetUploadUI();
                 loadCourses();
+                loadLessons();
                 loadVideos(true);
             }, 800);
         } else if (data.errors) {
@@ -1016,6 +967,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
             const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
             modal.hide();
             loadCourses();
+            loadLessons();
             loadVideos(true);
         } else {
             showToast('Failed to delete', 'danger');
