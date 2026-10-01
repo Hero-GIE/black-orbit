@@ -82,7 +82,7 @@ class FirebaseAuthService
         } catch (\Exception $e) {
             Log::error('Firebase REST API error: ' . $e->getMessage());
 
-            // In local environment, fallback to test user
+
             if (app()->environment('local')) {
                 Log::info('Local environment - falling back to test user');
                 return [

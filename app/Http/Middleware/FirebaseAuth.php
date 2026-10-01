@@ -86,7 +86,7 @@ class FirebaseAuth
             ], 401);
         }
 
-        // Web: clear session and redirect (existing behaviour)
+
         Session::forget([
             'firebase_token',
             'firebase_refresh_token',
