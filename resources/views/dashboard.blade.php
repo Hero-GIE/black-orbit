@@ -358,29 +358,15 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="stat-label mb-0">Chats</p>
-                            <h4 class="stat-value mb-0" id="totalChats">0</h4>
-                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newChatsToday">+0 today</span></span>
+                            <p class="stat-label mb-0">Total Installs</p>
+                            <h4 class="stat-value mb-0" id="appInstallsTotal">0</h4>
+                            <span class="stat-delta">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>All devices</span>
+                            </span>
                         </div>
-                        <div class="stat-icon-wrap red">
-                            <i class="fas fa-comment-dots text-danger"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <p class="stat-label mb-0">Word Search</p>
-                            <h4 class="stat-value mb-0" id="wordSearchProgress">0%</h4>
-                            <span class="stat-delta" style="color:#d97706;"><i class="fas fa-search"></i> <span id="wordsFound">0 found</span></span>
-                        </div>
-                        <div class="stat-icon-wrap amber">
-                            <i class="fas fa-search text-warning"></i>
+                        <div class="stat-icon-wrap blue">
+                            <i class="fas fa-download text-primary"></i>
                         </div>
                     </div>
                 </div>
@@ -392,12 +378,35 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="stat-label mb-0">Courses</p>
-                            <h4 class="stat-value mb-0" id="totalCourses">0</h4>
-                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newCoursesToday">+0 today</span></span>
+                            <p class="stat-label mb-0">iOS Installs</p>
+                            <h4 class="stat-value mb-0" id="appInstallsIos">0</h4>
+                            <span class="stat-delta">
+                                <i class="fab fa-apple"></i>
+                                <span>App Store</span>
+                            </span>
+                        </div>
+                        <div class="stat-icon-wrap blue">
+                            <i class="fab fa-apple text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="stat-label mb-0">Android Installs</p>
+                            <h4 class="stat-value mb-0" id="appInstallsAndroid">0</h4>
+                            <span class="stat-delta">
+                                <i class="fab fa-android"></i>
+                                <span>Play Store</span>
+                            </span>
                         </div>
                         <div class="stat-icon-wrap green">
-                            <i class="fas fa-book text-success"></i>
+                            <i class="fab fa-android text-success"></i>
                         </div>
                     </div>
                 </div>
@@ -409,29 +418,35 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="stat-label mb-0">Enrollments</p>
-                            <h4 class="stat-value mb-0" id="totalEnrollments">0</h4>
-                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newEnrollmentsToday">+0 today</span></span>
-                        </div>
-                        <div class="stat-icon-wrap red">
-                            <i class="fas fa-user-graduate text-danger"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <p class="stat-label mb-0">Users</p>
-                            <h4 class="stat-value mb-0" id="totalUsers">0</h4>
-                            <span class="stat-delta"><i class="fas fa-arrow-up"></i> <span id="newUsersToday">+0 today</span></span>
+                            <p class="stat-label mb-0">Opens Today</p>
+                            <h4 class="stat-value mb-0" id="appOpensToday">0</h4>
+                            <span class="stat-delta">
+                                <i class="fas fa-bolt"></i>
+                                <span>Launches</span>
+                            </span>
                         </div>
                         <div class="stat-icon-wrap amber">
-                            <i class="fas fa-users text-warning"></i>
+                            <i class="fas fa-bolt text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card stat-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="stat-label mb-0">Active Today</p>
+                            <h4 class="stat-value mb-0" id="appDauToday">0</h4>
+                            <span class="stat-delta">
+                                <i class="fas fa-users"></i>
+                                <span>DAU</span>
+                            </span>
+                        </div>
+                        <div class="stat-icon-wrap red">
+                            <i class="fas fa-users text-danger"></i>
                         </div>
                     </div>
                 </div>
@@ -615,8 +630,6 @@
 </div>
 
 <script>
-// ── All JavaScript below is unchanged from your original file ──
-
 function dismissToast() {
     const toast = document.getElementById('loginToast');
     if (toast) {
@@ -674,6 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     Promise.all([
         loadDashboardStats(),
+        loadAppStats(),
         loadRecentActivity(),
         updateAnalyticsChart(30, 'all'),
         updateDistributionChart()
@@ -688,6 +702,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     refreshInterval = setInterval(function() {
         loadDashboardStats();
+        loadAppStats();
         loadRecentActivity();
     }, 60000);
 
@@ -729,18 +744,32 @@ async function loadDashboardStats() {
     }
 }
 
+async function loadAppStats() {
+    try {
+        const response = await fetch('/admin/api/apps/installs', {
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (data.success && data.data) {
+            const installs = data.data.installs || {};
+            const opens    = data.data.opens    || {};
+
+            document.getElementById('appInstallsTotal').textContent   = formatNumber(installs.total   || 0);
+            document.getElementById('appInstallsIos').textContent     = formatNumber(installs.ios     || 0);
+            document.getElementById('appInstallsAndroid').textContent = formatNumber(installs.android || 0);
+            document.getElementById('appOpensToday').textContent      = formatNumber(opens.today      || 0);
+            document.getElementById('appDauToday').textContent        = formatNumber(opens.dauToday   || 0);
+        } else {
+            console.warn('App stats response invalid:', data);
+        }
+    } catch (error) {
+        console.error('Error loading app stats:', error);
+    }
+}
+
 function updateStatsUI(stats) {
     try {
-        document.getElementById('totalChats').textContent = formatNumber(stats.chats?.total || 0);
-        document.getElementById('totalCourses').textContent = formatNumber(stats.courses?.total || 0);
-        document.getElementById('totalEnrollments').textContent = formatNumber(stats.enrollments?.total || 0);
-        document.getElementById('totalUsers').textContent = formatNumber(stats.users?.total || 0);
-
-        document.getElementById('newChatsToday').innerHTML = `+${formatNumber(stats.chats?.today || 0)} today`;
-        document.getElementById('newCoursesToday').innerHTML = `+${formatNumber(stats.courses?.today || 0)} today`;
-        document.getElementById('newEnrollmentsToday').innerHTML = `+${formatNumber(stats.enrollments?.today || 0)} today`;
-        document.getElementById('newUsersToday').innerHTML = `+${formatNumber(stats.users?.today || 0)} today`;
-
         document.getElementById('chatBadge').textContent = `${formatNumber(stats.chats?.total || 0)} conversations`;
         document.getElementById('courseBadge').textContent = `${formatNumber(stats.courses?.total || 0)} courses`;
         document.getElementById('enrollmentBadge').textContent = `${formatNumber(stats.enrollments?.total || 0)} enrollments`;
@@ -750,11 +779,8 @@ function updateStatsUI(stats) {
         const totalWords = stats.wordSearch?.total || 100;
         const percentage = Math.min((wordsFound / totalWords) * 100, 100);
 
-        document.getElementById('wordSearchProgress').textContent = `${percentage.toFixed(0)}%`;
-        document.getElementById('wordsFound').textContent = `${formatNumber(wordsFound)} found`;
         document.getElementById('wordSearchBar').style.width = `${percentage}%`;
         document.getElementById('wordSearchPercent').textContent = `${percentage.toFixed(0)}% Complete`;
-
     } catch (error) {
         console.error('Error updating stats UI:', error);
     }
@@ -1079,6 +1105,7 @@ function refreshActivity() {
 
 function refreshAll() {
     loadDashboardStats();
+    loadAppStats();
     loadRecentActivity();
     updateDistributionChart();
     showToast('Dashboard refreshed', 'success');
@@ -1115,6 +1142,7 @@ window.refreshActivity = refreshActivity;
 window.refreshAll = refreshAll;
 window.showToast = showToast;
 window.loadDashboardStats = loadDashboardStats;
+window.loadAppStats = loadAppStats;
 window.loadRecentActivity = loadRecentActivity;
 window.dismissToast = dismissToast;
 </script>

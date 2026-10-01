@@ -12,18 +12,13 @@ use Illuminate\Support\Facades\Log;
 class AppInstallController extends Controller
 {
     /**
-     * Called by mobile apps on FIRST launch.
      * POST /api/apps/install
+     * Body: { deviceId, platform, version }
+     *
+     * WARNING: No validation. Missing fields will cause a 500.
      */
     public function track(Request $request)
     {
-        $data = $request->validate([
-            'deviceId'    => 'required|string|max:128',
-            'platform'    => 'required|in:ios,android',
-            'version'     => 'nullable|string|max:32',
-            'deviceModel' => 'nullable|string|max:64',
-        ]);
-
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
             $bearer    = $this->getBearer();
@@ -31,15 +26,28 @@ class AppInstallController extends Controller
                 return response()->json(['success' => false, 'message' => 'Server not configured'], 500);
             }
 
-            $deviceId = preg_replace('/[^A-Za-z0-9_\-]/', '_', $data['deviceId']);
+            $deviceId = (string) $request->input('deviceId', '');
+            $platform = (string) $request->input('platform', '');
+            $version  = (string) $request->input('version', '');
+
+            if ($deviceId === '' || $platform === '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'deviceId and platform are required',
+                    'received' => $request->all(),
+                ], 422);
+            }
+
+            $deviceId = preg_replace('/[^A-Za-z0-9_\-]/', '_', $deviceId);
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/app_installs/{$deviceId}";
 
             $fields = [
-                'platform'    => ['stringValue' => $data['platform']],
+                'platform'    => ['stringValue' => $platform],
                 'installedAt' => ['timestampValue' => now()->toISOString()],
             ];
-            if (!empty($data['version']))     $fields['version']     = ['stringValue' => $data['version']];
-            if (!empty($data['deviceModel'])) $fields['deviceModel'] = ['stringValue' => $data['deviceModel']];
+            if ($version !== '') {
+                $fields['version'] = ['stringValue' => $version];
+            }
 
             $resp = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
                 ->timeout(30)
@@ -60,17 +68,13 @@ class AppInstallController extends Controller
     }
 
     /**
-     * Called by mobile apps on EVERY launch.
      * POST /api/apps/open
+     * Body: { deviceId, platform, version }
+     *
+     * WARNING: No validation. Missing fields will cause a 500.
      */
     public function trackOpen(Request $request)
     {
-        $data = $request->validate([
-            'deviceId' => 'required|string|max:128',
-            'platform' => 'required|in:ios,android',
-            'version'  => 'nullable|string|max:32',
-        ]);
-
         try {
             $projectId = env('FIREBASE_PROJECT_ID');
             $bearer    = $this->getBearer();
@@ -78,16 +82,28 @@ class AppInstallController extends Controller
                 return response()->json(['success' => false, 'message' => 'Server not configured'], 500);
             }
 
-            $deviceId = preg_replace('/[^A-Za-z0-9_\-]/', '_', $data['deviceId']);
+            $deviceId = (string) $request->input('deviceId', '');
+            $platform = (string) $request->input('platform', '');
+            $version  = (string) $request->input('version', '');
+
+            if ($deviceId === '' || $platform === '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'deviceId and platform are required',
+                    'received' => $request->all(),
+                ], 422);
+            }
+
+            $deviceId = preg_replace('/[^A-Za-z0-9_\-]/', '_', $deviceId);
             $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/app_opens";
 
             $fields = [
                 'deviceId' => ['stringValue' => $deviceId],
-                'platform' => ['stringValue' => $data['platform']],
+                'platform' => ['stringValue' => $platform],
                 'openedAt' => ['timestampValue' => now()->toISOString()],
             ];
-            if (!empty($data['version'])) {
-                $fields['version'] = ['stringValue' => $data['version']];
+            if ($version !== '') {
+                $fields['version'] = ['stringValue' => $version];
             }
 
             $resp = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
@@ -108,12 +124,6 @@ class AppInstallController extends Controller
         }
     }
 
-    /**
-     * Aggregated stats for the admin dashboard.
-     * GET /api/apps/stats  OR  GET /admin/api/apps/stats
-     *
-     * Returns: { installs: {ios, android, total}, opens: {today, dauToday, total} }
-     */
     public function stats(Request $request)
     {
         try {
@@ -122,7 +132,6 @@ class AppInstallController extends Controller
                 $bearer    = $this->getBearer();
                 if (!$bearer) return null;
 
-                // ── Installs ──
                 $installs = ['ios' => 0, 'android' => 0, 'total' => 0, 'other' => 0];
                 $pageToken = null;
                 do {
@@ -143,11 +152,10 @@ class AppInstallController extends Controller
                     $pageToken = $json['nextPageToken'] ?? null;
                 } while ($pageToken);
 
-                // ── Opens (today + DAU today + total) ──
-                $today       = now()->toDateString();         // YYYY-MM-DD
+                $today       = now()->toDateString();
                 $opensToday  = 0;
                 $totalOpens  = 0;
-                $dauToday    = [];                            // set of deviceIds
+                $dauToday    = [];
                 $pageToken   = null;
 
                 do {
