@@ -200,7 +200,10 @@ class VideoController extends Controller
             // Apply filters
             $videos = [];
             foreach ($lessons as $lesson) {
-                if ($lessonid && $lesson['lessonid'] !== $lessonid) continue;
+              if ($lessonid) {
+    $label = $this->lessonLabelFromTitle($lesson['title'] ?? '');
+    if ($lesson['lessonid'] !== $lessonid && $label !== $lessonid) continue;
+    }
                 if ($search) {
                     $q = mb_strtolower($search);
                     if (!str_contains(mb_strtolower($lesson['title']), $q)
@@ -394,89 +397,129 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Distinct list of course IDs — from videos mirror.
-     */
-    public function fetchCourses()
-    {
-        try {
-            $projectId = env('FIREBASE_PROJECT_ID');
-            $bearer    = $this->getBearer();
-            if (!$bearer) return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
 
-            $baseUrl   = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos";
-            $courses   = [];
-            $pageToken = null;
-
-            for ($page = 0; $page < 50; $page++) {
-                $query = ['pageSize' => 300];
-                if ($pageToken) $query['pageToken'] = $pageToken;
-
-                $response = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
-                    ->timeout(30)->get($baseUrl . '?' . http_build_query($query));
-                if (!$response->successful()) break;
-
-                $data = $response->json();
-                foreach ($data['documents'] ?? [] as $doc) {
-                    $c = $doc['fields']['courseid']['stringValue'] ?? '';
-                    if ($c !== '' && !in_array($c, $courses, true)) $courses[] = $c;
-                }
-                $pageToken = $data['nextPageToken'] ?? null;
-                if (!$pageToken) break;
-            }
-
-            sort($courses, SORT_NATURAL | SORT_FLAG_CASE);
-
-            return response()->json([
-                'success' => true, 'message' => 'Courses retrieved', 'count' => count($courses), 'data' => $courses,
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('[video:fetchCourses] FAILED', ['message' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
+  /**
+ * Distinct list of courses — reads from courses/ collection.
+ */
+public function fetchCourses()
+{
+    try {
+        $projectId = env('FIREBASE_PROJECT_ID');
+        $bearer    = $this->getBearer();
+        if (!$bearer) {
+            return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
         }
+
+        $baseUrl   = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/courses";
+        $courses   = [];
+        $pageToken = null;
+
+        for ($page = 0; $page < 50; $page++) {
+            $query = ['pageSize' => 300];
+            if ($pageToken) $query['pageToken'] = $pageToken;
+
+            $response = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
+                ->timeout(30)->get($baseUrl . '?' . http_build_query($query));
+            if (!$response->successful()) break;
+
+            $data = $response->json();
+            foreach ($data['documents'] ?? [] as $doc) {
+                $courseId = $doc['fields']['courseid']['stringValue'] ?? '';
+                if ($courseId === '') $courseId = basename($doc['name']);
+                if (!in_array($courseId, $courses, true)) $courses[] = $courseId;
+            }
+            $pageToken = $data['nextPageToken'] ?? null;
+            if (!$pageToken) break;
+        }
+
+        sort($courses, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Courses retrieved',
+            'count'   => count($courses),
+            'data'    => $courses,
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('[video:fetchCourses] FAILED', ['message' => $e->getMessage()]);
+        return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
     }
+}
 
     /**
      * Distinct list of lesson IDs.
      */
-    public function fetchLessons()
-    {
-        try {
-            $projectId = env('FIREBASE_PROJECT_ID');
-            $bearer    = $this->getBearer();
-            if (!$bearer) return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
+/**
+ * Distinct list of lessons across all courses.
+ * Returns labels like "lesson_00", "lesson_01", ..., "lesson_14"
+ * derived from the module number in each lesson's title.
+ */
+public function fetchLessons()
+{
+    try {
+        $projectId = env('FIREBASE_PROJECT_ID');
+        $bearer    = $this->getBearer();
+        if (!$bearer) {
+            return response()->json(['success' => false, 'message' => 'Not authenticated', 'count' => 0], 401);
+        }
 
-            $baseUrl   = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/videos";
-            $lessons   = [];
+        // 1. Get all courses
+        $courses = [];
+        $coursesUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/courses";
+        $pageToken = null;
+        for ($page = 0; $page < 50; $page++) {
+            $query = ['pageSize' => 300];
+            if ($pageToken) $query['pageToken'] = $pageToken;
+            $resp = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
+                ->timeout(30)->get($coursesUrl . '?' . http_build_query($query));
+            if (!$resp->successful()) break;
+            $data = $resp->json();
+            foreach ($data['documents'] ?? [] as $doc) {
+                $courses[] = basename($doc['name']);
+            }
+            $pageToken = $data['nextPageToken'] ?? null;
+            if (!$pageToken) break;
+        }
+
+        // 2. Walk each course, pull lessons, build labels
+        $lessons = [];
+        foreach ($courses as $courseId) {
+            $lessonsUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/courses/{$courseId}/lessons";
             $pageToken = null;
-
             for ($page = 0; $page < 50; $page++) {
                 $query = ['pageSize' => 300];
                 if ($pageToken) $query['pageToken'] = $pageToken;
-
-                $response = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
-                    ->timeout(30)->get($baseUrl . '?' . http_build_query($query));
-                if (!$response->successful()) break;
-
-                $data = $response->json();
+                $resp = Http::withHeaders(['Authorization' => 'Bearer ' . $bearer])
+                    ->timeout(30)->get($lessonsUrl . '?' . http_build_query($query));
+                if (!$resp->successful()) break;
+                $data = $resp->json();
                 foreach ($data['documents'] ?? [] as $doc) {
-                    $l = $doc['fields']['lessonid']['stringValue'] ?? '';
-                    if ($l !== '' && !in_array($l, $lessons, true)) $lessons[] = $l;
+                    $f = $doc['fields'] ?? [];
+                    $title = $f['title']['stringValue'] ?? '';
+                    $label = $this->lessonLabelFromTitle($title);
+                    if ($label !== '' && !in_array($label, $lessons, true)) {
+                        $lessons[] = $label;
+                    }
                 }
                 $pageToken = $data['nextPageToken'] ?? null;
                 if (!$pageToken) break;
             }
-
-            sort($lessons, SORT_NATURAL | SORT_FLAG_CASE);
-
-            return response()->json([
-                'success' => true, 'message' => 'Lessons retrieved', 'count' => count($lessons), 'data' => $lessons,
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('[video:fetchLessons] FAILED', ['message' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
         }
+
+        // 3. Sort naturally so lesson_00 → lesson_01 → ... → lesson_14
+        sort($lessons, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lessons retrieved',
+            'count'   => count($lessons),
+            'data'    => $lessons,
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('[video:fetchLessons] FAILED', ['message' => $e->getMessage()]);
+        return response()->json(['success' => false, 'message' => $e->getMessage(), 'count' => 0], 500);
     }
+}
 
     /**
      * Read every lesson doc in a course.
@@ -593,6 +636,13 @@ class VideoController extends Controller
 
         return 9999;
     }
+
+    private function lessonLabelFromTitle(string $title): string
+{
+    $order = $this->extractTitleOrder($title);
+    if ($order >= 9999) return '';
+    return 'lesson_' . str_pad((string) $order, 2, '0', STR_PAD_LEFT);
+}
 
     private function getBearer(): ?string
     {

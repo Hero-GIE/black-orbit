@@ -274,18 +274,20 @@
         opacity: 1;
     }
     .card-action-btn {
-        width: 36px; height: 36px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255, 255, 255, 0.9);
-        color: #333;
-        backdrop-filter: blur(4px);
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
     }
     .card-action-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
     .card-action-btn.delete:hover { background: #dc3545; color: #fff; }
+    .card-action-btn i { cursor: pointer; pointer-events: none; }
 
     .card-overlay-content {
         position: absolute;
