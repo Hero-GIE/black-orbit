@@ -31,9 +31,6 @@ class ResetAndSeedLessons extends Command
             return self::FAILURE;
         }
 
-        // -------------------------------------------------------------
-        // STEP 1: List + delete existing lesson docs
-        // -------------------------------------------------------------
         $this->info("STEP 1 — Deleting existing lessons in courses/{$courseId}/lessons");
 
         $existing = $this->listExistingLessons($projectId, $bearer, $courseId);
@@ -55,9 +52,7 @@ class ResetAndSeedLessons extends Command
             }
         }
 
-        // -------------------------------------------------------------
-        // STEP 2: Fetch all videos, sort by lessonid (lesson_00 → lesson_14)
-        // -------------------------------------------------------------
+
         $this->newLine();
         $this->info('STEP 2 — Fetching videos from top-level collection');
 
@@ -66,9 +61,6 @@ class ResetAndSeedLessons extends Command
 
         usort($videos, fn ($a, $b) => strnatcmp($a['lessonid'] ?? '', $b['lessonid'] ?? ''));
 
-        // -------------------------------------------------------------
-        // STEP 3: Write each video into courses/{course}/lessons/lesson_XX
-        // -------------------------------------------------------------
         $this->newLine();
         $this->info("STEP 3 — Writing to courses/{$courseId}/lessons/lesson_XX");
 
@@ -109,9 +101,6 @@ class ResetAndSeedLessons extends Command
             }
         }
 
-        // -------------------------------------------------------------
-        // Summary
-        // -------------------------------------------------------------
         $this->newLine();
         $this->info("Course           : {$courseId}");
         $this->info("Deleted old      : " . count($existing));
