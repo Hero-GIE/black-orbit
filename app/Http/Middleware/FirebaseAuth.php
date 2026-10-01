@@ -19,17 +19,21 @@ class FirebaseAuth
 
     public function handle(Request $request, Closure $next)
     {
-        $token = Session::get('firebase_token');
         $environment = app()->environment();
+        $isApi = $request->is('api/*') || $request->expectsJson();
+
+        // Prefer bearer token for API, session token for web
+        $token = $request->bearerToken() ?: Session::get('firebase_token');
 
         Log::info('FirebaseAuth middleware', [
             'has_token'   => !empty($token),
             'environment' => $environment,
             'path'        => $request->path(),
             'method'      => $request->method(),
+            'is_api'      => $isApi,
         ]);
 
-        // Local dev fallback (no token required)
+        // Local dev fallback
         if ($environment === 'local' && !$token) {
             Log::info('Local environment - using test user (no token)');
             $request->merge([
@@ -45,7 +49,7 @@ class FirebaseAuth
         }
 
         if (!$token) {
-            return $this->logoutAndRedirect('Please login to continue.');
+            return $this->unauthorized($request, $isApi, 'Please login to continue.');
         }
 
         $userData = $this->firebaseAuth->verifyToken($token);
@@ -56,7 +60,7 @@ class FirebaseAuth
                 'token_preview' => substr($token, 0, 30) . '...',
             ]);
 
-            return $this->logoutAndRedirect('Your session has expired. Please login again.');
+            return $this->unauthorized($request, $isApi, 'Your session has expired. Please login again.');
         }
 
         $request->merge([
@@ -73,11 +77,16 @@ class FirebaseAuth
         return $next($request);
     }
 
-    /**
-     * Wipe the session and redirect to login.
-     */
-    private function logoutAndRedirect(string $message)
+    private function unauthorized(Request $request, bool $isApi, string $message)
     {
+        if ($isApi) {
+            return response()->json([
+                'error'   => 'Unauthorized',
+                'message' => $message,
+            ], 401);
+        }
+
+        // Web: clear session and redirect (existing behaviour)
         Session::forget([
             'firebase_token',
             'firebase_refresh_token',
