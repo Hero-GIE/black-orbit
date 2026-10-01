@@ -8,6 +8,7 @@ use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ImageController extends Controller
 {
@@ -20,50 +21,66 @@ class ImageController extends Controller
 
     public function upload(Request $request): JsonResponse
     {
+        // TEMP DEBUG — remove after we find the second error
+        Log::info('ImageController@upload debug', [
+            'has_file'       => $request->hasFile('image'),
+            'all_keys'       => array_keys($request->all()),
+            'all_files'      => array_keys($request->allFiles()),
+            'content_type'   => $request->header('Content-Type'),
+            'content_length' => $request->header('Content-Length'),
+            'raw_files'      => $_FILES ?? 'empty',
+        ]);
+        if ($request->hasFile('image')) {
+            $f = $request->file('image');
+            Log::info('ImageController@upload file debug', [
+                'valid'       => $f->isValid(),
+                'error'       => $f->getError(),
+                'error_msg'   => $f->getErrorMessage(),
+                'mime'        => $f->getMimeType(),
+                'client_mime' => $f->getClientMimeType(),
+                'ext'         => $f->getClientOriginalExtension(),
+                'size'        => $f->getSize(),
+                'path'        => $f->getPathname(),
+                'is_file'     => is_file($f->getPathname()),
+                'is_readable' => is_readable($f->getPathname()),
+                'finfo'       => class_exists('finfo')
+                                    ? (new \finfo(FILEINFO_MIME_TYPE))->file($f->getPathname())
+                                    : 'no finfo',
+            ]);
+        }
+        // END TEMP DEBUG
+
         try {
-            if (!$request->hasFile('image')) {
-                return response()->json([
-                    'success' => false,
-                    'error'   => 'No file uploaded',
-                    'message' => 'The "image" field is missing or was not received by the server.',
-                ], 400);
-            }
+            $request->validate([
+                'image'  => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:' . env('IMAGE_MAX_SIZE', 10240),
+                'folder' => 'sometimes|string|max:100',
+            ]);
+        } catch (ValidationException $e) {
+            Log::warning('ImageController@upload validation failed', [
+                'errors' => $e->errors(),
+            ]);
 
-            $file = $request->file('image');
+            return response()->json([
+                'success' => false,
+                'error'   => 'Validation failed',
+                'message' => $e->getMessage(),
+                'errors'  => $e->errors(),
+            ], 422);
+        }
 
-            if (!$file->isValid()) {
-                Log::warning('ImageController@upload: invalid upload', [
-                    'error'     => $file->getError(),
-                    'error_msg' => $file->getErrorMessage(),
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'error'   => 'Upload failed',
-                    'message' => $file->getErrorMessage(),
-                    'code'    => $file->getError(),
-                ], 400);
-            }
-
-            $userId = $request->input('user_id')
-                ?? data_get($request->input('firebase_user'), 'uid')
-                ?? 'test_user';
+        try {
+            $file   = $request->file('image');
+            $userId = $request->input('firebase_user.uid', 'test_user');
             $folder = $request->input('folder', 'general');
 
             $result = $this->imageService->upload($file, $userId, $folder);
 
-            try {
-                ActivityLogger::log(
-                    'admin_action',
-                    'Image uploaded',
-                    'Uploaded to ' . ($result['path'] ?? 'unknown'),
-                    ['folder' => $folder]
-                );
-            } catch (\Throwable $e) {
-                Log::warning('ActivityLogger failed on upload', [
-                    'message' => $e->getMessage(),
-                ]);
-            }
+            ActivityLogger::log(
+                'admin_action',
+                'Image uploaded',
+                'Uploaded to ' . ($result['path'] ?? 'unknown'),
+                ['folder' => $folder]
+            );
 
             return response()->json([
                 'success' => true,
@@ -89,45 +106,40 @@ class ImageController extends Controller
     public function uploadMultiple(Request $request): JsonResponse
     {
         try {
-            if (!$request->hasFile('images')) {
-                return response()->json([
-                    'success' => false,
-                    'error'   => 'No files uploaded',
-                    'message' => 'The "images" field is missing or empty.',
-                ], 400);
-            }
+            $request->validate([
+                'images'   => 'required|array|max:5',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:' . env('IMAGE_MAX_SIZE', 10240),
+                'folder'   => 'sometimes|string|max:100',
+            ]);
+        } catch (ValidationException $e) {
+            Log::warning('ImageController@uploadMultiple validation failed', [
+                'errors' => $e->errors(),
+            ]);
 
-            $userId = $request->input('user_id')
-                ?? data_get($request->input('firebase_user'), 'uid')
-                ?? 'test_user';
+            return response()->json([
+                'success' => false,
+                'error'   => 'Validation failed',
+                'message' => $e->getMessage(),
+                'errors'  => $e->errors(),
+            ], 422);
+        }
+
+        try {
+            $userId = $request->input('firebase_user.uid', 'test_user');
             $folder = $request->input('folder', 'general');
             $files  = $request->file('images');
 
             $results = [];
             foreach ($files as $file) {
-                if (!$file->isValid()) {
-                    Log::warning('ImageController@uploadMultiple: invalid file', [
-                        'error'     => $file->getError(),
-                        'error_msg' => $file->getErrorMessage(),
-                    ]);
-                    continue;
-                }
-
                 $results[] = $this->imageService->upload($file, $userId, $folder);
             }
 
-            try {
-                ActivityLogger::log(
-                    'admin_action',
-                    'Images uploaded',
-                    count($results) . ' images uploaded',
-                    ['folder' => $folder]
-                );
-            } catch (\Throwable $e) {
-                Log::warning('ActivityLogger failed on uploadMultiple', [
-                    'message' => $e->getMessage(),
-                ]);
-            }
+            ActivityLogger::log(
+                'admin_action',
+                'Images uploaded',
+                count($results) . ' images uploaded',
+                ['folder' => $folder]
+            );
 
             return response()->json([
                 'success' => true,
@@ -153,19 +165,21 @@ class ImageController extends Controller
     public function delete(Request $request): JsonResponse
     {
         try {
-            $path = $request->input('path');
+            $request->validate([
+                'path' => 'required|string',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Validation failed',
+                'message' => $e->getMessage(),
+                'errors'  => $e->errors(),
+            ], 422);
+        }
 
-            if (!$path || !is_string($path)) {
-                return response()->json([
-                    'success' => false,
-                    'error'   => 'Invalid path',
-                    'message' => 'A "path" string is required.',
-                ], 400);
-            }
-
-            $userId = $request->input('user_id')
-                ?? data_get($request->input('firebase_user'), 'uid')
-                ?? 'test_user';
+        try {
+            $userId = $request->input('firebase_user.uid', 'test_user');
+            $path   = $request->input('path');
 
             if (!str_starts_with($path, "uploads/{$userId}/")) {
                 return response()->json([
@@ -177,13 +191,7 @@ class ImageController extends Controller
 
             $this->imageService->delete($path, $userId);
 
-            try {
-                ActivityLogger::log('admin_action', 'Image deleted', 'Deleted ' . $path);
-            } catch (\Throwable $e) {
-                Log::warning('ActivityLogger failed on delete', [
-                    'message' => $e->getMessage(),
-                ]);
-            }
+            ActivityLogger::log('admin_action', 'Image deleted', 'Deleted ' . $path);
 
             return response()->json([
                 'success' => true,
@@ -208,11 +216,9 @@ class ImageController extends Controller
     public function list(Request $request): JsonResponse
     {
         try {
-            $userId = $request->input('user_id')
-                ?? data_get($request->input('firebase_user'), 'uid')
-                ?? 'test_user';
-            $limit  = (int) $request->input('limit', 50);
-            $offset = (int) $request->input('offset', 0);
+            $userId = $request->input('firebase_user.uid', 'test_user');
+            $limit  = $request->input('limit', 50);
+            $offset = $request->input('offset', 0);
 
             $result = $this->imageService->getUserImages($userId, $limit, $offset);
 
@@ -221,8 +227,8 @@ class ImageController extends Controller
                 'data'    => $result['data'],
                 'meta'    => [
                     'total'  => $result['total'],
-                    'limit'  => $limit,
-                    'offset' => $offset,
+                    'limit'  => (int) $limit,
+                    'offset' => (int) $offset,
                 ],
             ], 200);
 
@@ -244,23 +250,26 @@ class ImageController extends Controller
     public function getUrl(Request $request): JsonResponse
     {
         try {
-            $path = $request->input('path');
+            $request->validate([
+                'path' => 'required|string',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Validation failed',
+                'message' => $e->getMessage(),
+                'errors'  => $e->errors(),
+            ], 422);
+        }
 
-            if (!$path || !is_string($path)) {
-                return response()->json([
-                    'success' => false,
-                    'error'   => 'Invalid path',
-                    'message' => 'A "path" string is required.',
-                ], 400);
-            }
-
-            $url = $this->imageService->getImageUrl($path);
+        try {
+            $url = $this->imageService->getImageUrl($request->input('path'));
 
             return response()->json([
                 'success' => true,
                 'data'    => [
                     'url'  => $url,
-                    'path' => $path,
+                    'path' => $request->input('path'),
                 ],
             ], 200);
 
