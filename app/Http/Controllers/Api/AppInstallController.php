@@ -14,8 +14,6 @@ class AppInstallController extends Controller
     /**
      * POST /api/apps/install
      * Body: { deviceId, platform, version }
-     *
-     * WARNING: No validation. Missing fields will cause a 500.
      */
     public function track(Request $request)
     {
@@ -60,7 +58,16 @@ class AppInstallController extends Controller
 
             Cache::forget('app_stats');
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Install tracked',
+                'data'    => [
+                    'deviceId' => $deviceId,
+                    'platform' => $platform,
+                    'version'  => $version !== '' ? $version : null,
+                    'storedAt' => now()->toIso8601String(),
+                ],
+            ]);
         } catch (\Throwable $e) {
             Log::error('[app:install] FAILED', ['message' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -70,8 +77,6 @@ class AppInstallController extends Controller
     /**
      * POST /api/apps/open
      * Body: { deviceId, platform, version }
-     *
-     * WARNING: No validation. Missing fields will cause a 500.
      */
     public function trackOpen(Request $request)
     {
@@ -117,7 +122,16 @@ class AppInstallController extends Controller
 
             Cache::forget('app_stats');
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Open tracked',
+                'data'    => [
+                    'deviceId' => $deviceId,
+                    'platform' => $platform,
+                    'version'  => $version !== '' ? $version : null,
+                    'openedAt' => now()->toIso8601String(),
+                ],
+            ]);
         } catch (\Throwable $e) {
             Log::error('[app:open] FAILED', ['message' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -132,7 +146,8 @@ class AppInstallController extends Controller
                 $bearer    = $this->getBearer();
                 if (!$bearer) return null;
 
-                $installs = ['ios' => 0, 'android' => 0, 'total' => 0, 'other' => 0];
+                // Count ONLY ios and android. Anything else is skipped.
+                $installs  = ['ios' => 0, 'android' => 0, 'total' => 0];
                 $pageToken = null;
                 do {
                     $q = ['pageSize' => 300];
@@ -144,9 +159,11 @@ class AppInstallController extends Controller
 
                     $json = $resp->json();
                     foreach ($json['documents'] ?? [] as $doc) {
-                        $p = $doc['fields']['platform']['stringValue'] ?? 'other';
-                        if (isset($installs[$p])) $installs[$p]++;
-                        else $installs['other']++;
+                        $p = $doc['fields']['platform']['stringValue'] ?? null;
+                        if ($p !== 'ios' && $p !== 'android') {
+                            continue;
+                        }
+                        $installs[$p]++;
                         $installs['total']++;
                     }
                     $pageToken = $json['nextPageToken'] ?? null;

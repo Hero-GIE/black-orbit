@@ -45,4 +45,7 @@ Route::middleware(['firebase.auth'])->group(function () {
     Route::post('/videos/{id}/replace', [VideoController::class, 'replaceVideo']);
     Route::get('/videos/{id}', [VideoController::class, 'getVideo']);
     Route::delete('/videos/{id}', [VideoController::class, 'destroy']);
+
+    // App install / open stats
+    Route::get('/apps/stats', [AppInstallController::class, 'stats']);
 });
