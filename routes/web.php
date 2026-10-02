@@ -31,16 +31,11 @@ Route::get('/forgot-password', function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-
-Route::get('/dashboard', function () {
-    return redirect('/admin/dashboard');
-})->middleware('auth')->name('dashboard.redirect');
-
-
 Route::get('/dashboard', function () {
     return redirect('/admin/dashboard');
 })->middleware(['auth', 'firebase.auth'])->name('dashboard.redirect');
 
+// Public admin API (no auth)
 Route::prefix('admin')->group(function () {
     Route::get('/api/personalities', [PersonalityController::class, 'fetchPersonalities'])
         ->name('public.api.personalities');
@@ -48,9 +43,7 @@ Route::prefix('admin')->group(function () {
         ->name('public.api.personality.get');
 });
 
-
 // Admin Routes (Protected)
-
 Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::post('/api/images/upload', [ImageController::class, 'upload']);
@@ -61,8 +54,11 @@ Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->g
     Route::get('/api/analytics', [DashboardController::class, 'getAnalytics'])->name('api.analytics');
     Route::get('/api/distribution', [DashboardController::class, 'getDistribution'])->name('api.distribution');
     Route::get('/api/dashboard/activity', [DashboardController::class, 'getActivity'])->name('api.activity');
+
     // app install stats
     Route::get('/api/apps/installs', [AppInstallController::class, 'stats'])->name('api.apps.installs');
+    // app install
+    Route::get('/api/apps/stats', [AppInstallController::class, 'stats'])->name('api.apps.stats');
 
     // user routes
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -124,7 +120,6 @@ Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->g
     Route::put('/api/facts/{id}', [FactController::class, 'update'])->name('api.facts.update');
     Route::delete('/api/facts/{id}', [FactController::class, 'destroy'])->name('api.facts.delete');
 
-
     // Notification Routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/api/notifications', [NotificationController::class, 'fetchNotifications'])->name('api.notifications');
@@ -142,7 +137,6 @@ Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->g
     Route::put('/api/articles/{id}', [ArticleController::class, 'update'])->name('api.articles.update');
     Route::delete('/api/articles/{id}', [ArticleController::class, 'destroy'])->name('api.articles.delete');
     Route::post('/api/articles/{id}/rename', [ArticleController::class, 'rename'])->name('api.articles.rename');
-
 
     // Video Routes
     Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
