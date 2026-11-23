@@ -76,8 +76,6 @@ class LoginController extends Controller
 
                 // Log activity
                 ActivityLogger::log('user_login', 'User logged in', $email . ' signed in successfully', ['ip' => $request->ip()]);
-
-                // Check if request expects JSON (API call)
                 if ($request->expectsJson() || $request->is('api/*')) {
                     return response()->json([
                         'success' => true,
@@ -101,11 +99,9 @@ class LoginController extends Controller
                 return redirect()->route('admin.dashboard')->with('success', 'Welcome back, ' . ($userData['username'] ?? 'Administrator') . '!');
             }
 
-            // Handle unsuccessful response
             $error = $response->json();
             $errorMessage = $error['error']['message'] ?? 'Invalid credentials';
 
-            // Check for specific Firebase error codes
             $firebaseErrorCodes = [
                 'INVALID_LOGIN_CREDENTIALS' => 'Invalid email or password. Please try again.',
                 'EMAIL_NOT_FOUND' => 'No account found with this email address.',

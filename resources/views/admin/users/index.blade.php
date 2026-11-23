@@ -19,8 +19,7 @@
         </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="row mb-4">
+    <div class="row mb-2 g-2">
         <div class="col-md-6 col-lg-4">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;">
@@ -33,7 +32,41 @@
                        style="border-left: none; border-radius: 0 10px 10px 0;">
             </div>
         </div>
-        <div class="col-md-6 col-lg-8 text-md-end">
+
+        {{-- Date preset --}}
+        <div class="col-6 col-md-3 col-lg-2">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 10px 0 0 10px;">
+                    <i class="fas fa-calendar-day text-muted"></i>
+                </span>
+                <select class="form-select border-start-0" id="datePreset" style="border-left: none; border-radius: 0 10px 10px 0;">
+                    <option value="all">All time</option>
+                    <option value="today">Today</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="this_month">This month</option>
+                    <option value="this_year">This year</option>
+                    <option value="custom">Custom range...</option>
+                </select>
+            </div>
+        </div>
+
+        {{-- From date --}}
+        <div class="col-6 col-md-3 col-lg-2">
+            <input type="date" class="form-control" id="dateFrom" style="border-radius: 10px;" title="From date">
+        </div>
+
+        {{-- To date --}}
+        <div class="col-6 col-md-3 col-lg-2">
+            <input type="date" class="form-control" id="dateTo" style="border-radius: 10px;" title="To date">
+        </div>
+
+        {{-- Count + Clear --}}
+        <div class="col-6 col-md-3 col-lg-2 d-flex align-items-center justify-content-end gap-2">
+            <button class="btn btn-outline-secondary btn-sm" id="clearFiltersBtn" title="Clear all filters" style="border-radius: 10px;">
+                <i class="fas fa-times"></i>
+            </button>
             <span class="text-muted small" id="userCount">Loading...</span>
         </div>
     </div>
@@ -362,7 +395,8 @@
         vertical-align: middle;
     }
 
-    .input-group .form-control:focus {
+    .input-group .form-control:focus,
+    .input-group .form-select:focus {
         border-color: #dee2e6;
         box-shadow: none;
     }
@@ -375,8 +409,23 @@
         border-radius: 10px 0 0 10px;
     }
 
-    .input-group .form-control {
+    .input-group .form-control,
+    .input-group .form-select {
         border-radius: 0 10px 10px 0;
+    }
+
+    /* Date filter tweaks */
+    input[type="date"].form-control {
+        padding: 0.55rem 0.75rem;
+    }
+    input[type="date"].form-control:disabled {
+        background-color: #f8f9fa;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    [data-bs-theme="dark"] input[type="date"].form-control:disabled {
+        background-color: #1a1a1a;
+        color: #888;
     }
 </style>
 @endsection
@@ -387,6 +436,7 @@ let editingUserId = null;
 let viewModalInstance = null;
 let allUsers = [];
 let filteredUsers = [];
+let debounceTimer = null;
 
 function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -394,48 +444,196 @@ function getCsrfToken() {
 
 document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
-    setupSearch();
+    setupFilters();
 });
 
-function setupSearch() {
-    const searchInput = document.getElementById('searchUsers');
+/* =====================================================================
+ *  Filter setup — search + date preset + custom date range
+ * ===================================================================== */
+function setupFilters() {
+    const searchInput  = document.getElementById('searchUsers');
+    const datePreset   = document.getElementById('datePreset');
+    const dateFrom     = document.getElementById('dateFrom');
+    const dateTo       = document.getElementById('dateTo');
+    const clearBtn     = document.getElementById('clearFiltersBtn');
+
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
-            filterUsers(query);
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(applyFilters, 300);
         });
+    }
+
+    if (datePreset) {
+        datePreset.addEventListener('change', () => {
+            applyDatePreset(datePreset.value);
+            applyFilters();
+        });
+    }
+
+    if (dateFrom) {
+        dateFrom.addEventListener('change', () => {
+            // If user manually picks a date, switch preset to "custom"
+            if (datePreset && datePreset.value !== 'custom') {
+                datePreset.value = 'custom';
+            }
+            applyFilters();
+        });
+    }
+
+    if (dateTo) {
+        dateTo.addEventListener('change', () => {
+            if (datePreset && datePreset.value !== 'custom') {
+                datePreset.value = 'custom';
+            }
+            applyFilters();
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearAllFilters);
     }
 }
 
-function filterUsers(query) {
-    if (!query) {
-        filteredUsers = allUsers;
-    } else {
-        filteredUsers = allUsers.filter(user => {
+function applyDatePreset(preset) {
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo   = document.getElementById('dateTo');
+    if (!dateFrom || !dateTo) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+
+    if (preset === 'all') {
+        dateFrom.value = '';
+        dateTo.value = '';
+        dateFrom.disabled = true;
+        dateTo.disabled = true;
+        return;
+    }
+
+    if (preset === 'custom') {
+        dateFrom.disabled = false;
+        dateTo.disabled = false;
+        return;
+    }
+
+    dateFrom.disabled = false;
+    dateTo.disabled = false;
+    dateTo.value = todayStr;
+
+    if (preset === 'today') {
+        dateFrom.value = todayStr;
+    } else if (preset === '7' || preset === '30' || preset === '90') {
+        const days = parseInt(preset, 10);
+        const from = new Date(today);
+        from.setDate(from.getDate() - (days - 1));
+        dateFrom.value = from.toISOString().slice(0, 10);
+    } else if (preset === 'this_month') {
+        const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        dateFrom.value = firstOfMonth.toISOString().slice(0, 10);
+    } else if (preset === 'this_year') {
+        const firstOfYear = new Date(today.getFullYear(), 0, 1);
+        dateFrom.value = firstOfYear.toISOString().slice(0, 10);
+    }
+}
+
+function clearAllFilters() {
+    const searchInput = document.getElementById('searchUsers');
+    const datePreset  = document.getElementById('datePreset');
+    const dateFrom    = document.getElementById('dateFrom');
+    const dateTo      = document.getElementById('dateTo');
+
+    if (searchInput) searchInput.value = '';
+    if (datePreset)  datePreset.value = 'all';
+    if (dateFrom)    { dateFrom.value = ''; dateFrom.disabled = true; }
+    if (dateTo)      { dateTo.value = ''; dateTo.disabled = true; }
+
+    applyFilters();
+}
+
+/* =====================================================================
+ *  Combined filter: search query + date range
+ * ===================================================================== */
+function applyFilters() {
+    const searchInput = document.getElementById('searchUsers');
+    const dateFrom    = document.getElementById('dateFrom');
+    const dateTo      = document.getElementById('dateTo');
+
+    const query = (searchInput?.value || '').toLowerCase().trim();
+    const fromStr = dateFrom?.value || '';  // YYYY-MM-DD
+    const toStr   = dateTo?.value   || '';
+
+    const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
+    const toDate   = toStr   ? new Date(toStr + 'T23:59:59')   : null;
+
+    filteredUsers = allUsers.filter(user => {
+        // --- text search ---
+        if (query) {
             const username = (user.username || '').toLowerCase();
-            const email = (user.email || '').toLowerCase();
-            return username.includes(query) || email.includes(query);
-        });
-    }
-    renderUsers(filteredUsers);
-    updateUserCount(filteredUsers.length);
-}
-
-function updateUserCount(count) {
-    const countElement = document.getElementById('userCount');
-    if (countElement) {
-        if (count === 1) {
-            countElement.textContent = '1 user found';
-        } else {
-            countElement.textContent = count + ' users found';
+            const email    = (user.email || '').toLowerCase();
+            if (!username.includes(query) && !email.includes(query)) {
+                return false;
+            }
         }
+
+        // --- date range filter on createdAt ---
+        if (fromDate || toDate) {
+            const userDate = parseUserDate(user.createdAt);
+            if (!userDate) return false;  // unknown date — exclude when filtering by date
+
+            if (fromDate && userDate < fromDate) return false;
+            if (toDate   && userDate > toDate)   return false;
+        }
+
+        return true;
+    });
+
+    renderUsers(filteredUsers);
+    updateUserCount(filteredUsers.length, allUsers.length);
+}
+
+/**
+ * Firestore createdAt can be either a timestampValue (ISO 8601)
+ * or a stringValue — both parse with new Date(). Returns null if
+ * the date is missing or invalid.
+ */
+function parseUserDate(createdAt) {
+    if (!createdAt) return null;
+    try {
+        const d = new Date(createdAt);
+        return isNaN(d.getTime()) ? null : d;
+    } catch {
+        return null;
     }
 }
 
-// Load all users
+function updateUserCount(count, total) {
+    const countElement = document.getElementById('userCount');
+    if (!countElement) return;
+
+    total = total ?? allUsers.length;
+
+    if (count === total) {
+        countElement.textContent = count === 1 ? '1 user' : count + ' users';
+    } else {
+        countElement.textContent = count + ' of ' + total + ' users';
+    }
+}
+
+/* =====================================================================
+ *  Load all users (unchanged from original)
+ * ===================================================================== */
 async function loadUsers() {
     const skeleton = document.getElementById('users-skeleton');
     const content = document.getElementById('users-content');
+
+    // Disable date inputs until data is loaded
+    const datePreset = document.getElementById('datePreset');
+    const dateFrom   = document.getElementById('dateFrom');
+    const dateTo     = document.getElementById('dateTo');
+    if (datePreset) datePreset.disabled = true;
+    if (dateFrom)   dateFrom.disabled = true;
+    if (dateTo)     dateTo.disabled = true;
 
     try {
         const response = await fetch('/admin/api/users');
@@ -444,26 +642,33 @@ async function loadUsers() {
         if (data.success) {
             allUsers = data.data || [];
             filteredUsers = allUsers;
-            renderUsers(filteredUsers);
-            updateUserCount(filteredUsers.length);
+
+            // Enable filters now that data is loaded
+            if (datePreset) datePreset.disabled = false;
+            // Date from/to stay disabled until preset != "all"
+            const preset = datePreset ? datePreset.value : 'all';
+            if (preset !== 'all') {
+                applyDatePreset(preset);
+            }
+
+            applyFilters();
         } else {
             showToast('Failed to load users', 'danger');
             renderUsers([]);
-            updateUserCount(0);
+            updateUserCount(0, 0);
         }
     } catch (error) {
         console.error('Error loading users:', error);
         showToast('Error loading users', 'danger');
         renderUsers([]);
-        updateUserCount(0);
+        updateUserCount(0, 0);
     } finally {
-        // Hide skeleton, show content
         if (skeleton) skeleton.style.display = 'none';
-        if (content) content.style.display = 'block';
+        if (content)  content.style.display = 'block';
     }
 }
 
-// Render users in table
+
 function renderUsers(users) {
     const tbody = document.getElementById('usersTableBody');
 
@@ -474,7 +679,7 @@ function renderUsers(users) {
                     <div class="text-muted">
                         <i class="fas fa-users-slash fa-2x mb-3 d-block opacity-50"></i>
                         <p class="mb-0 fw-bold">No users found</p>
-                        <small>${allUsers.length > 0 ? 'Try a different search term' : 'Click "Add User" to create one'}</small>
+                        <small>${allUsers.length > 0 ? 'Try adjusting your filters' : 'Click "Add User" to create one'}</small>
                     </div>
                 </td>
             </tr>
@@ -538,7 +743,7 @@ function renderUsers(users) {
     tbody.innerHTML = html;
 }
 
-// Open Add User Modal
+
 function openAddModal() {
     editingUserId = null;
     document.getElementById('userModalTitle').textContent = 'Add New User';
@@ -550,7 +755,6 @@ function openAddModal() {
     modal.show();
 }
 
-// Edit User
 async function editUser(userId) {
     const modalBody = document.querySelector('#userModal .modal-body');
     const saveBtn = document.getElementById('saveUserBtn');
@@ -642,7 +846,6 @@ async function editUser(userId) {
     }
 }
 
-// View User
 async function viewUser(userId) {
     const content = document.getElementById('viewUserContent');
 
@@ -792,14 +995,12 @@ document.getElementById('saveUserBtn').addEventListener('click', async function(
     }
 });
 
-// Confirm Delete
 function confirmDelete(userId) {
     document.getElementById('deleteUserId').value = userId;
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
 }
 
-// Delete User
 document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
     const userId = document.getElementById('deleteUserId').value;
 
@@ -840,7 +1041,6 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
     }
 });
 
-// Toast notification
 function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {

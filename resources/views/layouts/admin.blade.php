@@ -157,6 +157,13 @@
                     </a>
                 </li>
 
+             <li>
+    <a class="sb-link {{ request()->routeIs('admin.user-activities.*') ? 'active' : '' }}"
+       href="{{ route('admin.user-activities.index') }}" data-label="User Activities">
+        <i class="fas fa-chart-bar"></i><span>User Activities Report</span>
+    </a>
+</li>
+
                 <li>
                     <a class="sb-link {{ request()->routeIs('admin.players.*') ? 'active' : '' }}"
                        href="{{ route('admin.players.index') }}" data-label="Players">
