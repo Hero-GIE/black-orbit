@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $DRY_RUN = in_array('--dry-run', $argv);
-$BUMP_UPDATED_AT = true;   // set false if you don't want updatedAt to change
+$BUMP_UPDATED_AT = true;
 
 $logFile = __DIR__ . '/migrate-content-log.txt';
 function log_($m) {
