@@ -56,7 +56,7 @@ class LoginController extends Controller
                 $authController = app(AuthController::class);
                 $userData = $authController->getUserFromFirestore($uid);
 
-                $isAdmin = ($email === 'admin@gmail.com');
+                $isAdmin = ($email === 'rowusu@wowlogbook.com');
 
                 if ($isAdmin) {
                     $userData['role'] = 'admin';
