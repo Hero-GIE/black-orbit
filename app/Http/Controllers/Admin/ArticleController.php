@@ -273,33 +273,46 @@ class ArticleController extends Controller
         return trim($text);
     }
 
-    // ---------- LIST (Firestore) ----------
+    // ---------- LIST (Firestore, paginated) ----------
     public function fetchArticles()
     {
         try {
             $projectId = $this->projectId();
-            $token = $this->token();
+            $token     = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
-            $url = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles";
-            $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->timeout(30)->get($url);
+            $baseUrl   = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles";
+            $pageToken = null;
+            $articles  = [];
 
-            if (!$response->successful()) {
-                Log::error('[fetchArticles] Firestore fetch failed', [
-                    'status' => $response->status(),
-                    'body'   => substr($response->body(), 0, 500),
-                ]);
-                return response()->json(['success' => false, 'message' => 'Failed to fetch articles'], 500);
-            }
+            for ($page = 0; $page < 50; $page++) {
+                $query = ['pageSize' => 300];
+                if ($pageToken) $query['pageToken'] = $pageToken;
+                $url = $baseUrl . '?' . http_build_query($query);
 
-            $data = $response->json();
-            $articles = [];
-            foreach ($data['documents'] ?? [] as $doc) {
-                $id = basename($doc['name']);
-                $fields = $doc['fields'] ?? [];
-                $article = $this->fieldsToArticle($id, $fields);
-                if (empty($article['slug'])) continue;
-                $articles[] = $article;
+                $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+                    ->timeout(30)
+                    ->get($url);
+
+                if (!$response->successful()) {
+                    Log::error('[fetchArticles] Firestore fetch failed', [
+                        'status' => $response->status(),
+                        'body'   => substr($response->body(), 0, 500),
+                    ]);
+                    return response()->json(['success' => false, 'message' => 'Failed to fetch articles'], 500);
+                }
+
+                $data = $response->json();
+                foreach ($data['documents'] ?? [] as $doc) {
+                    $id      = basename($doc['name']);
+                    $fields  = $doc['fields'] ?? [];
+                    $article = $this->fieldsToArticle($id, $fields);
+                    if (empty($article['slug'])) continue;
+                    $articles[] = $article;
+                }
+
+                $pageToken = $data['nextPageToken'] ?? null;
+                if (!$pageToken) break;
             }
 
             usort($articles, function ($a, $b) {
@@ -343,7 +356,6 @@ class ArticleController extends Controller
                     'category'    => $fields['category']['stringValue'] ?? '',
                     'categories'  => array_map(fn($v) => $v['stringValue'], $fields['categories']['arrayValue']['values'] ?? []),
                     'excerpt'     => $plainExcerpt,
-                    // KEY CHANGE: sanitizeHtml preserves formatting, htmlToPlainText destroyed it
                     'content'     => $this->sanitizeHtml($post['content']['rendered'] ?? ''),
                     'image'       => $fields['image']['stringValue'] ?? '',
                     'link'        => $post['link'] ?? '',
@@ -426,7 +438,6 @@ class ArticleController extends Controller
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
-            // KEY CHANGE: use sanitizeHtml (preserves formatting) not htmlToPlainText (strips everything)
             $sanitizedContent = $this->sanitizeHtml($rawContent);
 
             Log::info('[article.save] AFTER sanitizeHtml (store)', [
@@ -452,7 +463,6 @@ class ArticleController extends Controller
 
             $now = now()->toISOString();
 
-            // Auto-generate excerpt if empty
             $excerpt = $request->excerpt;
             if (empty($excerpt)) {
                 $excerpt = mb_substr($this->htmlToPlainText($sanitizedContent), 0, 200);
@@ -466,7 +476,6 @@ class ArticleController extends Controller
                 'categories'  => ['arrayValue' => ['values' => $request->category
                                     ? [['stringValue' => $request->category]] : []]],
                 'excerpt'     => ['stringValue' => $excerpt],
-                // KEY CHANGE: store sanitized HTML, not stripped plain text
                 'content'     => ['stringValue' => $sanitizedContent],
                 'image'       => ['stringValue' => $request->image ?? ''],
                 'viewcount'   => ['integerValue' => 0],
@@ -530,7 +539,6 @@ class ArticleController extends Controller
             $token = $this->token();
             if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
 
-            // KEY CHANGE: use sanitizeHtml
             $sanitizedContent = $this->sanitizeHtml($rawContent);
 
             Log::info('[article.save] AFTER sanitizeHtml (update)', [
@@ -561,7 +569,6 @@ class ArticleController extends Controller
                 'categories' => ['arrayValue' => ['values' => $request->category
                                     ? [['stringValue' => $request->category]] : []]],
                 'excerpt'    => ['stringValue' => $excerpt],
-                // KEY CHANGE: store sanitized HTML
                 'content'    => ['stringValue' => $sanitizedContent],
                 'image'      => ['stringValue' => $request->image ?? ''],
                 'updatedAt'  => ['timestampValue' => now()->toISOString()],
@@ -681,6 +688,137 @@ class ArticleController extends Controller
 
         } catch (\Exception $e) {
             Log::error('[article.rename] exception', ['id' => $id, 'msg' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function fetchAllDocuments(string $projectId, string $token, string $collection): array
+{
+    $baseUrl   = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/{$collection}";
+    $docs      = [];
+    $pageToken = null;
+
+    for ($page = 0; $page < 50; $page++) {
+        $query = ['pageSize' => 300];
+        if ($pageToken) $query['pageToken'] = $pageToken;
+        $url = $baseUrl . '?' . http_build_query($query);
+
+        $resp = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+            ->timeout(60)
+            ->get($url);
+
+        if (!$resp->successful()) {
+            Log::error('[fetchAllDocuments] Firestore fetch failed', [
+                'collection' => $collection,
+                'status'     => $resp->status(),
+                'body'       => substr($resp->body(), 0, 500),
+                'page'       => $page,
+            ]);
+            break;
+        }
+
+        $data = $resp->json();
+        foreach ($data['documents'] ?? [] as $doc) $docs[] = $doc;
+
+        $pageToken = $data['nextPageToken'] ?? null;
+        if (!$pageToken) break;
+    }
+
+    return $docs;
+}
+
+    public function incrementViewCount($id)
+    {
+        try {
+            $projectId = $this->projectId();
+            $token     = $this->token();
+            if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+
+            $getUrl  = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}";
+            $existing = Http::withHeaders(['Authorization' => 'Bearer ' . $token])->timeout(30)->get($getUrl);
+
+            if (!$existing->successful()) {
+                return response()->json(['success' => false, 'message' => 'Article not found'], 404);
+            }
+
+            $fields  = $existing->json()['fields'] ?? [];
+            $current = (int) ($fields['viewcount']['integerValue'] ?? 0);
+
+            $patchUrl = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles/{$id}?updateMask.fieldPaths=viewcount";
+            $resp = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+                ->timeout(30)
+                ->patch($patchUrl, ['fields' => [
+                    'viewcount' => ['integerValue' => $current + 1],
+                ]]);
+
+            if ($resp->successful()) {
+                return response()->json(['success' => true, 'viewcount' => $current + 1]);
+            }
+
+            Log::error('[incrementViewCount] Firestore failed', [
+                'id'     => $id,
+                'status' => $resp->status(),
+                'body'   => substr($resp->body(), 0, 500),
+            ]);
+            return response()->json(['success' => false, 'message' => 'Failed to increment view count'], 500);
+        } catch (\Exception $e) {
+            Log::error('[incrementViewCount] exception', ['id' => $id, 'msg' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // ---------- TOP ARTICLES ----------
+    /**
+     * Return the top 4 articles by viewcount (for a "Most Read" widget).
+     * Paginates so it stays in sync with fetchArticleViews() in UserActivityController.
+     */
+    public function topArticles()
+    {
+        try {
+            $projectId = $this->projectId();
+            $token     = $this->token();
+            if (!$token) return response()->json(['success' => false, 'message' => 'Not authenticated'], 401);
+
+            $baseUrl   = "https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/articles";
+            $pageToken = null;
+            $articles  = [];
+
+            for ($page = 0; $page < 50; $page++) {
+                $query = ['pageSize' => 300];
+                if ($pageToken) $query['pageToken'] = $pageToken;
+                $url = $baseUrl . '?' . http_build_query($query);
+
+                $response = Http::withHeaders(['Authorization' => 'Bearer ' . $token])
+                    ->timeout(30)
+                    ->get($url);
+
+                if (!$response->successful()) {
+                    Log::error('[topArticles] Firestore fetch failed', [
+                        'status' => $response->status(),
+                    ]);
+                    return response()->json(['success' => false], 500);
+                }
+
+                $data = $response->json();
+                foreach ($data['documents'] ?? [] as $doc) {
+                    $id      = basename($doc['name']);
+                    $fields  = $doc['fields'] ?? [];
+                    $article = $this->fieldsToArticle($id, $fields);
+                    if (!empty($article['slug'])) $articles[] = $article;
+                }
+
+                $pageToken = $data['nextPageToken'] ?? null;
+                if (!$pageToken) break;
+            }
+
+            usort($articles, fn($a, $b) => $b['viewcount'] <=> $a['viewcount']);
+
+            return response()->json([
+                'success' => true,
+                'data'    => array_slice($articles, 0, 4),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('[topArticles] exception', ['msg' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }

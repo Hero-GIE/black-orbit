@@ -11,7 +11,7 @@
                 <i class="fas fa-chart-bar me-2"></i>User Activity Report
             </h4>
             <small class="text-muted">
-                Per-user engagement across articles, facts, videos, games, personalities, and quizzes.
+                Per-user engagement across articles, facts, videos, games, personalities, quizzes, and course progress.
             </small>
         </div>
         <div class="d-flex gap-2 flex-wrap">
@@ -115,9 +115,9 @@
         </div>
     </div>
 
-    {{-- Secondary stats: cosmic stars + space academy XP --}}
+    {{-- Secondary stats --}}
     <div class="row g-3 mb-4" id="secondaryStatCards">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
                 <div class="card-body py-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -133,7 +133,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
                 <div class="card-body py-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -149,23 +149,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
-                <div class="card-body py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="flex-grow-1">
-                            <div class="text-muted text-uppercase stat-label" style="font-size: 0.65rem; letter-spacing: 0.5px;">Space Academy XP</div>
-                            <div class="fw-bold fs-4 stat-value" id="stat-xp">—</div>
-                        </div>
-                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 stat-icon-lg"
-                             style="width: 44px; height: 44px; background: linear-gradient(135deg, #d1fae5, #a7f3d0);">
-                            <i class="fas fa-rocket text-success"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
                 <div class="card-body py-3">
                     <div class="d-flex justify-content-between align-items-center">
@@ -177,6 +161,132 @@
                              style="width: 44px; height: 44px; background: linear-gradient(135deg, #fee2e2, #fecaca);">
                             <i class="fas fa-user-graduate text-danger"></i>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted text-uppercase stat-label" style="font-size: 0.65rem; letter-spacing: 0.5px;">Lessons Completed</div>
+                            <div class="fw-bold fs-4 stat-value" id="stat-lessons">—</div>
+                        </div>
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 stat-icon-lg"
+                             style="width: 44px; height: 44px; background: linear-gradient(135deg, #d1fae5, #a7f3d0);">
+                            <i class="fas fa-book-open text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted text-uppercase stat-label" style="font-size: 0.65rem; letter-spacing: 0.5px;">Courses Completed</div>
+                            <div class="fw-bold fs-4 stat-value" id="stat-courses-completed">—</div>
+                        </div>
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 stat-icon-lg"
+                             style="width: 44px; height: 44px; background: linear-gradient(135deg, #dbeafe, #bfdbfe);">
+                            <i class="fas fa-graduation-cap text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm stat-card" style="border-radius: 12px;">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="text-muted text-uppercase stat-label" style="font-size: 0.65rem; letter-spacing: 0.5px;">Course Quizzes Completed</div>
+                            <div class="fw-bold fs-4 stat-value" id="stat-course-quizzes">—</div>
+                        </div>
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 stat-icon-lg"
+                             style="width: 44px; height: 44px; background: linear-gradient(135deg, #fef3c7, #fde68a);">
+                            <i class="fas fa-clipboard-check text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Video Views --}}
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <span class="fw-bold"><i class="fas fa-fire me-2 text-danger"></i>Most Viewed Videos</span>
+                    <small class="text-muted d-block">Top 4 by lesson view count</small>
+                </div>
+                <div class="card-body pt-0" id="topVideosContainer">
+                    <div class="text-muted py-4 text-center">Loading…</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <span class="fw-bold"><i class="fas fa-video me-2 text-dark"></i>Views by Video</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="sticky-top">
+                                <tr class="bg-white">
+                                    <th class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
+                                    <th class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Video</th>
+                                    <th class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Course</th>
+                                    <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Views</th>
+                                </tr>
+                            </thead>
+                            <tbody id="videoViewsTableBody">
+                                <tr><td colspan="4" class="text-center text-muted py-4">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Article Views --}}
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <span class="fw-bold"><i class="fas fa-fire me-2 text-danger"></i>Most Read Articles</span>
+                    <small class="text-muted d-block">Top 4 by article view count</small>
+                </div>
+                <div class="card-body pt-0" id="topArticlesContainer">
+                    <div class="text-muted py-4 text-center">Loading…</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <span class="fw-bold"><i class="fas fa-newspaper me-2 text-dark"></i>Views by Article</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="sticky-top">
+                                <tr class="bg-white">
+                                    <th class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">#</th>
+                                    <th class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Article</th>
+                                    <th class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Category</th>
+                                    <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Views</th>
+                                </tr>
+                            </thead>
+                            <tbody id="articleViewsTableBody">
+                                <tr><td colspan="4" class="text-center text-muted py-4">Loading…</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -267,6 +377,8 @@
                 <option value="stars">Cosmic Stars</option>
                 <option value="xp">Space XP</option>
                 <option value="courses">Course Enrollments</option>
+                <option value="lessons">Lessons Completed</option>
+                <option value="coursesdone">Courses Completed</option>
                 <option value="username">Username</option>
             </select>
         </div>
@@ -278,7 +390,7 @@
         </div>
     </div>
 
-    {{-- Table --}}
+    {{-- User table --}}
     <div class="card border-0 shadow-sm" style="border-radius: 12px;">
         <div class="card-body p-0">
             <div id="table-skeleton" class="p-4">
@@ -298,6 +410,8 @@
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stars</th>
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">XP</th>
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Courses</th>
+                                <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lessons Done</th>
+                                <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Courses Done</th>
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Last Active</th>
                                 <th class="text-muted text-uppercase text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Score</th>
                             </tr>
@@ -325,6 +439,8 @@
                                     <td class="text-center"><div class="skeleton-box mx-auto" style="width: 28px; height: 14px;"></div></td>
                                     <td class="text-center"><div class="skeleton-box mx-auto" style="width: 28px; height: 14px;"></div></td>
                                     <td class="text-center"><div class="skeleton-box mx-auto" style="width: 24px; height: 14px;"></div></td>
+                                    <td class="text-center"><div class="skeleton-box mx-auto" style="width: 24px; height: 14px;"></div></td>
+                                    <td class="text-center"><div class="skeleton-box mx-auto" style="width: 24px; height: 14px;"></div></td>
                                     <td class="text-center"><div class="skeleton-box mx-auto" style="width: 60px; height: 12px;"></div></td>
                                     <td class="text-end"><div class="skeleton-box ms-auto" style="width: 40px; height: 20px; border-radius: 12px;"></div></td>
                                 </tr>
@@ -335,7 +451,7 @@
             </div>
 
             <div id="table-content" style="display: none;">
-                <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0" id="reportTable">
                         <thead class="sticky-top">
                             <tr class="bg-white">
@@ -351,6 +467,8 @@
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stars</th>
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">XP</th>
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Courses</th>
+                                <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lessons Done</th>
+                                <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Courses Done</th>
                                 <th class="text-muted text-uppercase text-center" style="font-size: 0.7rem; letter-spacing: 0.5px;">Last Active</th>
                                 <th class="text-muted text-uppercase text-end" style="font-size: 0.7rem; letter-spacing: 0.5px;">Score</th>
                             </tr>
@@ -416,13 +534,14 @@
     .table-hover tbody tr:hover {
         background-color: #f8f9fa;
     }
+    .min-width-0 { min-width: 0; }
+
     [data-bs-theme="dark"] .sticky-top th { background: #0a0a0a; color: #aaa; }
     [data-bs-theme="dark"] .table-hover tbody tr:hover { background-color: #1a1a1a; }
     [data-bs-theme="dark"] .avatar-circle { background: #222; color: #ddd; }
     [data-bs-theme="dark"] .role-badge.student { background: #222; color: #ddd; }
     [data-bs-theme="dark"] .score-pill { background: #fff; color: #000; }
 
-    /* Skeleton loader — matches the dashboard's shimmer */
     @keyframes skeleton-pulse {
         0%   { opacity: 0.55; }
         50%  { opacity: 1; }
@@ -440,7 +559,6 @@
         background-size: 400% 100%;
     }
 
-    /* Card skeleton — hides real content and shows shimmer placeholders */
     .stat-card.is-loading .stat-label,
     .stat-card.is-loading .stat-value,
     .stat-card.is-loading .stat-icon,
@@ -463,14 +581,8 @@
         left: 0;
         transform: translateY(-50%);
     }
-    .stat-card.is-loading .stat-label::after {
-        width: 80px;
-        height: 10px;
-    }
-    .stat-card.is-loading .stat-value::after {
-        width: 48px;
-        height: 20px;
-    }
+    .stat-card.is-loading .stat-label::after { width: 80px; height: 10px; }
+    .stat-card.is-loading .stat-value::after { width: 48px; height: 20px; }
     .stat-card.is-loading .stat-icon::after,
     .stat-card.is-loading .stat-icon-lg::after {
         width: 100%;
@@ -491,7 +603,6 @@
         background-size: 400% 100%;
     }
 
-    /* Subtle refresh indicator shown over the table while updating in place */
     .table-refreshing { position: relative; }
     .table-refreshing::after {
         content: '';
@@ -507,7 +618,6 @@
 @endsection
 
 @push('styles')
-    {{-- Chart.js --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css">
 @endpush
 
@@ -517,29 +627,35 @@
 let charts = { byType: null, topUsers: null, byRole: null, overTime: null };
 let lastReportData = null;
 let debounceTimer = null;
+let currentRequest = null;  // ← abort previous in-flight request
 
 document.addEventListener('DOMContentLoaded', function() {
     loadReport();
 
+    // Debounced search
     document.getElementById('searchInput').addEventListener('input', () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(loadReport, 350);
     });
+
+    // Fires immediately on every dropdown change
     ['roleFilter', 'sortBy', 'sortDir'].forEach(id => {
-        document.getElementById(id).addEventListener('change', loadReport);
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', () => {
+                console.log('[filter change]', id, '=', el.value);
+                loadReport();
+            });
+        }
     });
 });
 
-function getCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || '';
-}
-
 function buildQuery() {
     const params = new URLSearchParams();
-    const q = document.getElementById('searchInput').value.trim();
+    const q    = document.getElementById('searchInput').value.trim();
     const role = document.getElementById('roleFilter').value;
     const sort = document.getElementById('sortBy').value;
-    const dir = document.getElementById('sortDir').value;
+    const dir  = document.getElementById('sortDir').value;
     if (q) params.set('q', q);
     if (role && role !== 'all') params.set('role', role);
     params.set('sort', sort);
@@ -554,10 +670,17 @@ function setStatCardsSkeleton(on) {
 }
 
 async function loadReport() {
-    const skeleton = document.getElementById('table-skeleton');
-    const content  = document.getElementById('table-content');
+    const skeleton  = document.getElementById('table-skeleton');
+    const content   = document.getElementById('table-content');
     const tableWrap = content ? content.querySelector('.table-responsive') : null;
     const isFirstLoad = !lastReportData;
+
+
+    if (currentRequest) {
+        try { currentRequest.abort(); } catch (e) {}
+    }
+    const controller = new AbortController();
+    currentRequest = controller;
 
     setStatCardsSkeleton(true);
 
@@ -568,9 +691,13 @@ async function loadReport() {
         if (tableWrap) tableWrap.classList.add('table-refreshing');
     }
 
+    const qs = buildQuery();
+    console.log('[loadReport] fetching', qs);
+
     try {
-        const res  = await fetch('/admin/api/user-activities/report?' + buildQuery(), {
-            headers: { 'Accept': 'application/json' }
+        const res  = await fetch('/admin/api/user-activities/report?' + qs, {
+            headers: { 'Accept': 'application/json' },
+            signal: controller.signal,
         });
         const json = await res.json();
 
@@ -583,10 +710,17 @@ async function loadReport() {
         renderStats(json.data);
         renderTable(json.data.rows);
         renderCharts(json.data);
+        renderVideoViews(json.data);
+        renderArticleViews(json.data);
     } catch (e) {
+        if (e.name === 'AbortError') {
+            console.log('[loadReport] aborted previous request');
+            return;
+        }
         console.error(e);
         showToast('Error loading report', 'danger');
     } finally {
+        if (currentRequest === controller) currentRequest = null;
         setStatCardsSkeleton(false);
         if (isFirstLoad) {
             if (skeleton) skeleton.style.display = 'none';
@@ -599,16 +733,19 @@ async function loadReport() {
 
 function renderStats(data) {
     const t = data.totals || {};
-    document.getElementById('stat-articles').textContent      = fmt(t.articlesRead ?? 0);
+
+    document.getElementById('stat-articles').textContent      = fmt(data.article_views?.total ?? 0);
+    document.getElementById('stat-videos').textContent        = fmt(data.video_views?.total ?? 0);
     document.getElementById('stat-facts').textContent         = fmt(t.factsRead ?? 0);
-    document.getElementById('stat-videos').textContent        = fmt(t.videosWatched ?? 0);
     document.getElementById('stat-games').textContent         = fmt(t.gamesCompleted ?? 0);
     document.getElementById('stat-personalities').textContent = fmt(t.personalityview ?? 0);
-    document.getElementById('stat-quizzes').textContent      = fmt(t.quizzesCompleted ?? 0);
+    document.getElementById('stat-quizzes').textContent       = fmt(t.quizzesCompleted ?? 0);
     document.getElementById('stat-active').textContent        = fmt(data.active_user_count ?? 0);
     document.getElementById('stat-stars').textContent         = fmt(t.cosmicStars ?? 0);
-    document.getElementById('stat-xp').textContent            = fmt(t.spaceXp ?? 0);
-    document.getElementById('stat-enrollments').textContent  = fmt(t.courseEnrollments ?? 0);
+    document.getElementById('stat-enrollments').textContent   = fmt(t.courseEnrollments ?? 0);
+    document.getElementById('stat-lessons').textContent       = fmt(t.completedLessons ?? 0);
+    document.getElementById('stat-courses-completed').textContent = fmt(t.completedCourses ?? 0);
+    document.getElementById('stat-course-quizzes').textContent = fmt(t.completedQuizzes ?? 0);
 }
 
 function renderTable(rows) {
@@ -617,7 +754,7 @@ function renderTable(rows) {
     if (!rows || rows.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="14" class="text-center py-5">
+                <td colspan="16" class="text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-folder-open fa-2x mb-3 d-block opacity-50"></i>
                         <p class="mb-0 fw-bold">No user activity found</p>
@@ -631,8 +768,11 @@ function renderTable(rows) {
 
     let html = '';
     rows.forEach((u, idx) => {
-        const initials = (u.username || 'U').substring(0, 2).toUpperCase();
-        const a = u.activities || {};
+        const initials   = (u.username || 'U').substring(0, 2).toUpperCase();
+        const a          = u.activities || {};
+        const prog       = u.progress || {};
+        const lessonsDone = prog.total_completed_lessons ?? 0;
+        const coursesDone = prog.completed_courses ?? 0;
         const lastActive = u.last_activity ? formatDate(u.last_activity) : '—';
 
         const cell = (val) => {
@@ -664,6 +804,8 @@ function renderTable(rows) {
                 </td>
                 <td class="text-center activity-cell">${u.space?.xp ?? 0}</td>
                 <td class="text-center activity-cell">${u.courses_enrolled ?? 0}</td>
+                ${cell(lessonsDone)}
+                ${cell(coursesDone)}
                 <td class="text-center text-muted" style="font-size: 0.78rem;">${lastActive}</td>
                 <td class="text-end"><span class="score-pill">${u.engagement_score ?? 0}</span></td>
             </tr>
@@ -673,17 +815,125 @@ function renderTable(rows) {
     tbody.innerHTML = html;
 }
 
+function renderVideoViews(data) {
+    const vv = data.video_views || { total: 0, top_video: null, top_videos: [], videos: [] };
+
+    const topContainer = document.getElementById('topVideosContainer');
+    if (topContainer) {
+        const top = vv.top_videos || [];
+        if (top.length === 0) {
+            topContainer.innerHTML = `<p class="text-muted text-center py-4 mb-0">No video views recorded yet.</p>`;
+        } else {
+            topContainer.innerHTML = top.map((v, i) => {
+                const rankColor = ['#dc3545', '#fd7e14', '#ffc107', '#0d6efd'][i] || '#6c757d';
+                return `
+                    <div class="d-flex align-items-center gap-3 py-2 ${i < top.length - 1 ? 'border-bottom' : ''}">
+                        <div class="d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:32px;height:32px;border-radius:50%;background:${rankColor};color:#fff;font-weight:700;font-size:0.85rem;">
+                            ${i + 1}
+                        </div>
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="fw-semibold text-dark text-truncate" title="${escapeHtml(v.title)}">
+                                ${escapeHtml(v.title)}
+                            </div>
+                            <div class="text-muted text-truncate" style="font-size: 0.72rem;" title="${escapeHtml(v.course || '')}">
+                                ${escapeHtml(v.course || '—')}
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <span class="score-pill"><i class="fas fa-eye me-1"></i>${fmt(v.views)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    const tbody = document.getElementById('videoViewsTableBody');
+    if (!tbody) return;
+
+    if (!vv.videos || vv.videos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No videos found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = vv.videos.map((v, i) => `
+        <tr>
+            <td class="text-muted">${i + 1}</td>
+            <td>
+                <div class="fw-semibold text-dark">${escapeHtml(v.title)}</div>
+                <div class="text-muted" style="font-size: 0.7rem;">${escapeHtml(v.lesson_id)}</div>
+            </td>
+            <td class="text-muted" style="font-size: 0.8rem;">${escapeHtml(v.course || '—')}</td>
+            <td class="text-center activity-cell">${fmt(v.views)}</td>
+        </tr>
+    `).join('');
+}
+
+function renderArticleViews(data) {
+    const av = data.article_views || { total: 0, top_article: null, top_articles: [], articles: [] };
+
+    const topContainer = document.getElementById('topArticlesContainer');
+    if (topContainer) {
+        const top = av.top_articles || [];
+        if (top.length === 0) {
+            topContainer.innerHTML = `<p class="text-muted text-center py-4 mb-0">No article views recorded yet.</p>`;
+        } else {
+            topContainer.innerHTML = top.map((a, i) => {
+                const rankColor = ['#dc3545', '#fd7e14', '#ffc107', '#0d6efd'][i] || '#6c757d';
+                return `
+                    <div class="d-flex align-items-center gap-3 py-2 ${i < top.length - 1 ? 'border-bottom' : ''}">
+                        <div class="d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:32px;height:32px;border-radius:50%;background:${rankColor};color:#fff;font-weight:700;font-size:0.85rem;">
+                            ${i + 1}
+                        </div>
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="fw-semibold text-dark text-truncate" title="${escapeHtml(a.title)}">
+                                ${escapeHtml(a.title)}
+                            </div>
+                            <div class="text-muted text-truncate" style="font-size: 0.72rem;" title="${escapeHtml(a.category || a.author || '')}">
+                                ${escapeHtml(a.category || a.author || '—')}
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <span class="score-pill"><i class="fas fa-eye me-1"></i>${fmt(a.views)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    const tbody = document.getElementById('articleViewsTableBody');
+    if (!tbody) return;
+
+    if (!av.articles || av.articles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No articles found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = av.articles.map((a, i) => `
+        <tr>
+            <td class="text-muted">${i + 1}</td>
+            <td>
+                <div class="fw-semibold text-dark">${escapeHtml(a.title)}</div>
+                <div class="text-muted" style="font-size: 0.7rem;">${escapeHtml(a.slug)}</div>
+            </td>
+            <td class="text-muted" style="font-size: 0.8rem;">${escapeHtml(a.category || '—')}</td>
+            <td class="text-center activity-cell">${fmt(a.views)}</td>
+        </tr>
+    `).join('');
+}
+
 function renderCharts(data) {
-    const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const isDark    = document.documentElement.getAttribute('data-bs-theme') === 'dark';
     const textColor = isDark ? '#aaa' : '#666';
     const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
     Chart.defaults.color = textColor;
     Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
 
-    // ---- Light/pastel palette — matches the dashboard's doughnut + line chart ----
     const lightPalette = ['#8ab4ff', '#75c594', '#ffcc66', '#f69595', '#b0b7bd', '#96e6c9'];
 
-    // 1. Engagement by Activity Type (vertical bar) — LIGHT colors from the API
     const byType = data.engagement_by_type || [];
     destroyChart('byType');
     charts.byType = new Chart(document.getElementById('chartByType'), {
@@ -709,7 +959,6 @@ function renderCharts(data) {
         }
     });
 
-    // 2. Top 10 users (horizontal bar) — light primary blue
     const top = data.top_users || [];
     destroyChart('topUsers');
     charts.topUsers = new Chart(document.getElementById('chartTopUsers'), {
@@ -736,7 +985,6 @@ function renderCharts(data) {
         }
     });
 
-    // 3. Engagement by Role (donut) — light palette
     const byRole = data.engagement_by_role || [];
     destroyChart('byRole');
     charts.byRole = new Chart(document.getElementById('chartByRole'), {
@@ -754,14 +1002,11 @@ function renderCharts(data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
-            },
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } } },
             cutout: '60%'
         }
     });
 
-    // 4. Activity Log Entries (line) — dashboard style: solid stroke + soft fill
     const overTime = data.over_time || { labels: [], values: [] };
     destroyChart('overTime');
     charts.overTime = new Chart(document.getElementById('chartOverTime'), {
@@ -805,7 +1050,7 @@ async function exportReport(type) {
     const btn = document.getElementById(type === 'pdf' ? 'btnExportPdf' : 'btnExportExcel');
     const originalHtml = btn ? btn.innerHTML : null;
 
-    const qs = buildQuery();
+    const qs  = buildQuery();
     const url = type === 'excel'
         ? '/admin/api/user-activities/export/excel?' + qs
         : '/admin/api/user-activities/export/pdf?' + qs;
@@ -828,9 +1073,7 @@ async function exportReport(type) {
             throw new Error(err.message || `Server error (${res.status})`);
         }
 
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
 
         if (contentType.includes('text/html')) {
             const blob = await res.blob();

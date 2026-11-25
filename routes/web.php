@@ -149,8 +149,8 @@ Route::middleware(['auth', 'firebase.auth'])->prefix('admin')->name('admin.')->g
     Route::post('/api/videos/{id}/replace', [VideoController::class, 'replaceVideo'])->name('api.videos.replace');
     Route::delete('/api/videos/{id}', [VideoController::class, 'destroy'])->name('api.videos.delete');
 
-    Route::get('/user-activities',                  [UserActivityController::class, 'index'])->name('user-activities.index');
-    Route::get('/api/user-activities/report',       [UserActivityController::class, 'fetchReport'])->name('user-activities.report');
-    Route::get('/api/user-activities/export/excel', [UserActivityController::class, 'exportExcel'])->name('user-activities.export.excel');
-    Route::get('/api/user-activities/export/pdf',   [UserActivityController::class, 'exportPdf'])->name('user-activities.export.pdf');
+Route::get('/user-activities',                  [UserActivityController::class, 'index'])->name('user-activities.index');
+Route::get('/api/user-activities/report',       [UserActivityController::class, 'fetchReport'])->name('user-activities.report');
+Route::get('/api/user-activities/export/excel', [UserActivityController::class, 'exportExcel'])->name('user-activities.export.excel');
+Route::get('/api/user-activities/export/pdf',   [UserActivityController::class, 'exportPdf'])->name('user-activities.export.pdf');
 });
