@@ -32,6 +32,21 @@ class UserActivityController extends Controller
         return (string) env('FIREBASE_PROJECT_ID', '');
     }
 
+    /**
+     * Safely extract an integer from a Firestore value object.
+     * Handles integerValue, doubleValue, stringValue, and nullValue.
+     * This is critical because Firestore can return the same numeric field
+     * in different shapes depending on how it was written.
+     */
+    private function intFromFirestore(?array $field): int
+    {
+        if (!$field) return 0;
+        if (isset($field['integerValue'])) return (int) $field['integerValue'];
+        if (isset($field['doubleValue']))  return (int) round((float) $field['doubleValue']);
+        if (isset($field['stringValue']))  return (int) $field['stringValue'];
+        return 0;
+    }
+
     public function fetchReport(Request $request)
     {
         try {
@@ -90,8 +105,20 @@ class UserActivityController extends Controller
 
             foreach ($activities as $doc) {
                 $fields = $doc['fields'] ?? [];
-                $userId = $fields['userid']['stringValue'] ?? basename($doc['name'] ?? '');
-                if (empty($userId)) continue;
+
+                // ── Resolve userId with all fallbacks ──
+                //   1. userid.stringValue (normal case)
+                //   2. uid.stringValue (alternate schema)
+                //   3. Firestore doc ID (always present)
+                $userId = '';
+                if (!empty($fields['userid']['stringValue'])) {
+                    $userId = $fields['userid']['stringValue'];
+                } elseif (!empty($fields['uid']['stringValue'])) {
+                    $userId = $fields['uid']['stringValue'];
+                } else {
+                    $userId = basename($doc['name'] ?? '');
+                }
+                if ($userId === '') continue;
 
                 $user   = $usersMap[$userId] ?? null;
                 $cosmic = $cosmicMap[$userId] ?? ['stars' => 0, 'completed_levels' => 0, 'total_levels' => 0];
@@ -99,12 +126,13 @@ class UserActivityController extends Controller
                 $enrolled = $enrollmentCounts[$userId] ?? 0;
                 $lastActivity = $lastActivityMap[$userId] ?? null;
 
-                $articlesRead     = (int) ($fields['articlesRead']['integerValue']      ?? 0);
-                $factsRead        = (int) ($fields['factsRead']['integerValue']         ?? 0);
-                $videosWatched    = (int) ($fields['videosWatched']['integerValue']     ?? 0);
-                $gamesCompleted   = (int) ($fields['gamesCompleted']['integerValue']    ?? 0);
-                $personalityView  = (int) ($fields['personalityview']['integerValue']   ?? 0);
-                $quizzesCompleted = (int) ($fields['quizzesCompleted']['integerValue']  ?? 0);
+                // ── Safely extract all counters regardless of Firestore shape ──
+                $articlesRead     = $this->intFromFirestore($fields['articlesRead']     ?? null);
+                $factsRead        = $this->intFromFirestore($fields['factsRead']        ?? null);
+                $videosWatched    = $this->intFromFirestore($fields['videosWatched']    ?? null);
+                $gamesCompleted   = $this->intFromFirestore($fields['gamesCompleted']   ?? null);
+                $personalityView  = $this->intFromFirestore($fields['personalityview']  ?? null);
+                $quizzesCompleted = $this->intFromFirestore($fields['quizzesCompleted'] ?? null);
 
                 $engagementScore = $articlesRead + $factsRead + $videosWatched
                     + $gamesCompleted + $personalityView + $quizzesCompleted
@@ -182,7 +210,7 @@ class UserActivityController extends Controller
                 $byRole[$r]['users']++;
             }
 
-            // ── Sort with proper type handling (string vs numeric) ──
+            // ── Sort with proper type handling ──
             usort($rows, function ($a, $b) use ($sortBy, $sortDir) {
                 $av = $this->sortValue($a, $sortBy);
                 $bv = $this->sortValue($b, $sortBy);
@@ -193,10 +221,17 @@ class UserActivityController extends Controller
                     $cmp = $av <=> $bv;
                 }
 
+                // Stable tie-breaker
+                if ($cmp === 0) {
+                    $cmp = ($b['engagement_score'] ?? 0) <=> ($a['engagement_score'] ?? 0);
+                }
+                if ($cmp === 0) {
+                    $cmp = strcasecmp($a['username'] ?? '', $b['username'] ?? '');
+                }
+
                 return $sortDir === 'asc' ? $cmp : -$cmp;
             });
 
-            // Log the sort result so you can verify order in laravel.log
             Log::info('[fetchReport] sorted', [
                 'sort_by'   => $sortBy,
                 'sort_dir'  => $sortDir,
@@ -213,14 +248,14 @@ class UserActivityController extends Controller
                 'engagement_score' => $r['engagement_score'],
             ], $rows), 0, 10);
 
-            $engagementByType = [
-                ['label' => 'Articles Read',        'value' => $totals['articlesRead'],     'color' => '#8ab4ff'],
-                ['label' => 'Facts Read',           'value' => $totals['factsRead'],        'color' => '#75c594'],
-                ['label' => 'Videos Watched',       'value' => $totals['videosWatched'],    'color' => '#ffcc66'],
-                ['label' => 'Games Completed',      'value' => $totals['gamesCompleted'],   'color' => '#f69595'],
-                ['label' => 'Personalities Viewed', 'value' => $totals['personalityview'],  'color' => '#b0b7bd'],
-                ['label' => 'Quizzes Completed',    'value' => $totals['quizzesCompleted'], 'color' => '#96e6c9'],
-            ];
+$engagementByType = [
+    ['label' => 'Articles Read',        'value' => $articleViews['total_views'],  'color' => '#8ab4ff'],
+    ['label' => 'Facts Read',           'value' => $totals['factsRead'],          'color' => '#75c594'],
+    ['label' => 'Videos Watched',       'value' => $videoViews['total_views'],    'color' => '#ffcc66'],
+    ['label' => 'Games Completed',      'value' => $totals['gamesCompleted'],     'color' => '#f69595'],
+    ['label' => 'Personalities Viewed', 'value' => $totals['personalityview'],    'color' => '#b0b7bd'],
+    ['label' => 'Quizzes Completed',    'value' => $totals['quizzesCompleted'],   'color' => '#96e6c9'],
+];
 
             $engagementByRole = [];
             foreach ($byRole as $roleName => $counts) {
@@ -405,13 +440,7 @@ class UserActivityController extends Controller
             $articleId = basename($doc['name'] ?? '');
             if (empty($articleId)) continue;
 
-            $views = 0;
-            if (isset($fields['viewcount'])) {
-                $raw = $fields['viewcount'];
-                if (isset($raw['integerValue']))    $views = (int) $raw['integerValue'];
-                elseif (isset($raw['doubleValue'])) $views = (int) round((float) $raw['doubleValue']);
-                elseif (isset($raw['stringValue'])) $views = (int) $raw['stringValue'];
-            }
+            $views = $this->intFromFirestore($fields['viewcount'] ?? null);
 
             $articles[] = [
                 'article_id'   => $articleId,
@@ -522,7 +551,7 @@ class UserActivityController extends Controller
             $userId = basename($doc['name'] ?? '');
             if (empty($userId)) continue;
 
-            $stars = (int) ($fields['totalStars']['integerValue'] ?? 0);
+            $stars = $this->intFromFirestore($fields['totalStars'] ?? null);
             $completedLevels = 0;
             $totalLevels = 0;
 
@@ -566,7 +595,7 @@ class UserActivityController extends Controller
 
             $map[$userId] = [
                 'phase'        => $fields['phase']['stringValue'] ?? 'menu',
-                'xp'           => (int) ($fields['xp']['integerValue'] ?? 0),
+                'xp'           => $this->intFromFirestore($fields['xp'] ?? null),
                 'achievements' => $achievementsCount,
             ];
         }
@@ -620,11 +649,7 @@ class UserActivityController extends Controller
                 $videoUrl = $fields['videourl']['stringValue'] ?? '';
                 if ($videoUrl === '') continue;
 
-                $views = (int) (
-                    $fields['viewCount']['integerValue']
-                    ?? $fields['viewCount']['doubleValue']
-                    ?? 0
-                );
+                $views = $this->intFromFirestore($fields['viewCount'] ?? null);
 
                 $videos[] = [
                     'video_id'  => $lessonId,

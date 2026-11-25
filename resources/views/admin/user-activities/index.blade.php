@@ -451,7 +451,7 @@
             </div>
 
             <div id="table-content" style="display: none;">
-                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
                     <table class="table table-hover align-middle mb-0" id="reportTable">
                         <thead class="sticky-top">
                             <tr class="bg-white">
@@ -627,18 +627,16 @@
 let charts = { byType: null, topUsers: null, byRole: null, overTime: null };
 let lastReportData = null;
 let debounceTimer = null;
-let currentRequest = null;  // ← abort previous in-flight request
+let currentRequest = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadReport();
 
-    // Debounced search
     document.getElementById('searchInput').addEventListener('input', () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(loadReport, 350);
     });
 
-    // Fires immediately on every dropdown change
     ['roleFilter', 'sortBy', 'sortDir'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -674,7 +672,6 @@ async function loadReport() {
     const content   = document.getElementById('table-content');
     const tableWrap = content ? content.querySelector('.table-responsive') : null;
     const isFirstLoad = !lastReportData;
-
 
     if (currentRequest) {
         try { currentRequest.abort(); } catch (e) {}
